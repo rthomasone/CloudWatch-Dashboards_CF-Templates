@@ -1,0 +1,2594 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "CloudWatch Dashboards to visualize Application Load Balancer (ALB) resources. Both dashboards leverage Dashboard Variables to filter on the desired resources. Dashboard 'ALB_All_Resources' visualizes ALL ALB resources in the target region. Dashboard 'ALB_Individual_Resources' provides additional filters to isolate a specific ALB and the corresponding Web Application Firewall (WAF).",
+    "Transform": "AWS::LanguageExtensions",
+    "Parameters": {
+        "DefaultAccountID": {
+            "Description": "Input the AWS Account ID hosting the load balancers to be monitored.(e.g. 123456789012)",
+            "Type": "String",
+            "Default": ""
+        },
+        "DefaultRegion": {
+            "Description": "Select the default region hosting the load balancers to be monitored.",
+            "Type": "String",
+            "Default": "us-east-1"
+        },
+        "DefaultALB": {
+            "Description": "Input the default load balancer to be monitored. (e.g. app/ALB-ABC/0123456789abcdef)",
+            "Type": "String",
+            "Default": ""
+        },
+        "DefaultWebACL": {
+            "Description": "If WAF is associated with the default load balancer, input the corresponding WebACL. (e.g. sample-waf-name)",
+            "Type": "String",
+            "Default": ""
+        }
+    },
+    "Resources": {
+        "CWDashboardALBAll": {
+            "Type": "AWS::CloudWatch::Dashboard",
+            "Properties": {
+                "DashboardName": "ALB_All_Resources_Account_ID_Test",
+                "DashboardBody": {
+                    "Fn::ToJsonString": {
+                        "variables": [
+                            {
+                                "type": "property",
+                                "property": "accountId",
+                                "inputType": "select",
+                                "id": "accountId",
+                                "label": "Account ID",
+                                "defaultValue": {
+                                    "Ref": "DefaultAccountID"
+                                },
+                                "visible": true,
+                                "inputPopulationType": "custom",
+                                "values": [
+                                    {
+                                        "value": {
+                                            "Ref": "DefaultAccountID"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "pattern",
+                                "pattern": "us-east-1",
+                                "inputType": "select",
+                                "id": "Region",
+                                "label": "Region",
+                                "defaultValue": {
+                                    "Ref": "DefaultRegion"
+                                },
+                                "visible": true,
+                                "values": [
+                                    {
+                                        "value": "us-east-1",
+                                        "label": "N. Virginia"
+                                    },
+                                    {
+                                        "value": "us-east-2",
+                                        "label": "Ohio"
+                                    },
+                                    {
+                                        "value": "us-west-1",
+                                        "label": "N.California"
+                                    },
+                                    {
+                                        "value": "us-west-2",
+                                        "label": "Oregon"
+                                    },
+                                    {
+                                        "value": "ap-east-1",
+                                        "label": "Hong Kong"
+                                    },
+                                    {
+                                        "value": "ap-south-1",
+                                        "label": "Mumbai"
+                                    },
+                                    {
+                                        "value": "ap-northeast-3",
+                                        "label": "Osaka"
+                                    },
+                                    {
+                                        "value": "ap-northeast-2",
+                                        "label": "Seoul"
+                                    },
+                                    {
+                                        "value": "ap-southeast-1",
+                                        "label": "Singapore"
+                                    },
+                                    {
+                                        "value": "ap-southeast-2",
+                                        "label": "Sydney"
+                                    },
+                                    {
+                                        "value": "ap-noutheast-1",
+                                        "label": "Toyko"
+                                    },
+                                    {
+                                        "value": "ca-central-1",
+                                        "label": "Canada"
+                                    },
+                                    {
+                                        "value": "eu-central-1",
+                                        "label": "Frankfurt"
+                                    },
+                                    {
+                                        "value": "eu-west-1",
+                                        "label": "Ireland"
+                                    },
+                                    {
+                                        "value": "eu-west-2",
+                                        "label": "London"
+                                    },
+                                    {
+                                        "value": "eu-west-3",
+                                        "label": "Paris"
+                                    },
+                                    {
+                                        "value": "eu-north-1",
+                                        "label": "Stockholm"
+                                    },
+                                    {
+                                        "value": "sa-east-1",
+                                        "label": "South America"
+                                    }
+                                ],
+                                "value": "us-east-1",
+                                "customValues": "us-east-1, N. Virginia\nus-east-2, Ohio\nus-west-1, N.California\nca-central-1, Canada\nus-west-2, Oregon\neu-west-1, Ireland\neu-west-2, London\neu-central-1, Frankfurt"
+                            }
+                        ],
+                        "widgets": [
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 8,
+                                "width": 6,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"RequestCount\"', 'Sum', 60))",
+                                                "label": "${PROP('Dim.LoadBalancer')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "period": 60,
+                                    "stat": "Sum",
+                                    "title": "RequestCount"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 18,
+                                "y": 8,
+                                "width": 6,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"HTTPCode_ELB_5XX_Count\"', 'Sum', 60))",
+                                                "label": "${PROP('Dim.LoadBalancer')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "title": "HTTP 5XX emitted by ALB",
+                                    "period": 60,
+                                    "stat": "Sum"
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 0,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "## ALB Request Metrics",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 8,
+                                "width": 6,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"HTTPCode_ELB_4XX_Count\"', 'Sum', 60))",
+                                                "label": "${PROP('Dim.LoadBalancer')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "title": "HTTP 4XX emitted by ALB",
+                                    "period": 60,
+                                    "stat": "Sum"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 37,
+                                "width": 6,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,TargetGroup,LoadBalancer} MetricName=\"HealthyHostCount\"', 'Minimum', 60))",
+                                                "label": "${PROP('Dim.LoadBalancer')} ${PROP('Dim.TargetGroup')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "period": 300,
+                                    "stat": "Average",
+                                    "title": "Healthy Targets"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 6,
+                                "y": 37,
+                                "width": 6,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,TargetGroup,LoadBalancer} MetricName=\"RequestCount\"', 'Sum', 60))",
+                                                "label": "${PROP('Dim.LoadBalancer')} ${PROP('Dim.TargetGroup')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "period": 300,
+                                    "stat": "Average",
+                                    "title": "Request Count Per Target"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 6,
+                                "y": 51,
+                                "width": 6,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,TargetGroup,LoadBalancer} MetricName=\"TargetConnectionErrorCount\"', 'Sum', 60))",
+                                                "label": "${PROP('Dim.LoadBalancer')} ${PROP('Dim.TargetGroup')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "title": "TargetConnectionErrorCount",
+                                    "period": 300,
+                                    "stat": "Average"
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 22,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "## Target Group Metrics",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 51,
+                                "width": 6,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,TargetGroup,LoadBalancer} MetricName=\"TargetResponseTime\"', 'p90', 60))",
+                                                "label": "${LABEL} ${PROP('Dim.TargetGroup')}",
+                                                "id": "e1",
+                                                "region": "us-east-1",
+                                                "period": 60
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "title": "Latency added by Target (TargetResponseTime p90)",
+                                    "period": 60,
+                                    "stat": "Average"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 82,
+                                "width": 12,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"ELBAuthSuccess\"', 'Sum', 60))",
+                                                "label": "${PROP('Dim.LoadBalancer')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "period": 60,
+                                    "stat": "Sum",
+                                    "title": "Successful Authenticate Actions"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 6,
+                                "y": 8,
+                                "width": 6,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"HTTPCode_ELB_3XX_Count\"', 'Sum', 60))",
+                                                "label": "${PROP('Dim.LoadBalancer')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "title": "HTTP 3XX emitted by ALB",
+                                    "period": 60,
+                                    "stat": "Sum"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 59,
+                                "width": 12,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"NewConnectionCount\"', 'Sum', 60))",
+                                                "label": "${PROP('Dim.LoadBalancer')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "stat": "Sum",
+                                    "period": 60,
+                                    "title": "New Connections"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 44,
+                                "width": 6,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,TargetGroup,LoadBalancer} MetricName=\"HTTPCode_Target_2XX_Count\"', 'Sum', 60))",
+                                                "label": "${PROP('Dim.LoadBalancer')} ${PROP('Dim.TargetGroup')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "period": 300,
+                                    "stat": "Average",
+                                    "title": "HTTP 2XX emitted from Targets"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 6,
+                                "y": 44,
+                                "width": 6,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,TargetGroup,LoadBalancer} MetricName=\"HTTPCode_Target_3XX_Count\"', 'Sum', 60))",
+                                                "label": "${PROP('Dim.LoadBalancer')} ${PROP('Dim.TargetGroup')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "period": 300,
+                                    "stat": "Average",
+                                    "title": "HTTP 3XX emitted from Targets"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 44,
+                                "width": 6,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,TargetGroup,LoadBalancer} MetricName=\"HTTPCode_Target_4XX_Count\"', 'Sum', 60))",
+                                                "label": "${PROP('Dim.LoadBalancer')} ${PROP('Dim.TargetGroup')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "period": 300,
+                                    "stat": "Average",
+                                    "title": "HTTP 4XX emitted from Targets"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 18,
+                                "y": 44,
+                                "width": 6,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,TargetGroup,LoadBalancer} MetricName=\"HTTPCode_Target_5XX_Count\"', 'Sum', 60))",
+                                                "label": "${PROP('Dim.LoadBalancer')} ${PROP('Dim.TargetGroup')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "period": 300,
+                                    "stat": "Average",
+                                    "title": "HTTP 5XX emitted from Targets"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 18,
+                                "y": 37,
+                                "width": 6,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,TargetGroup,LoadBalancer} MetricName=\"UnHealthyHostCount\"', 'Maximum', 60))",
+                                                "label": "${PROP('Dim.LoadBalancer')} ${PROP('Dim.TargetGroup')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "period": 300,
+                                    "stat": "Average",
+                                    "title": "Unhealthy Targets"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 37,
+                                "width": 6,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,TargetGroup,LoadBalancer} MetricName=\"RequestCount\"', 'Sum', 60))",
+                                                "label": "${PROP('Dim.LoadBalancer')} ${PROP('Dim.TargetGroup')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "period": 300,
+                                    "stat": "Average",
+                                    "title": "Request Count Per Target Group"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 6,
+                                "y": 15,
+                                "width": 6,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"HTTPCode_ELB_502_Count\"', 'Sum', 60))",
+                                                "label": "${PROP('Dim.LoadBalancer')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "title": "HTTP 502 emitted by ALB",
+                                    "period": 60,
+                                    "stat": "Sum"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 15,
+                                "width": 6,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"HTTPCode_ELB_503_Count\"', 'Sum', 60))",
+                                                "label": "${PROP('Dim.LoadBalancer')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "title": "HTTP 503 emitted by ALB",
+                                    "period": 60,
+                                    "stat": "Sum"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 18,
+                                "y": 15,
+                                "width": 6,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"HTTPCode_ELB_504_Count\"', 'Sum', 60))",
+                                                "label": "${PROP('Dim.LoadBalancer')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "title": "HTTP 504 emitted by ALB",
+                                    "period": 60,
+                                    "stat": "Sum"
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 73,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "## TLS Metrics",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 58,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "## Connection Metrics\n",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 59,
+                                "width": 12,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"ActiveConnectionCount\"', 'Sum', 60))",
+                                                "label": "${PROP('Dim.LoadBalancer')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "stat": "Sum",
+                                    "period": 60,
+                                    "title": "Active Connections"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 66,
+                                "width": 12,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"RejectedConnectionCount\"', 'Sum', 60))",
+                                                "label": "${PROP('Dim.LoadBalancer')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "stat": "Sum",
+                                    "period": 60,
+                                    "title": "Rejected Connections"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 1,
+                                "width": 12,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"RequestCount\"', 'Sum', 60))",
+                                                "label": "${PROP('Dim.LoadBalancer')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "pie",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "period": 60,
+                                    "stat": "Sum",
+                                    "title": "RequestCount by ALB",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false,
+                                    "labels": {
+                                        "visible": true
+                                    },
+                                    "legend": {
+                                        "position": "hidden"
+                                    }
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 1,
+                                "width": 12,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"HTTPCode_ELB_5XX_Count\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.LoadBalancer')}",
+                                                "id": "e2"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "title": "HTTP 5XX Responses by ALB",
+                                    "period": 60,
+                                    "stat": "Sum",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 23,
+                                "width": 12,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/ApplicationELB,TargetGroup,LoadBalancer} MetricName=\"UnHealthyHostCount\"', 'Maximum', 60), MAX, DESC))",
+                                                "label": "${PROP('Dim.LoadBalancer')} ${PROP('Dim.TargetGroup')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "period": 300,
+                                    "stat": "Average",
+                                    "title": "Unhealthy Targets by ALB & Target Group",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 23,
+                                "width": 12,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/ApplicationELB,TargetGroup,LoadBalancer} MetricName=\"RequestCount\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.LoadBalancer')} ${PROP('Dim.TargetGroup')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "pie",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "period": 300,
+                                    "stat": "Average",
+                                    "title": "Request Count Per Target Group",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false,
+                                    "labels": {
+                                        "visible": true
+                                    },
+                                    "legend": {
+                                        "position": "hidden"
+                                    }
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 30,
+                                "width": 12,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/ApplicationELB,TargetGroup,LoadBalancer} MetricName=\"TargetResponseTime\"', 'p90', 60), SUM, DESC))",
+                                                "label": "${LABEL} ${PROP('Dim.TargetGroup')}",
+                                                "id": "e1",
+                                                "region": "us-east-1",
+                                                "period": 60
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "title": "Latency added by Target (TargetResponseTime p90)",
+                                    "period": 60,
+                                    "stat": "Average",
+                                    "setPeriodToTimeRange": true,
+                                    "singleValueFullPrecision": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 30,
+                                "width": 12,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,TargetGroup,LoadBalancer} MetricName=\"HTTPCode_Target_5XX_Count\"', 'Sum', 60))",
+                                                "label": "${PROP('Dim.LoadBalancer')} ${PROP('Dim.TargetGroup')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "period": 300,
+                                    "stat": "Average",
+                                    "title": "HTTP 5XX by Target Group",
+                                    "legend": {
+                                        "position": "hidden"
+                                    },
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 15,
+                                "width": 6,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"NonStickyRequestCount\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.LoadBalancer')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "period": 60,
+                                    "stat": "Sum",
+                                    "title": "NonStickyRequestCount"
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 81,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "## Authentication Metrics\n",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 82,
+                                "width": 12,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"ELBAuthFailure\"', 'Sum', 60))",
+                                                "label": "${PROP('Dim.LoadBalancer')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "period": 60,
+                                    "stat": "Sum",
+                                    "title": "Failed Authenticate Actions"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 89,
+                                "width": 12,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"ELBAuthError\"', 'Sum', 60))",
+                                                "label": "${PROP('Dim.LoadBalancer')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "period": 60,
+                                    "stat": "Sum",
+                                    "title": "Errored Authenticate Actions"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 74,
+                                "width": 12,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"ClientTLSNegotiationErrorCount\"', 'Sum', 60))",
+                                                "label": "${PROP('Dim.LoadBalancer')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "period": 60,
+                                    "stat": "Sum",
+                                    "title": "TLS Negotiation Errors emitted by Client"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 74,
+                                "width": 12,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"TargetTLSNegotiationErrorCount\"', 'Sum', 60))",
+                                                "label": "${PROP('Dim.LoadBalancer')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "period": 60,
+                                    "stat": "Sum",
+                                    "title": "TLS Negotiation Errors emitted by Target"
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 96,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "## Load Balancer Capacity Units (LCU)",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 97,
+                                "width": 12,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"ConsumedLCUs\"', 'Sum', 3600))",
+                                                "label": "${PROP('Dim.LoadBalancer')}",
+                                                "id": "e3",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "period": 3600,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "stat": "Sum",
+                                    "title": "ConsumedLCUs",
+                                    "yAxis": {
+                                        "left": {
+                                            "min": 0
+                                        }
+                                    },
+                                    "view": "timeSeries",
+                                    "stacked": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 104,
+                                "width": 12,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"ReservedLCUs\"', 'Sum', 3600))",
+                                                "label": "${PROP('Dim.LoadBalancer')}",
+                                                "id": "e3",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "period": 3600,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "stat": "Sum",
+                                    "title": "ReservedLCUs",
+                                    "yAxis": {
+                                        "left": {
+                                            "min": 0
+                                        }
+                                    },
+                                    "view": "timeSeries",
+                                    "stacked": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 97,
+                                "width": 12,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"PeakLCUs\"', 'Sum', 3600))",
+                                                "label": "${PROP('Dim.LoadBalancer')}",
+                                                "id": "e3",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "period": 3600,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "stat": "Sum",
+                                    "title": "PeakLCUs",
+                                    "yAxis": {
+                                        "left": {
+                                            "min": 0
+                                        }
+                                    },
+                                    "view": "timeSeries",
+                                    "stacked": false
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        },
+        "CWDashboardALBIndividual": {
+            "Type": "AWS::CloudWatch::Dashboard",
+            "Properties": {
+                "DashboardName": "ALB_Individual_Resources_Account_ID_Test",
+                "DashboardBody": {
+                    "Fn::ToJsonString": {
+                        "variables": [
+                            {
+                                "type": "property",
+                                "property": "accountId",
+                                "inputType": "select",
+                                "id": "accountId",
+                                "label": "Account ID",
+                                "defaultValue": {
+                                    "Ref": "DefaultAccountID"
+                                },
+                                "visible": true,
+                                "inputPopulationType": "custom",
+                                "values": [
+                                    {
+                                        "value": {
+                                            "Ref": "DefaultAccountID"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "pattern",
+                                "pattern": "us-east-1",
+                                "inputType": "select",
+                                "id": "Region",
+                                "label": "Region",
+                                "defaultValue": {
+                                    "Ref": "DefaultRegion"
+                                },
+                                "visible": true,
+                                "values": [
+                                    {
+                                        "value": "us-east-1",
+                                        "label": "N. Virginia"
+                                    },
+                                    {
+                                        "value": "us-east-2",
+                                        "label": "Ohio"
+                                    },
+                                    {
+                                        "value": "us-west-1",
+                                        "label": "N.California"
+                                    },
+                                    {
+                                        "value": "us-west-2",
+                                        "label": "Oregon"
+                                    },
+                                    {
+                                        "value": "ap-east-1",
+                                        "label": "Hong Kong"
+                                    },
+                                    {
+                                        "value": "ap-south-1",
+                                        "label": "Mumbai"
+                                    },
+                                    {
+                                        "value": "ap-northeast-3",
+                                        "label": "Osaka"
+                                    },
+                                    {
+                                        "value": "ap-northeast-2",
+                                        "label": "Seoul"
+                                    },
+                                    {
+                                        "value": "ap-southeast-1",
+                                        "label": "Singapore"
+                                    },
+                                    {
+                                        "value": "ap-southeast-2",
+                                        "label": "Sydney"
+                                    },
+                                    {
+                                        "value": "ap-noutheast-1",
+                                        "label": "Toyko"
+                                    },
+                                    {
+                                        "value": "ca-central-1",
+                                        "label": "Canada"
+                                    },
+                                    {
+                                        "value": "eu-central-1",
+                                        "label": "Frankfurt"
+                                    },
+                                    {
+                                        "value": "eu-west-1",
+                                        "label": "Ireland"
+                                    },
+                                    {
+                                        "value": "eu-west-2",
+                                        "label": "London"
+                                    },
+                                    {
+                                        "value": "eu-west-3",
+                                        "label": "Paris"
+                                    },
+                                    {
+                                        "value": "eu-north-1",
+                                        "label": "Stockholm"
+                                    },
+                                    {
+                                        "value": "sa-east-1",
+                                        "label": "South America"
+                                    }
+                                ],
+                                "value": "us-east-1",
+                                "customValues": "us-east-1, N. Virginia\nus-east-2, Ohio\nus-west-1, N.California\nca-central-1, Canada\nus-west-2, Oregon\neu-west-1, Ireland\neu-west-2, London\neu-central-1, Frankfurt"
+                            },
+                            {
+                                "type": "property",
+                                "property": "LoadBalancer",
+                                "inputType": "select",
+                                "id": "LoadBalancer",
+                                "label": "LoadBalancer",
+                                "defaultValue": {
+                                    "Ref": "DefaultALB"
+                                },
+                                "visible": true,
+                                "search": "{AWS/ApplicationELB,LoadBalancer} MetricName=RequestCount",
+                                "populateFrom": "LoadBalancer"
+                            },
+                            {
+                                "type": "property",
+                                "property": "WebACL",
+                                "inputType": "select",
+                                "id": "WebACL",
+                                "label": "WebACL",
+                                "defaultValue": {
+                                    "Ref": "DefaultWebACL"
+                                },
+                                "visible": true,
+                                "search": "{AWS/WAFV2,Region,Rule,WebACL} MetricName=AllowedRequests",
+                                "populateFrom": "WebACL"
+                            }
+                        ],
+                        "widgets": [
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 7,
+                                "width": 6,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"RequestCount\" LoadBalancer=\"appname\"', 'Sum', 60))",
+                                                "label": "${PROP('Dim.LoadBalancer')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "period": 60,
+                                    "stat": "Sum",
+                                    "title": "RequestCount"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 1,
+                                "width": 12,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"HTTPCode_ELB_5XX_Count\" LoadBalancer=appname', 'Sum', 60))",
+                                                "label": "${PROP('MetricName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ],
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"HTTPCode_ELB_500_Count\" LoadBalancer=appname', 'Sum', 60))",
+                                                "label": "${PROP('MetricName')}",
+                                                "id": "e5",
+                                                "region": "us-east-1"
+                                            }
+                                        ],
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"HTTPCode_ELB_502_Count\" LoadBalancer=appname', 'Sum', 60))",
+                                                "label": "${PROP('MetricName')}",
+                                                "id": "e2",
+                                                "region": "us-east-1"
+                                            }
+                                        ],
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"HTTPCode_ELB_503_Count\" LoadBalancer=appname', 'Sum', 60))",
+                                                "label": "${PROP('MetricName')}",
+                                                "id": "e3",
+                                                "region": "us-east-1"
+                                            }
+                                        ],
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"HTTPCode_ELB_504_Count\" LoadBalancer=appname', 'Sum', 60))",
+                                                "label": "${PROP('MetricName')}",
+                                                "id": "e4",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "title": "HTTP 5XX emitted by ALB",
+                                    "period": 60,
+                                    "stat": "Sum",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 0,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "## ALB Request Metrics",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 7,
+                                "width": 6,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"HTTPCode_ELB_4XX_Count\" LoadBalancer=appname', 'Sum', 60))",
+                                                "label": "${PROP('Dim.LoadBalancer')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "title": "HTTP 4XX emitted by ALB",
+                                    "period": 60,
+                                    "stat": "Sum"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 29,
+                                "width": 6,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,TargetGroup,LoadBalancer} MetricName=\"HealthyHostCount\" LoadBalancer=appname', 'Minimum', 60))",
+                                                "label": "${PROP('Dim.TargetGroup')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "title": "Healthy Targets",
+                                    "stat": "Maximum",
+                                    "period": 60
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 6,
+                                "y": 29,
+                                "width": 6,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/ApplicationELB,TargetGroup,LoadBalancer} MetricName=\"RequestCountPerTarget\" LoadBalancer=appname', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.TargetGroup')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "period": 300,
+                                    "stat": "Average",
+                                    "title": "RequestCount Per Target"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 43,
+                                "width": 6,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/ApplicationELB,TargetGroup,LoadBalancer} MetricName=\"TargetConnectionErrorCount\" LoadBalancer=appname', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.TargetGroup')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "title": "TargetConnectionErrorCount",
+                                    "period": 300,
+                                    "stat": "Average"
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 21,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "## Target Group Metrics",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 6,
+                                "y": 43,
+                                "width": 6,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,TargetGroup,LoadBalancer} MetricName=\"TargetResponseTime\" LoadBalancer=appname', 'p90', 60))",
+                                                "label": "${PROP('Dim.TargetGroup')}",
+                                                "id": "e1",
+                                                "region": "us-east-1",
+                                                "period": 60
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "title": "Latency added by Target (TargetResponseTime p90)",
+                                    "period": 60,
+                                    "stat": "Average"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 60,
+                                "width": 6,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"TargetTLSNegotiationErrorCount\" LoadBalancer=\"appname\"', 'Sum', 60))",
+                                                "label": "${PROP('Dim.LoadBalancer')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "period": 60,
+                                    "stat": "Sum",
+                                    "title": "TLS Negotiation Errors emitted by Target"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 60,
+                                "width": 6,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"ClientTLSNegotiationErrorCount\" LoadBalancer=\"appname\"', 'Sum', 60))",
+                                                "label": "${PROP('Dim.LoadBalancer')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "period": 60,
+                                    "stat": "Sum",
+                                    "title": "TLS Negotiation Errors emitted by Client"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 6,
+                                "y": 7,
+                                "width": 6,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"HTTPCode_ELB_3XX_Count\" LoadBalancer=appname', 'Sum', 60))",
+                                                "label": "${PROP('Dim.LoadBalancer')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "title": "HTTP 3XX emitted by ALB",
+                                    "period": 60,
+                                    "stat": "Sum"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 36,
+                                "width": 6,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/ApplicationELB,TargetGroup,LoadBalancer} MetricName=\"HTTPCode_Target_2XX_Count\" LoadBalancer=appname', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.TargetGroup')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "title": "HTTP 2XX emitted from Targets",
+                                    "period": 60,
+                                    "stat": "Sum"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 6,
+                                "y": 36,
+                                "width": 6,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/ApplicationELB,TargetGroup,LoadBalancer} MetricName=\"HTTPCode_Target_3XX_Count\" LoadBalancer=appname', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.TargetGroup')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "title": "HTTP 3XX emitted from Targets",
+                                    "period": 60,
+                                    "stat": "Sum"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 36,
+                                "width": 6,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/ApplicationELB,TargetGroup,LoadBalancer} MetricName=\"HTTPCode_Target_4XX_Count\" LoadBalancer=appname', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.TargetGroup')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "title": "HTTP 4XX emitted from Targets",
+                                    "period": 60,
+                                    "stat": "Sum"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 18,
+                                "y": 36,
+                                "width": 6,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/ApplicationELB,TargetGroup,LoadBalancer} MetricName=\"HTTPCode_Target_5XX_Count\" LoadBalancer=appname', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.TargetGroup')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "title": "HTTP 5XX emitted from Targets",
+                                    "period": 60,
+                                    "stat": "Sum"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 18,
+                                "y": 84,
+                                "width": 6,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/WAFV2,WebACL,Region,Rule} WebACL=\"appname\" Region=\"us-east-1\" MetricName=\"AllowedRequests\"', 'Sum', 60),SUM, DESC))",
+                                                "label": "${LABEL} ${PROP('Dim.WebACL')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "period": 60,
+                                    "stat": "Sum",
+                                    "title": "AllowedRequests"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 84,
+                                "width": 6,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/WAFV2,WebACL,Region,Rule} WebACL=\"appname\" Region=\"us-east-1\" MetricName=\"BlockedRequests\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${LABEL} ${PROP('Dim.WebACL')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "period": 60,
+                                    "stat": "Sum",
+                                    "title": "BlockedRequests"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 18,
+                                "y": 29,
+                                "width": 6,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,TargetGroup,LoadBalancer} MetricName=\"UnHealthyHostCount\" LoadBalancer=appname', 'Maximum', 60))",
+                                                "label": "${PROP('Dim.TargetGroup')}",
+                                                "id": "e2",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "title": "UnHealthy Targets",
+                                    "stat": "Maximum",
+                                    "period": 60
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 29,
+                                "width": 6,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/ApplicationELB,TargetGroup,LoadBalancer} MetricName=\"RequestCount\" LoadBalancer=appname', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.TargetGroup')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "period": 300,
+                                    "stat": "Average",
+                                    "title": "Request Count Per Target Group"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 18,
+                                "y": 7,
+                                "width": 6,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"HTTPCode_ELB_5XX_Count\" LoadBalancer=appname', 'Sum', 60))",
+                                                "label": "${PROP('MetricName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ],
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"HTTPCode_ELB_500_Count\" LoadBalancer=appname', 'Sum', 60))",
+                                                "label": "${PROP('MetricName')}",
+                                                "id": "e5",
+                                                "region": "us-east-1"
+                                            }
+                                        ],
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"HTTPCode_ELB_502_Count\" LoadBalancer=appname', 'Sum', 60))",
+                                                "label": "${PROP('MetricName')}",
+                                                "id": "e2",
+                                                "region": "us-east-1"
+                                            }
+                                        ],
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"HTTPCode_ELB_503_Count\" LoadBalancer=appname', 'Sum', 60))",
+                                                "label": "${PROP('MetricName')}",
+                                                "id": "e3",
+                                                "region": "us-east-1"
+                                            }
+                                        ],
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"HTTPCode_ELB_504_Count\" LoadBalancer=appname', 'Sum', 60))",
+                                                "label": "${PROP('MetricName')}",
+                                                "id": "e4",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "title": "HTTP 5XX emitted by ALB",
+                                    "period": 60,
+                                    "stat": "Sum"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 14,
+                                "width": 6,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"NonStickyRequestCount\" LoadBalancer=\"appname\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('MetricName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "period": 60,
+                                    "stat": "Sum",
+                                    "title": "NonStickyRequestCount"
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 50,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "## Connection Metrics",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 59,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "## TLS Metrics",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 67,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "## Authentication Metrics",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 51,
+                                "width": 12,
+                                "height": 8,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"NewConnectionCount\" LoadBalancer=\"appname\"', 'Sum', 60))",
+                                                "label": "${PROP('MetricName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ],
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"ActiveConnectionCount\" LoadBalancer=\"appname\"', 'Sum', 60))",
+                                                "label": "${PROP('MetricName')}",
+                                                "id": "e2",
+                                                "region": "us-east-1"
+                                            }
+                                        ],
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"RejectedConnectionCount\" LoadBalancer=\"appname\"', 'Sum', 60))",
+                                                "label": "${PROP('MetricName')}",
+                                                "id": "e3",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "stat": "Sum",
+                                    "period": 60,
+                                    "title": "Connections"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 51,
+                                "width": 12,
+                                "height": 5,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"NewConnectionCount\" LoadBalancer=\"appname\"', 'Sum', 60))",
+                                                "label": "${PROP('MetricName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ],
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"ActiveConnectionCount\" LoadBalancer=\"appname\"', 'Sum', 60))",
+                                                "label": "${PROP('MetricName')}",
+                                                "id": "e2",
+                                                "region": "us-east-1"
+                                            }
+                                        ],
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"RejectedConnectionCount\" LoadBalancer=\"appname\"', 'Sum', 60))",
+                                                "label": "${PROP('MetricName')}",
+                                                "id": "e3",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "stat": "Sum",
+                                    "period": 60,
+                                    "title": "Connections",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 6,
+                                "y": 60,
+                                "width": 6,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"ClientTLSNegotiationErrorCount\" LoadBalancer=\"appname\"', 'Sum', 60))",
+                                                "label": "${PROP('Dim.LoadBalancer')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "period": 60,
+                                    "stat": "Sum",
+                                    "title": "TLS Negotiation Errors emitted by Client",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 18,
+                                "y": 60,
+                                "width": 6,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"TargetTLSNegotiationErrorCount\" LoadBalancer=\"appname\"', 'Sum', 60))",
+                                                "label": "${PROP('Dim.LoadBalancer')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "period": 60,
+                                    "stat": "Sum",
+                                    "title": "TLS Negotiation Errors emitted by Target",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 68,
+                                "width": 6,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"ELBAuthSuccess\" LoadBalancer=\"appname\"', 'Sum', 60))",
+                                                "label": "${PROP('Dim.LoadBalancer')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "period": 60,
+                                    "stat": "Sum",
+                                    "title": "Successful Authenticate Actions"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 68,
+                                "width": 6,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"ELBAuthFailure\" LoadBalancer=\"appname\"', 'Sum', 60))",
+                                                "label": "${PROP('Dim.LoadBalancer')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "period": 60,
+                                    "stat": "Sum",
+                                    "title": "Failed Authenticate Actions"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 6,
+                                "y": 68,
+                                "width": 6,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"ELBAuthError\" LoadBalancer=\"appname\"', 'Sum', 60))",
+                                                "label": "${PROP('Dim.LoadBalancer')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "period": 60,
+                                    "stat": "Sum",
+                                    "title": "Errored Authenticate Actions"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 18,
+                                "y": 22,
+                                "width": 6,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,TargetGroup,LoadBalancer} MetricName=\"UnHealthyHostCount\" LoadBalancer=appname', 'Maximum', 60))",
+                                                "label": "${PROP('Dim.TargetGroup')}",
+                                                "id": "e2",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "title": "Unhealthy Targets by Target Group",
+                                    "stat": "Maximum",
+                                    "period": 60,
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 43,
+                                "width": 6,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,TargetGroup,LoadBalancer} MetricName=\"TargetResponseTime\" LoadBalancer=appname', 'p90', 60))",
+                                                "label": "${PROP('Dim.TargetGroup')}",
+                                                "id": "e1",
+                                                "region": "us-east-1",
+                                                "period": 60
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "title": "Latency added by Target (TargetResponseTime p90)",
+                                    "period": 60,
+                                    "stat": "Average",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 22,
+                                "width": 6,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,TargetGroup,LoadBalancer} MetricName=\"HTTPCode_Target_5XX_Count\" LoadBalancer=appname', 'Sum', 60))",
+                                                "label": "${PROP('Dim.TargetGroup')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "title": "HTTP 5XX by Target Group",
+                                    "period": 60,
+                                    "stat": "Sum",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 6,
+                                "y": 22,
+                                "width": 6,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"HTTPCode_Target_2XX_Count\" LoadBalancer=appname', 'Sum', 60))",
+                                                "label": "${PROP('MetricName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ],
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"HTTPCode_Target_3XX_Count\" LoadBalancer=appname', 'Sum', 60))",
+                                                "label": "${PROP('MetricName')}",
+                                                "id": "e2",
+                                                "region": "us-east-1"
+                                            }
+                                        ],
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"HTTPCode_Target_4XX_Count\" LoadBalancer=appname', 'Sum', 60))",
+                                                "label": "${PROP('MetricName')}",
+                                                "id": "e3",
+                                                "region": "us-east-1"
+                                            }
+                                        ],
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"HTTPCode_Target_5XX_Count\" LoadBalancer=appname', 'Sum', 60))",
+                                                "label": "${PROP('MetricName')}",
+                                                "id": "e4",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "pie",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "title": "Request Count by Response Code",
+                                    "period": 60,
+                                    "stat": "Sum",
+                                    "setPeriodToTimeRange": true
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 6,
+                                "y": 84,
+                                "width": 6,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"HTTPCode_ELB_4XX_Count\" LoadBalancer=appname', 'Sum', 60))",
+                                                "label": "${PROP('Dim.LoadBalancer')} ${PROP('MetricName')}",
+                                                "id": "e2",
+                                                "region": "us-east-1"
+                                            }
+                                        ],
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/WAFV2,WebACL,Region,Rule} Rule=\"ALL\" WebACL=\"appname\" Region=\"us-east-1\" MetricName=\"BlockedRequests\"', 'Sum', 60))",
+                                                "label": "${PROP('Dim.WebACL')} ${PROP('Dim.Rule')} ${PROP('MetricName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "period": 60,
+                                    "stat": "Sum",
+                                    "title": "ALB HTTP 4XX vs WAF BlockedRequests"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 76,
+                                "width": 12,
+                                "height": 7,
+                                "properties": {
+                                    "period": 3600,
+                                    "metrics": [
+                                        [
+                                            "AWS/ApplicationELB",
+                                            "PeakLCUs",
+                                            "LoadBalancer",
+                                            "appname",
+                                            {
+                                                "label": "Peak LCU base",
+                                                "id": "peakLCUs",
+                                                "visible": false,
+                                                "stat": "Maximum",
+                                                "region": "us-east-1"
+                                            }
+                                        ],
+                                        [
+                                            "...",
+                                            {
+                                                "label": "Peak LCU sample count",
+                                                "id": "peakLCUsSampleCount",
+                                                "visible": false,
+                                                "stat": "SampleCount",
+                                                "region": "us-east-1"
+                                            }
+                                        ],
+                                        [
+                                            ".",
+                                            "ReservedLCUs",
+                                            ".",
+                                            ".",
+                                            {
+                                                "label": "Reserved LCU",
+                                                "visible": true,
+                                                "region": "us-east-1"
+                                            }
+                                        ],
+                                        [
+                                            {
+                                                "expression": "peakLCUs*FLOOR(peakLCUsSampleCount*60/PERIOD(peakLCUsSampleCount))",
+                                                "label": "Peak LCU usage",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "stat": "Sum",
+                                    "title": "Load Balancer Capacity Units (LCU): Peak vs. Reserved Usage",
+                                    "yAxis": {
+                                        "left": {
+                                            "min": 0
+                                        }
+                                    },
+                                    "view": "timeSeries",
+                                    "stacked": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 76,
+                                "width": 12,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"ConsumedLCUs\" LoadBalancer=\"appname\"', 'Sum', 3600))",
+                                                "label": "${PROP('MetricName')}",
+                                                "id": "e3",
+                                                "region": "us-east-1"
+                                            }
+                                        ],
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"PeakLCUs\" LoadBalancer=\"appname\"', 'Sum', 3600))",
+                                                "label": "${PROP('MetricName')}",
+                                                "id": "e2",
+                                                "region": "us-east-1"
+                                            }
+                                        ],
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"ReservedLCUs\" LoadBalancer=\"appname\"', 'Sum', 3600))",
+                                                "label": "${PROP('MetricName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "period": 3600,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "stat": "Sum",
+                                    "title": "Load Balancer Capacity Units (LCU)",
+                                    "yAxis": {
+                                        "left": {
+                                            "min": 0
+                                        }
+                                    },
+                                    "view": "timeSeries",
+                                    "stacked": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 1,
+                                "width": 12,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"RequestCount\" LoadBalancer=\"appname\"', 'Sum', 60))",
+                                                "label": "${PROP('MetricName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ],
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"HTTPCode_ELB_5XX_Count\" LoadBalancer=appname', 'Sum', 60))",
+                                                "label": "${PROP('MetricName')}",
+                                                "id": "e4",
+                                                "region": "us-east-1"
+                                            }
+                                        ],
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"HTTPCode_ELB_4XX_Count\" LoadBalancer=appname', 'Sum', 60))",
+                                                "label": "${PROP('MetricName')}",
+                                                "id": "e3",
+                                                "region": "us-east-1"
+                                            }
+                                        ],
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"HTTPCode_ELB_3XX_Count\" LoadBalancer=appname', 'Sum', 60))",
+                                                "label": "${PROP('MetricName')}",
+                                                "id": "e2",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "period": 60,
+                                    "stat": "Sum",
+                                    "title": "RequestCount",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 84,
+                                "width": 6,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"HTTPCode_ELB_4XX_Count\" LoadBalancer=appname', 'Sum', 60))",
+                                                "label": "${PROP('Dim.LoadBalancer')} ${PROP('MetricName')}",
+                                                "id": "e2",
+                                                "region": "us-east-1"
+                                            }
+                                        ],
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/WAFV2,WebACL,Region,Rule} WebACL=\"appname\" Region=\"us-east-1\" MetricName=\"BlockedRequests\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.WebACL')} ${PROP('Dim.Rule')} ${PROP('MetricName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "period": 60,
+                                    "stat": "Sum",
+                                    "title": "ALB HTTP 4XX vs WAF BlockedRequests",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 22,
+                                "width": 6,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/ApplicationELB,TargetGroup,LoadBalancer} MetricName=\"RequestCount\" LoadBalancer=appname', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.TargetGroup')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "pie",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "period": 300,
+                                    "stat": "Average",
+                                    "title": "Request Count Per Target Group",
+                                    "setPeriodToTimeRange": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 75,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "## Load Balancer Capacity Units (LCU)",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 83,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "## Web Application Firewall (WAF)",
+                                    "background": "transparent"
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        }
+    }
+}

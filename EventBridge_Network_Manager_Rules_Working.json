@@ -1,0 +1,75 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "EventBridge rules to log Network Manager events.",
+  "Parameters": {},
+  "Resources": {
+    "CWLTopologyChanges": {
+      "Type": "AWS::Logs::LogGroup",
+      "Properties": {
+        "LogGroupName": "/aws/events/network_manager_topology_changes2",
+        "RetentionInDays": 7
+      }
+    },
+    "CWLRoutingUpdates": {
+      "Type": "AWS::Logs::LogGroup",
+      "Properties": {
+        "LogGroupName": "/aws/events/network_manager_routing_updates_2",
+        "RetentionInDays": 7
+      }
+    },
+    "CWLStatusUpdates": {
+      "Type": "AWS::Logs::LogGroup",
+      "Properties": {
+        "LogGroupName": "/aws/events/network_manager_status_updates_2",
+        "RetentionInDays": 7
+      }
+    },
+    "CWLPeeringConnectionDeleted": {
+      "Type": "AWS::Logs::LogGroup",
+      "Properties": {
+        "LogGroupName": "/aws/events/network_manager_peering_connection_deleted_2",
+        "RetentionInDays": 7
+      }
+    },
+    "CWLRouteDeleted": {
+      "Type": "AWS::Logs::LogGroup",
+      "Properties": {
+        "LogGroupName": "/aws/events/network_manager_route_deleted_2",
+        "RetentionInDays": 7
+      }
+    },
+    "CWLVPNConnectionDown": {
+      "Type": "AWS::Logs::LogGroup",
+      "Properties": {
+        "LogGroupName": "/aws/events/network_manager_vpn_connection_down_2",
+        "RetentionInDays": 7
+      }
+    },
+    "RuleTopologyChanges": {
+      "Type": "AWS::Events::Rule",
+      "Properties": {
+        "Name": "Network_Manager_Topology_Changes_2",
+        "Description": "Capture Network Manger Topology Changes",
+        "EventPattern": {
+          "source": [
+            "aws.networkmanager"
+          ],
+          "detail-type": [
+            "Network Manager Topology Change"
+          ]
+        },
+        "Targets": [
+          {
+            "Id": "CW-Logs-Network-Manager-Toplogy-Changes",
+            "Arn": {
+              "Fn::GetAtt": [
+                "CWLTopologyChanges",
+                "Arn"
+              ]
+            }
+          }
+        ]
+      }
+    }
+  }
+}

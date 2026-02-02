@@ -1,0 +1,686 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "CloudWatch Dashboards to visualize Bedrock performance.",
+    "Transform": "AWS::LanguageExtensions",
+    "Parameters": {
+        "DefaultRegion": {
+            "Description": "Select the default region hosting the Bedrock resources to be monitored.",
+            "Type": "String",
+            "Default": "us-east-1"
+        }
+    },
+    "Resources": {
+        "CWDashboardBedrockAll": {
+            "Type": "AWS::CloudWatch::Dashboard",
+            "Properties": {
+                "DashboardName": "Bedrock_All_Resources",
+                "DashboardBody": {
+                    "Fn::ToJsonString": {
+                        "variables": [
+                            {
+                                "type": "property",
+                                "property": "region",
+                                "inputType": "select",
+                                "id": "Region",
+                                "label": "Region",
+                                "defaultValue": {
+                                    "Ref": "DefaultRegion"
+                                },
+                                "visible": true,
+                                "values": [
+                                    {
+                                        "value": "us-east-1",
+                                        "label": "N. Virginia"
+                                    },
+                                    {
+                                        "value": "us-east-2",
+                                        "label": "Ohio"
+                                    },
+                                    {
+                                        "value": "us-west-1",
+                                        "label": "N.California"
+                                    },
+                                    {
+                                        "value": "us-west-2",
+                                        "label": "Oregon"
+                                    },
+                                    {
+                                        "value": "ap-east-1",
+                                        "label": "Hong Kong"
+                                    },
+                                    {
+                                        "value": "ap-south-1",
+                                        "label": "Mumbai"
+                                    },
+                                    {
+                                        "value": "ap-northeast-3",
+                                        "label": "Osaka"
+                                    },
+                                    {
+                                        "value": "ap-northeast-2",
+                                        "label": "Seoul"
+                                    },
+                                    {
+                                        "value": "ap-southeast-1",
+                                        "label": "Singapore"
+                                    },
+                                    {
+                                        "value": "ap-southeast-2",
+                                        "label": "Sydney"
+                                    },
+                                    {
+                                        "value": "ap-noutheast-1",
+                                        "label": "Toyko"
+                                    },
+                                    {
+                                        "value": "ca-central-1",
+                                        "label": "Canada"
+                                    },
+                                    {
+                                        "value": "eu-central-1",
+                                        "label": "Frankfurt"
+                                    },
+                                    {
+                                        "value": "eu-west-1",
+                                        "label": "Ireland"
+                                    },
+                                    {
+                                        "value": "eu-west-2",
+                                        "label": "London"
+                                    },
+                                    {
+                                        "value": "eu-west-3",
+                                        "label": "Paris"
+                                    },
+                                    {
+                                        "value": "eu-north-1",
+                                        "label": "Stockholm"
+                                    },
+                                    {
+                                        "value": "sa-east-1",
+                                        "label": "South America"
+                                    }
+                                ]
+                            }
+                        ],
+                        "widgets": [
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 13,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/Bedrock} MetricName=\"Invocations\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('MetricName')}",
+                                                "id": "e1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "Invocations"
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 0,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "# Aggregate Model Performance",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 7,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/Bedrock} MetricName=\"InvocationClientErrors\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('MetricName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "InvocationClientErrors"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 6,
+                                "y": 7,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/Bedrock} MetricName=\"InvocationServerErrors\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('MetricName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "InvocationServerErrors"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 7,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/Bedrock} MetricName=\"InvocationThrottles\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('MetricName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "InvocationThrottles"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 6,
+                                "y": 13,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/Bedrock} MetricName=\"InputTokenCount\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('MetricName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "InputTokenCount"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 19,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/Bedrock} MetricName=\"LegacyModelInvocations\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('MetricName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "LegacyModelInvocations"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 13,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/Bedrock} MetricName=\"OutputTokenCount\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('MetricName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "OutputTokenCount"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 18,
+                                "y": 13,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/Bedrock} MetricName=\"OutputImageCount\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('MetricName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "OutputImageCount"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 1,
+                                "width": 24,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/Bedrock} MetricName=\"InvocationThrottles\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "InvocationThrottles",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ],
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/Bedrock} MetricName=\"InvocationServerErrors\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "InvocationServerErrors",
+                                                "id": "e2",
+                                                "region": "us-east-1"
+                                            }
+                                        ],
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/Bedrock} MetricName=\"InvocationClientErrors\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "InvocationClientErrors",
+                                                "id": "e3",
+                                                "region": "us-east-1"
+                                            }
+                                        ],
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/Bedrock} MetricName=\"InvocationLatency\"', 'Average', 60)),AVG, DESC)",
+                                                "label": "InvocationLatency",
+                                                "id": "e4",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "Throttling & Errors",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 18,
+                                "y": 7,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/Bedrock} MetricName=\"InvocationLatency\"', 'Average', 60)),AVG, DESC)",
+                                                "label": "${PROP('MetricName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "InvocationLatency (Average))"
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 25,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "# Individual Model Performance",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 32,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/Bedrock,ModelId} MetricName=\"InvocationThrottles\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.ModelId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "InvocationThrottles"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 6,
+                                "y": 32,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/Bedrock,ModelId} MetricName=\"InvocationServerErrors\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.ModelId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "InvocationServerErrors"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 32,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/Bedrock,ModelId} MetricName=\"InvocationClientErrors\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.ModelId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "InvocationClientErrors"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 18,
+                                "y": 32,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/Bedrock,ModelId} MetricName=\"InvocationLatency\"', 'Average', 60)),AVG, DESC)",
+                                                "label": "${PROP('Dim.ModelId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "InvocationLatency (Average))"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 38,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/Bedrock,ModelId} MetricName=\"Invocations\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.ModelId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "Invocations"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 6,
+                                "y": 38,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/Bedrock,ModelId} MetricName=\"InputTokenCount\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.ModelId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "InputTokenCount"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 38,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/Bedrock,ModelId} MetricName=\"OutputTokenCount\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.ModelId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "OutputTokenCount"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 18,
+                                "y": 38,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/Bedrock,ModelId} MetricName=\"OutputImageCount\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.ModelId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "OutputImageCount"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 44,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/Bedrock,ModelId} MetricName=\"LegacyModelInvocations\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.ModelId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "LegacyModelInvocations"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 26,
+                                "width": 24,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/Bedrock,ModelId} MetricName=\"InvocationThrottles\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "InvocationThrottles - ${PROP('Dim.ModelId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ],
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/Bedrock,ModelId} MetricName=\"InvocationServerErrors\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "InvocationServerErrors - ${PROP('Dim.ModelId')}",
+                                                "id": "e2",
+                                                "region": "us-east-1"
+                                            }
+                                        ],
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/Bedrock,ModelId} MetricName=\"InvocationClientErrors\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "InvocationClientErrors - ${PROP('Dim.ModelId')}",
+                                                "id": "e3",
+                                                "region": "us-east-1"
+                                            }
+                                        ],
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/Bedrock,ModelId} MetricName=\"InvocationLatency\"', 'Average', 60)),AVG, DESC)",
+                                                "label": "InvocationLatency - ${PROP('Dim.ModelId')}",
+                                                "id": "e4",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "Throttling & Errors",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        }
+    }
+}

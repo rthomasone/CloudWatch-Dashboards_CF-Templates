@@ -1,0 +1,2413 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "CloudWatch Dashboards to visualize S3 resources. Both dashboards leverage Dashboard Variables to filter on the desired resources. Dashboard 'S3_All_Resources' visualizes ALL S3 buckets in the target region. Dashboard 'S3_Individual_Resources' provides additional filters to isolate a specific S3 bucket.",
+    "Transform": "AWS::LanguageExtensions",
+    "Parameters": {
+        "DefaultRegion": {
+            "Description": "Select the default region hosting the S3 buckets to be monitored.",
+            "Type": "String",
+            "Default": "us-east-1"
+        },
+        "DefaultBucket": {
+            "Description": "Select the default S3 bucket to be monitored.",
+            "Type": "String",
+            "Default": ""
+        }
+    },
+    "Resources": {
+        "CWDashboardS3All": {
+            "Type": "AWS::CloudWatch::Dashboard",
+            "Properties": {
+                "DashboardName": "S3_All_Resources",
+                "DashboardBody": {
+                    "Fn::ToJsonString": {
+                        "variables": [
+                            {
+                                "type": "property",
+                                "property": "region",
+                                "inputType": "select",
+                                "id": "Region",
+                                "label": "Region",
+                                "defaultValue": {
+                                    "Ref": "DefaultRegion"
+                                },
+                                "visible": true,
+                                "values": [
+                                    {
+                                        "value": "us-east-1",
+                                        "label": "N. Virginia"
+                                    },
+                                    {
+                                        "value": "us-east-2",
+                                        "label": "Ohio"
+                                    },
+                                    {
+                                        "value": "us-west-1",
+                                        "label": "N.California"
+                                    },
+                                    {
+                                        "value": "us-west-2",
+                                        "label": "Oregon"
+                                    },
+                                    {
+                                        "value": "ap-east-1",
+                                        "label": "Hong Kong"
+                                    },
+                                    {
+                                        "value": "ap-south-1",
+                                        "label": "Mumbai"
+                                    },
+                                    {
+                                        "value": "ap-northeast-3",
+                                        "label": "Osaka"
+                                    },
+                                    {
+                                        "value": "ap-northeast-2",
+                                        "label": "Seoul"
+                                    },
+                                    {
+                                        "value": "ap-southeast-1",
+                                        "label": "Singapore"
+                                    },
+                                    {
+                                        "value": "ap-southeast-2",
+                                        "label": "Sydney"
+                                    },
+                                    {
+                                        "value": "ap-noutheast-1",
+                                        "label": "Toyko"
+                                    },
+                                    {
+                                        "value": "ca-central-1",
+                                        "label": "Canada"
+                                    },
+                                    {
+                                        "value": "eu-central-1",
+                                        "label": "Frankfurt"
+                                    },
+                                    {
+                                        "value": "eu-west-1",
+                                        "label": "Ireland"
+                                    },
+                                    {
+                                        "value": "eu-west-2",
+                                        "label": "London"
+                                    },
+                                    {
+                                        "value": "eu-west-3",
+                                        "label": "Paris"
+                                    },
+                                    {
+                                        "value": "eu-north-1",
+                                        "label": "Stockholm"
+                                    },
+                                    {
+                                        "value": "sa-east-1",
+                                        "label": "South America"
+                                    }
+                                ]
+                            }
+                        ],
+                        "widgets": [
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 9,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "# S3 Daily Storage Metrics "
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 57,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "# S3 Replication Metrics "
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 26,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "# S3 Request Metrics "
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 70,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "# S3 Object Lambda Request Metrics"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 10,
+                                "width": 5,
+                                "height": 8,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/S3,BucketName,StorageType} MetricName=\"BucketSizeBytes\"', 'Average', 86400), AVG, DESC))",
+                                                "label": "${PROP('Dim.BucketName')} ${PROP('Dim.StorageType')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "pie",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "BucketSizeBytes",
+                                    "setPeriodToTimeRange": false,
+                                    "sparkline": true
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 18,
+                                "width": 5,
+                                "height": 8,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/S3,BucketName,StorageType} MetricName=\"NumberOfObjects\"', 'Average', 86400), AVG, DESC))",
+                                                "label": "${PROP('Dim.BucketName')} ${PROP('Dim.StorageType')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "pie",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "NumberOfObjects",
+                                    "setPeriodToTimeRange": false,
+                                    "sparkline": true
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 5,
+                                "y": 10,
+                                "width": 19,
+                                "height": 8,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/S3,BucketName,StorageType} MetricName=\"BucketSizeBytes\"', 'Average', 86400), AVG, DESC))",
+                                                "label": "${PROP('Dim.BucketName')} ${PROP('Dim.StorageType')}",
+                                                "id": "e1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "BucketSizeBytes"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 5,
+                                "y": 18,
+                                "width": 19,
+                                "height": 8,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/S3,BucketName,StorageType} MetricName=\"NumberOfObjects\"', 'Average', 86400), AVG, DESC))",
+                                                "label": "${PROP('Dim.BucketName')} ${PROP('Dim.StorageType')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "NumberOfObjects"
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 0,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "# S3 Usage Metrics"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 33,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/S3,BucketName,FilterId} MetricName=\"AllRequests\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.BucketName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "AllRequests"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 16,
+                                "y": 1,
+                                "width": 8,
+                                "height": 8,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/Usage,Type,Resource,Service,Class} Service=\"S3\" MetricName=\"CallCount\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.Resource')}",
+                                                "id": "e1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "CallCount"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 8,
+                                "y": 1,
+                                "width": 8,
+                                "height": 8,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/Usage,Type,Resource,Service,Class} Service=\"S3\" MetricName=\"ErrorCount\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.Resource')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "ErrorCount"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 1,
+                                "width": 8,
+                                "height": 8,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/Usage,Type,Resource,Service,Class} Service=\"S3\" MetricName=\"ThrottleCount\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.Resource')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "ThrottleCount"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 18,
+                                "y": 58,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/S3,SourceBucket,DestinationBucket,RuleId} MetricName=\"ReplicationLatency\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.RuleId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "ReplicationLatency",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 58,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/S3,SourceBucket,DestinationBucket,RuleId} MetricName=\"OperationsFailedReplication\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.RuleId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "OperationsFailedReplication",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 6,
+                                "y": 58,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/S3,SourceBucket,DestinationBucket,RuleId} MetricName=\"OperationsPendingReplication\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.RuleId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "OperationsPendingReplication",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 58,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/S3,SourceBucket,DestinationBucket,RuleId} MetricName=\"BytesPendingReplication\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.RuleId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "BytesPendingReplication",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 64,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/S3,SourceBucket,DestinationBucket,RuleId} MetricName=\"OperationsFailedReplication\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.RuleId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "OperationsFailedReplication"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 6,
+                                "y": 64,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/S3,SourceBucket,DestinationBucket,RuleId} MetricName=\"OperationsPendingReplication\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.RuleId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "OperationsPendingReplication"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 64,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/S3,SourceBucket,DestinationBucket,RuleId} MetricName=\"BytesPendingReplication\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.RuleId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "BytesPendingReplication"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 18,
+                                "y": 64,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/S3,SourceBucket,DestinationBucket,RuleId} MetricName=\"ReplicationLatency\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.RuleId')}",
+                                                "id": "e1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "ReplicationLatency"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 83,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/S3,AccessPointName,DataSourceARN} MetricName=\"AllRequests\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.AccessPointName')}",
+                                                "id": "e1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "AllRequests"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 6,
+                                "y": 89,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/S3,AccessPointName,DataSourceARN} MetricName=\"PostRequests\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.AccessPointName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "PostRequests"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 95,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/S3,AccessPointName,DataSourceARN} MetricName=\"BytesUploaded\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.AccessPointName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "BytesUploaded"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 6,
+                                "y": 83,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/S3,AccessPointName,DataSourceARN} MetricName=\"GetRequests\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.AccessPointName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "GetRequests"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 89,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/S3,AccessPointName,DataSourceARN} MetricName=\"PutRequests\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.AccessPointName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "PutRequests"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 89,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/S3,AccessPointName,DataSourceARN} MetricName=\"DeleteRequests\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.AccessPointName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "DeleteRequests"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 6,
+                                "y": 95,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/S3,AccessPointName,DataSourceARN} MetricName=\"BytesDownloaded\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.AccessPointName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "BytesDownloaded"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 95,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/S3,AccessPointName,DataSourceARN} MetricName=\"FirstByteLatency\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.AccessPointName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "FirstByteLatency"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 83,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/S3,AccessPointName,DataSourceARN} MetricName=\"HeadRequests\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.AccessPointName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "HeadRequests"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 18,
+                                "y": 83,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/S3,AccessPointName,DataSourceARN} MetricName=\"ListRequests\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.AccessPointName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "ListRequests"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 71,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/S3,AccessPointName,DataSourceARN} MetricName=\"5xxErrors\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.AccessPointName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "5xxErrors",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 18,
+                                "y": 95,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/S3,AccessPointName,DataSourceARN} MetricName=\"TotalRequestLatency\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.AccessPointName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "TotalRequestLatency"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 6,
+                                "y": 71,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/S3,AccessPointName,DataSourceARN} MetricName=\"4xxErrors\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.AccessPointName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "4xxErrors"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 18,
+                                "y": 89,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/S3,AccessPointName,DataSourceARN} MetricName=\"ProxiedRequests\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.AccessPointName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "ProxiedRequests"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 77,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/S3,AccessPointName,DataSourceARN} MetricName=\"InvokedLambda\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.AccessPointName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "InvokedLambda"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 18,
+                                "y": 77,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/S3,AccessPointName,DataSourceARN} MetricName=\"LambdaResponseRequests\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.AccessPointName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "LambdaResponseRequests"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 77,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/S3,AccessPointName,DataSourceARN} MetricName=\"LambdaResponse4xx\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.AccessPointName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "LambdaResponse4xx"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 6,
+                                "y": 77,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/S3,AccessPointName,DataSourceARN} MetricName=\"LambdaResponse5xx\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.AccessPointName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "LambdaResponse5xx"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 71,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/S3,AccessPointName,DataSourceARN} MetricName=\"4xxErrors\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.AccessPointName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "4xxErrors",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 18,
+                                "y": 71,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/S3,AccessPointName,DataSourceARN} MetricName=\"5xxErrors\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.AccessPointName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "5xxErrors"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 39,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/S3,BucketName,FilterId} MetricName=\"DeleteRequests\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.BucketName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "DeleteRequests"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 39,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/S3,BucketName,FilterId} MetricName=\"PutRequests\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.BucketName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "PutRequests"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 6,
+                                "y": 33,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/S3,BucketName,FilterId} MetricName=\"GetRequests\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.BucketName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "GetRequests"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 33,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/S3,BucketName,FilterId} MetricName=\"HeadRequests\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.BucketName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "HeadRequests"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 6,
+                                "y": 39,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/S3,BucketName,FilterId} MetricName=\"PostRequests\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.BucketName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "PostRequests"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 18,
+                                "y": 39,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/S3,BucketName,FilterId} MetricName=\"SelectRequests\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.BucketName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "SelectRequests"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 18,
+                                "y": 45,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/S3,BucketName,FilterId} MetricName=\"SelectBytesScanned\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.BucketName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "SelectBytesScanned"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 45,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/S3,BucketName,FilterId} MetricName=\"SelectBytesReturned\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.BucketName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "SelectBytesReturned"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 18,
+                                "y": 33,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/S3,BucketName,FilterId} MetricName=\"ListRequests\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.BucketName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "ListRequests"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 6,
+                                "y": 45,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/S3,BucketName,FilterId} MetricName=\"BytesDownloaded\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.BucketName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "BytesDownloaded"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 45,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/S3,BucketName,FilterId} MetricName=\"BytesUploaded\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.BucketName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "BytesUploaded"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 6,
+                                "y": 27,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/S3,BucketName,FilterId} MetricName=\"4xxErrors\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.BucketName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "4xxErrors"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 18,
+                                "y": 27,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/S3,BucketName,FilterId} MetricName=\"5xxErrors\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.BucketName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "5xxErrors"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 51,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/S3,BucketName,FilterId} MetricName=\"FirstByteLatency\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.BucketName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "FirstByteLatency"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 6,
+                                "y": 51,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/S3,BucketName,FilterId} MetricName=\"TotalRequestLatency\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.BucketName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "TotalRequestLatency"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 27,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/S3,BucketName,FilterId} MetricName=\"4xxErrors\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.BucketName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "4xxErrors",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 27,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/S3,BucketName,FilterId} MetricName=\"5xxErrors\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.BucketName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "5xxErrors",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        },
+        "CWDashboardS3Individual": {
+            "Type": "AWS::CloudWatch::Dashboard",
+            "Properties": {
+                "DashboardName": "S3_Individual_Resources",
+                "DashboardBody": {
+                    "Fn::ToJsonString": {
+                        "variables": [
+                            {
+                                "type": "property",
+                                "property": "region",
+                                "inputType": "select",
+                                "id": "Region",
+                                "label": "Region",
+                                "defaultValue": {
+                                    "Ref": "DefaultRegion"
+                                },
+                                "visible": true,
+                                "values": [
+                                    {
+                                        "value": "us-east-1",
+                                        "label": "N. Virginia"
+                                    },
+                                    {
+                                        "value": "us-east-2",
+                                        "label": "Ohio"
+                                    },
+                                    {
+                                        "value": "us-west-1",
+                                        "label": "N.California"
+                                    },
+                                    {
+                                        "value": "us-west-2",
+                                        "label": "Oregon"
+                                    },
+                                    {
+                                        "value": "ap-east-1",
+                                        "label": "Hong Kong"
+                                    },
+                                    {
+                                        "value": "ap-south-1",
+                                        "label": "Mumbai"
+                                    },
+                                    {
+                                        "value": "ap-northeast-3",
+                                        "label": "Osaka"
+                                    },
+                                    {
+                                        "value": "ap-northeast-2",
+                                        "label": "Seoul"
+                                    },
+                                    {
+                                        "value": "ap-southeast-1",
+                                        "label": "Singapore"
+                                    },
+                                    {
+                                        "value": "ap-southeast-2",
+                                        "label": "Sydney"
+                                    },
+                                    {
+                                        "value": "ap-noutheast-1",
+                                        "label": "Toyko"
+                                    },
+                                    {
+                                        "value": "ca-central-1",
+                                        "label": "Canada"
+                                    },
+                                    {
+                                        "value": "eu-central-1",
+                                        "label": "Frankfurt"
+                                    },
+                                    {
+                                        "value": "eu-west-1",
+                                        "label": "Ireland"
+                                    },
+                                    {
+                                        "value": "eu-west-2",
+                                        "label": "London"
+                                    },
+                                    {
+                                        "value": "eu-west-3",
+                                        "label": "Paris"
+                                    },
+                                    {
+                                        "value": "eu-north-1",
+                                        "label": "Stockholm"
+                                    },
+                                    {
+                                        "value": "sa-east-1",
+                                        "label": "South America"
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "property",
+                                "property": "BucketName",
+                                "inputType": "select",
+                                "id": "BucketName",
+                                "label": "BucketName",
+                                "defaultValue": {
+                                    "Ref": "DefaultBucket"
+                                },
+                                "visible": true,
+                                "search": "{AWS/S3,BucketName,StorageType}",
+                                "populateFrom": "BucketName"
+                            }
+                        ],
+                        "widgets": [
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 0,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "# S3 Daily Storage Metrics "
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 48,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "# S3 Replication Metrics "
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 17,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "# S3 Request Metrics "
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 5,
+                                "y": 1,
+                                "width": 19,
+                                "height": 8,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/S3,BucketName,StorageType} BucketName=\"bucketname\" MetricName=\"BucketSizeBytes\"', 'Average', 86400), AVG, DESC))",
+                                                "label": "${PROP('Dim.BucketName')} ${PROP('Dim.StorageType')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "BucketSizeBytes"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 24,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/S3,BucketName,FilterId} BucketName=\"bucketname\" MetricName=\"AllRequests\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.BucketName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "AllRequests"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 18,
+                                "y": 49,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/S3,SourceBucket,DestinationBucket,RuleId} SourceBucket=\"srcbucket\" MetricName=\"ReplicationLatency\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.RuleId')} ${PROP('Dim.DestinationBucket')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "ReplicationLatency",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 49,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/S3,SourceBucket,DestinationBucket,RuleId} SourceBucket=\"srcbucket\" MetricName=\"OperationsFailedReplication\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.RuleId')} ${PROP('Dim.DestinationBucket')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "OperationsFailedReplication",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 6,
+                                "y": 49,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/S3,SourceBucket,DestinationBucket,RuleId} SourceBucket=\"srcbucket\" MetricName=\"OperationsPendingReplication\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.RuleId')} ${PROP('Dim.DestinationBucket')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "OperationsPendingReplication",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 49,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/S3,SourceBucket,DestinationBucket,RuleId} SourceBucket=\"srcbucket\" MetricName=\"BytesPendingReplication\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.RuleId')} ${PROP('Dim.DestinationBucket')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "BytesPendingReplication",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 55,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/S3,SourceBucket,DestinationBucket,RuleId} SourceBucket=\"srcbucket\" MetricName=\"OperationsFailedReplication\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.RuleId')} ${PROP('Dim.DestinationBucket')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "OperationsFailedReplication"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 6,
+                                "y": 55,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/S3,SourceBucket,DestinationBucket,RuleId} SourceBucket=\"srcbucket\" MetricName=\"OperationsPendingReplication\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.RuleId')} ${PROP('Dim.DestinationBucket')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "OperationsPendingReplication"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 55,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/S3,SourceBucket,DestinationBucket,RuleId} SourceBucket=\"srcbucket\" MetricName=\"BytesPendingReplication\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.RuleId')} ${PROP('Dim.DestinationBucket')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "BytesPendingReplication"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 18,
+                                "y": 55,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/S3,SourceBucket,DestinationBucket,RuleId} SourceBucket=\"srcbucket\" MetricName=\"ReplicationLatency\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.RuleId')} ${PROP('Dim.DestinationBucket')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "ReplicationLatency"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 30,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/S3,BucketName,FilterId} BucketName=\"bucketname\" MetricName=\"DeleteRequests\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.BucketName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "DeleteRequests"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 30,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/S3,BucketName,FilterId} BucketName=\"bucketname\" MetricName=\"PutRequests\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.BucketName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "PutRequests"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 6,
+                                "y": 24,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/S3,BucketName,FilterId} BucketName=\"bucketname\" MetricName=\"GetRequests\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.BucketName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "GetRequests"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 24,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/S3,BucketName,FilterId} BucketName=\"bucketname\" MetricName=\"HeadRequests\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.BucketName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "HeadRequests"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 6,
+                                "y": 30,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/S3,BucketName,FilterId} BucketName=\"bucketname\" MetricName=\"PostRequests\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.BucketName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "PostRequests"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 18,
+                                "y": 30,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/S3,BucketName,FilterId} BucketName=\"bucketname\" MetricName=\"SelectRequests\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.BucketName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "SelectRequests"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 18,
+                                "y": 36,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/S3,BucketName,FilterId} BucketName=\"bucketname\" MetricName=\"SelectBytesScanned\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.BucketName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "SelectBytesScanned"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 36,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/S3,BucketName,FilterId} BucketName=\"bucketname\" MetricName=\"SelectBytesReturned\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.BucketName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "SelectBytesReturned"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 18,
+                                "y": 24,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/S3,BucketName,FilterId} BucketName=\"bucketname\" MetricName=\"ListRequests\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.BucketName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "ListRequests"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 6,
+                                "y": 36,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/S3,BucketName,FilterId} BucketName=\"bucketname\" MetricName=\"BytesDownloaded\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.BucketName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "BytesDownloaded"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 36,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/S3,BucketName,FilterId} BucketName=\"bucketname\" MetricName=\"BytesUploaded\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.BucketName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "BytesUploaded"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 6,
+                                "y": 18,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/S3,BucketName,FilterId} BucketName=\"bucketname\" MetricName=\"4xxErrors\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.BucketName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "4xxErrors"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 18,
+                                "y": 18,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/S3,BucketName,FilterId} BucketName=\"bucketname\" MetricName=\"5xxErrors\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.BucketName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "5xxErrors"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 42,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/S3,BucketName,FilterId} BucketName=\"bucketname\" MetricName=\"FirstByteLatency\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.BucketName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "FirstByteLatency"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 6,
+                                "y": 42,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/S3,BucketName,FilterId} BucketName=\"bucketname\" MetricName=\"TotalRequestLatency\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.BucketName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "TotalRequestLatency"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 18,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/S3,BucketName,FilterId} BucketName=\"bucketname\" MetricName=\"4xxErrors\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.BucketName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "4xxErrors",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 18,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/S3,BucketName,FilterId} BucketName=\"bucketname\" MetricName=\"5xxErrors\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.BucketName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "5xxErrors",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 5,
+                                "y": 9,
+                                "width": 19,
+                                "height": 8,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/S3,BucketName,StorageType} BucketName=\"bucketname\" MetricName=\"NumberOfObjects\"', 'Average', 86400), AVG, DESC))",
+                                                "label": "${PROP('Dim.BucketName')} ${PROP('Dim.StorageType')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "NumberOfObjects"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 1,
+                                "width": 5,
+                                "height": 8,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/S3,BucketName,StorageType} BucketName=\"bucketname\" MetricName=\"BucketSizeBytes\"', 'Average', 86400), AVG, DESC))",
+                                                "label": "${PROP('Dim.BucketName')} ${PROP('Dim.StorageType')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "BucketSizeBytes"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 9,
+                                "width": 5,
+                                "height": 8,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/S3,BucketName,StorageType} BucketName=\"bucketname\" MetricName=\"NumberOfObjects\"', 'Average', 86400), AVG, DESC))",
+                                                "label": "${PROP('Dim.BucketName')} ${PROP('Dim.StorageType')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "NumberOfObjects"
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        }
+    }
+}

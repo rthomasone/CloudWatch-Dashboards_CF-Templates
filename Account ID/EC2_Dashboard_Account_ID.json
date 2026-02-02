@@ -1,0 +1,2382 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "CloudWatch Dashboards to visualize EC2 resources. Both dashboards leverage Dashboard Variables to filter on the desired resources. Dashboard 'EC2_All_Resources' visualizes ALL EC2 resources in the target region. Dashboard 'EC2_Individual_Resources' provides additional filters to isolate a specific EC2.",
+    "Transform": "AWS::LanguageExtensions",
+    "Parameters": {
+        "DefaultAccountID": {
+            "Description": "Input the AWS Account ID hosting the load balancers to be monitored.(e.g. 123456789012)",
+            "Type": "String",
+            "Default": ""
+        },
+        "DefaultRegion": {
+            "Description": "Select the default region hosting the load balancers to be monitored.",
+            "Type": "String",
+            "Default": "us-east-1"
+        },
+        "DefaultEC2": {
+            "Description": "Input the default EC2 Instance to be monitored. (e.g. i-abcdefg012345)",
+            "Type": "String",
+            "Default": ""
+        }
+    },
+    "Resources": {
+        "CWDashboardEC2All": {
+            "Type": "AWS::CloudWatch::Dashboard",
+            "Properties": {
+                "DashboardName": "EC2_All_Instances_Test",
+                "DashboardBody": {
+                    "Fn::ToJsonString": {
+                        "variables": [
+                            {
+                                "type": "property",
+                                "property": "accountId",
+                                "inputType": "select",
+                                "id": "accountId",
+                                "label": "Account_ID",
+                                "defaultValue": {
+                                    "Ref": "DefaultAccountID"
+                                },
+                                "visible": true,
+                                "values": [
+                                    {
+                                        "value": {
+                                            "Ref": "DefaultAccountID"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "property",
+                                "property": "region",
+                                "inputType": "select",
+                                "id": "Region",
+                                "label": "Region",
+                                "defaultValue":  {
+                                    "Ref": "DefaultRegion"
+                                },
+                                "visible": true,
+                                "values": [
+                                    {
+                                        "value": "us-east-1",
+                                        "label": "N. Virginia"
+                                    },
+                                    {
+                                        "value": "us-east-2",
+                                        "label": "Ohio"
+                                    },
+                                    {
+                                        "value": "us-west-1",
+                                        "label": "N.California"
+                                    },
+                                    {
+                                        "value": "us-west-2",
+                                        "label": "Oregon"
+                                    },
+                                    {
+                                        "value": "ap-east-1",
+                                        "label": "Hong Kong"
+                                    },
+                                    {
+                                        "value": "ap-south-1",
+                                        "label": "Mumbai"
+                                    },
+                                    {
+                                        "value": "ap-northeast-3",
+                                        "label": "Osaka"
+                                    },
+                                    {
+                                        "value": "ap-northeast-2",
+                                        "label": "Seoul"
+                                    },
+                                    {
+                                        "value": "ap-southeast-1",
+                                        "label": "Singapore"
+                                    },
+                                    {
+                                        "value": "ap-southeast-2",
+                                        "label": "Sydney"
+                                    },
+                                    {
+                                        "value": "ap-noutheast-1",
+                                        "label": "Toyko"
+                                    },
+                                    {
+                                        "value": "ca-central-1",
+                                        "label": "Canada"
+                                    },
+                                    {
+                                        "value": "eu-central-1",
+                                        "label": "Frankfurt"
+                                    },
+                                    {
+                                        "value": "eu-west-1",
+                                        "label": "Ireland"
+                                    },
+                                    {
+                                        "value": "eu-west-2",
+                                        "label": "London"
+                                    },
+                                    {
+                                        "value": "eu-west-3",
+                                        "label": "Paris"
+                                    },
+                                    {
+                                        "value": "eu-north-1",
+                                        "label": "Stockholm"
+                                    },
+                                    {
+                                        "value": "sa-east-1",
+                                        "label": "South America"
+                                    }
+                                ]
+                            }
+                        ],
+                        "widgets": [
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 1,
+                                "width": 12,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/EC2,InstanceId} MetricName=\"CPUUtilization\"', 'Maximum', 60), MAX, DESC))",
+                                                "label": "${PROP('Dim.InstanceId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "CPUUtilization (MAX)"
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 36,
+                                "width": 24,
+                                "height": 2,
+                                "properties": {
+                                    "markdown": "# Disk: Instance Store\n\n\nIf there are [no instance store volumes](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/viewing_metrics_with_cloudwatch.html#ec2-cloudwatch-metrics), it is expected that  the following metrics will report a value of `0` or no values is published:",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 0,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "# CPU Utilization",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 38,
+                                "width": 8,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/EC2,InstanceId} MetricName=\"DiskReadOps\"', 'Maximum', 60), MAX, DESC))",
+                                                "label": "${PROP('Dim.InstanceId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "DiskReadOps (MAX)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 8,
+                                "y": 38,
+                                "width": 8,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/EC2,InstanceId} MetricName=\"DiskWriteOps\"', 'Maximum', 60), MAX, DESC))",
+                                                "label": "${PROP('Dim.InstanceId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "DiskWriteOps (MAX)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 45,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/EC2,InstanceId} MetricName=\"DiskWriteBytes\"', 'Maximum', 60), MAX, DESC))",
+                                                "label": "${PROP('Dim.InstanceId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "DiskWriteBytes (MAX)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 16,
+                                "y": 38,
+                                "width": 8,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/EC2,InstanceId} MetricName=\"DiskReadBytes\"', 'Maximum', 60), MAX, DESC))",
+                                                "label": "${PROP('Dim.InstanceId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "DiskReadBytes (MAX)"
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 77,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "# Metadata",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 51,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "# Network",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 78,
+                                "width": 12,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/EC2,InstanceId} MetricName=\"MetadataNoToken\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.InstanceId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "MetadataNoToken (SUM)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 78,
+                                "width": 12,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/EC2,InstanceId} MetricName=\"MetadataNoTokenRejected\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.InstanceId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "MetadataNoTokenRejected (SUM)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 52,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/EC2,InstanceId} MetricName=\"NetworkIn\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.InstanceId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "NetworkIn (SUM)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 8,
+                                "y": 52,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/EC2,InstanceId} MetricName=\"NetworkOut\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.InstanceId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "NetworkOut (SUM)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 16,
+                                "y": 52,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/EC2,InstanceId} MetricName=\"NetworkPacketsIn\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.InstanceId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "NetworkPacketsIn (SUM)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 58,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/EC2,InstanceId} MetricName=\"NetworkPacketsOut\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.InstanceId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "NetworkPacketsOut (SUM)"
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 64,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "# Status Checks",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 65,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/EC2,InstanceId} MetricName=\"StatusCheckFailed\"', 'Maximum', 60), MAX, DESC))",
+                                                "label": "${PROP('Dim.InstanceId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "StatusCheckFailed (MAX)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 8,
+                                "y": 65,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/EC2,InstanceId} MetricName=\"StatusCheckFailed_Instance\"', 'Maximum', 60), MAX, DESC))",
+                                                "label": "${PROP('Dim.InstanceId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "StatusCheckFailed_Instance (MAX)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 1,
+                                "width": 12,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/EC2,InstanceId} MetricName=\"DedicatedHostCPUUtilization\"', 'Maximum', 60), MAX, DESC))",
+                                                "label": "${PROP('Dim.InstanceId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "DedicatedHostCPUUtilization (MAX)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 16,
+                                "y": 65,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/EC2,InstanceId} MetricName=\"StatusCheckFailed_System\"', 'Maximum', 60), MAX, DESC))",
+                                                "label": "${PROP('Dim.InstanceId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "StatusCheckFailed_System (MAX)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 71,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/EC2,InstanceId} MetricName=\"StatusCheckFailed_AttachedEBS\"', 'Maximum', 60), MAX, DESC))",
+                                                "label": "${PROP('Dim.InstanceId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "StatusCheckFailed_AttachedEBS (MAX)"
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 84,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "# EC2 Usage",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 8,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "# CPU Credit",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 9,
+                                "width": 8,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/EC2,InstanceId} MetricName=\"CPUCreditUsage\"', 'Average', 300), AVG, DESC))",
+                                                "label": "${PROP('Dim.InstanceId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "CPUCreditUsage (AVG)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 8,
+                                "y": 9,
+                                "width": 8,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/EC2,InstanceId} MetricName=\"CPUCreditBalance\"', 'Average', 300), AVG, DESC))",
+                                                "label": "${PROP('Dim.InstanceId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "CPUCreditBalance (AVG)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 16,
+                                "y": 9,
+                                "width": 8,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/EC2,InstanceId} MetricName=\"CPUSurplusCreditBalance\"', 'Average', 300), AVG, DESC))",
+                                                "label": "${PROP('Dim.InstanceId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "CPUSurplusCreditBalance (AVG)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 16,
+                                "width": 8,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/EC2,InstanceId} MetricName=\"CPUSurplusCreditsCharged\"', 'Average', 300), AVG, DESC))",
+                                                "label": "${PROP('Dim.InstanceId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "CPUSurplusCreditsCharged (AVG)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 16,
+                                "y": 85,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/Usage,Type,Resource,Service,Class} MetricName=\"CallCount\" Service=\"EC2\" Type=\"API\" Class=\"None\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.Resource')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "AWS/Usage:EC2 API CallCount (SUM)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 85,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/Usage,Type,Resource,Service,Class} MetricName=\"ThrottleCount\" Service=\"EC2\" Type=\"API\" Class=\"None\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.Resource')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "AWS/Usage:EC2 API ThrottleCount (SUM)",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 8,
+                                "y": 85,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/Usage,Type,Resource,Service,Class} MetricName=\"ErrorCount\" Service=\"EC2\" Type=\"API\" Class=\"None\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.Resource')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "AWS/Usage:EC2 API ErrorCount (SUM)",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 97,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/Usage,Type,Resource,Service,Class} MetricName=\"ResourceCount\" Service=\"EC2\" Type=\"Resource\" Class=\"Standard/OnDemand\"', 'Average', 300), AVG, DESC))",
+                                                "label": "${PROP('Dim.Resource')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "AWS/Usage:EC2 ResourceCount Standard/OnDemand (AVG)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 103,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/Usage,Type,Resource,Service,Class} MetricName=\"ResourceCount\" Service=\"EC2\" Type=\"Resource\" Class=\"Standard/OnDemand\"', 'Average', 300), AVG, DESC))",
+                                                "label": "${PROP('Dim.Resource')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "AWS/Usage:EC2 ResourceCount Standard/OnDemand (AVG)",
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 8,
+                                "y": 97,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/Usage,Type,Resource,Service,Class} MetricName=\"ResourceCount\" Service=\"EC2\" Type=\"Resource\" Class=\"NetworkAddressUsage\"', 'Average', 60), AVG, DESC))",
+                                                "label": "${PROP('Dim.Resource')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "AWS/Usage:EC2 ResourceCount NetworkAddressUsage (AVG)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 8,
+                                "y": 103,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/Usage,Type,Resource,Service,Class} MetricName=\"ResourceCount\" Service=\"EC2\" Type=\"Resource\" Class=\"NetworkAddressUsage\"', 'Average', 60), AVG, DESC))",
+                                                "label": "${PROP('Dim.Resource')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "AWS/Usage:EC2 ResourceCount NetworkAddressUsage (AVG)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 16,
+                                "y": 91,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/Usage,Type,Resource,Service,Class} MetricName=\"ResourceCount\" Service=\"EC2\" Type=\"Resource\" Class=\"NetworkAddressUsagePeered\"', 'Average', 60), AVG, DESC))",
+                                                "label": "${PROP('Dim.Resource')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "AWS/Usage:EC2 ResourceCount NetworkAddressUsagePeered (AVG)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 16,
+                                "y": 97,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/Usage,Type,Resource,Service,Class} MetricName=\"ResourceCount\" Service=\"EC2\" Type=\"Resource\" Class=\"NetworkAddressUsagePeered\"', 'Average', 60), AVG, DESC))",
+                                                "label": "${PROP('Dim.Resource')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "AWS/Usage:EC2 ResourceCount NetworkAddressUsagePeered (AVG)"
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 23,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "# Disk: EBS Metrics for Nitro Instances",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 24,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/EC2,InstanceId} MetricName=\"EBSReadOps\"', 'Average', 60), AVG, DESC))",
+                                                "label": "${PROP('Dim.InstanceId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "EBSReadOps (AVG)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 8,
+                                "y": 24,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/EC2,InstanceId} MetricName=\"EBSWriteOps\"', 'Average', 60), AVG, DESC))",
+                                                "label": "${PROP('Dim.InstanceId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "EBSWriteOps (AVG)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 30,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/EC2,InstanceId} MetricName=\"EBSReadBytes\"', 'Average', 60), AVG, DESC))",
+                                                "label": "${PROP('Dim.InstanceId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "EBSReadBytes (AVG)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 16,
+                                "y": 24,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/EC2,InstanceId} MetricName=\"EBSIOBalance%\"', 'Maximum', 60), MAX, DESC))",
+                                                "label": "${PROP('Dim.InstanceId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "EBSIOBalance% (MAX)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 16,
+                                "y": 30,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/EC2,InstanceId} MetricName=\"EBSByteBalance%\"', 'Maximum', 60), MAX, DESC))",
+                                                "label": "${PROP('Dim.InstanceId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "EBSByteBalance% (MAX)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 8,
+                                "y": 30,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/EC2,InstanceId} MetricName=\"EBSWriteBytes\"', 'Average', 60), AVG, DESC))",
+                                                "label": "${PROP('Dim.InstanceId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "EBSWriteBytes (AVG)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 91,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/Usage,Type,Resource,Service,Class} MetricName=\"ThrottleCount\" Service=\"EC2\" Type=\"API\" Class=\"None\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.Resource')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "AWS/Usage:EC2 API ThrottleCount (SUM)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 8,
+                                "y": 91,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/Usage,Type,Resource,Service,Class} MetricName=\"ErrorCount\" Service=\"EC2\" Type=\"API\" Class=\"None\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.Resource')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "AWS/Usage:EC2 API ErrorCount (SUM)"
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        },
+        "CWDashboardEC2Individual": {
+            "Type": "AWS::CloudWatch::Dashboard",
+            "Properties": {
+                "DashboardName": "EC2_Individual_Instances_Test",
+                "DashboardBody": {
+                    "Fn::ToJsonString": {
+                        "variables": [
+                            {
+                                "type": "property",
+                                "property": "accountId",
+                                "inputType": "select",
+                                "id": "accountId",
+                                "label": "Account_ID",
+                                "defaultValue": {
+                                    "Ref": "DefaultAccountID"
+                                },
+                                "visible": true,
+                                "values": [
+                                    {
+                                        "value": {
+                                            "Ref": "DefaultAccountID"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "property",
+                                "property": "region",
+                                "inputType": "select",
+                                "id": "Region",
+                                "label": "Region",
+                                "defaultValue": {
+                                    "Ref": "DefaultRegion"
+                                },
+                                "visible": true,
+                                "values": [
+                                    {
+                                        "value": "us-east-1",
+                                        "label": "N. Virginia"
+                                    },
+                                    {
+                                        "value": "us-east-2",
+                                        "label": "Ohio"
+                                    },
+                                    {
+                                        "value": "us-west-1",
+                                        "label": "N.California"
+                                    },
+                                    {
+                                        "value": "us-west-2",
+                                        "label": "Oregon"
+                                    },
+                                    {
+                                        "value": "ap-east-1",
+                                        "label": "Hong Kong"
+                                    },
+                                    {
+                                        "value": "ap-south-1",
+                                        "label": "Mumbai"
+                                    },
+                                    {
+                                        "value": "ap-northeast-3",
+                                        "label": "Osaka"
+                                    },
+                                    {
+                                        "value": "ap-northeast-2",
+                                        "label": "Seoul"
+                                    },
+                                    {
+                                        "value": "ap-southeast-1",
+                                        "label": "Singapore"
+                                    },
+                                    {
+                                        "value": "ap-southeast-2",
+                                        "label": "Sydney"
+                                    },
+                                    {
+                                        "value": "ap-noutheast-1",
+                                        "label": "Toyko"
+                                    },
+                                    {
+                                        "value": "ca-central-1",
+                                        "label": "Canada"
+                                    },
+                                    {
+                                        "value": "eu-central-1",
+                                        "label": "Frankfurt"
+                                    },
+                                    {
+                                        "value": "eu-west-1",
+                                        "label": "Ireland"
+                                    },
+                                    {
+                                        "value": "eu-west-2",
+                                        "label": "London"
+                                    },
+                                    {
+                                        "value": "eu-west-3",
+                                        "label": "Paris"
+                                    },
+                                    {
+                                        "value": "eu-north-1",
+                                        "label": "Stockholm"
+                                    },
+                                    {
+                                        "value": "sa-east-1",
+                                        "label": "South America"
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "property",
+                                "property": "InstanceId",
+                                "inputType": "select",
+                                "id": "InstanceId",
+                                "label": "InstanceId",
+                                "defaultValue": {
+                                    "Ref": "DefaultEC2"
+                                },
+                                "visible": true,
+                                "inputPopulationType": "search",
+                                "search": "AWS/EC2 MetricName=CPUUtilization",
+                                "populateFrom": "InstanceId"
+                            }
+                        ],
+                        "widgets": [
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 1,
+                                "width": 12,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/EC2,InstanceId} InstanceId=\"i-abcdefg012345\" MetricName=\"CPUUtilization\"', 'Maximum', 60), MAX, DESC))",
+                                                "label": "${PROP('Dim.InstanceId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "CPUUtilization (MAX)"
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 36,
+                                "width": 24,
+                                "height": 2,
+                                "properties": {
+                                    "markdown": "# Disk: Instance Store\n\n\nIf there are [no instance store volumes](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/viewing_metrics_with_cloudwatch.html#ec2-cloudwatch-metrics), it is expected that  the following metrics will report a value of `0` or no values is published:",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 0,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "# CPU Utilization",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 38,
+                                "width": 8,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/EC2,InstanceId} InstanceId=\"i-abcdefg012345\" MetricName=\"DiskReadOps\"', 'Maximum', 60), MAX, DESC))",
+                                                "label": "${PROP('Dim.InstanceId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "DiskReadOps (MAX)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 8,
+                                "y": 38,
+                                "width": 8,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/EC2,InstanceId} InstanceId=\"i-abcdefg012345\" MetricName=\"DiskWriteOps\"', 'Maximum', 60), MAX, DESC))",
+                                                "label": "${PROP('Dim.InstanceId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "DiskWriteOps (MAX)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 45,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/EC2,InstanceId} InstanceId=\"i-abcdefg012345\" MetricName=\"DiskWriteBytes\"', 'Maximum', 60), MAX, DESC))",
+                                                "label": "${PROP('Dim.InstanceId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "DiskWriteBytes (MAX)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 16,
+                                "y": 38,
+                                "width": 8,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/EC2,InstanceId} InstanceId=\"i-abcdefg012345\" MetricName=\"DiskReadBytes\"', 'Maximum', 60), MAX, DESC))",
+                                                "label": "${PROP('Dim.InstanceId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "DiskReadBytes (MAX)"
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 77,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "# Metadata",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 51,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "# Network",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 78,
+                                "width": 12,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/EC2,InstanceId} InstanceId=\"i-abcdefg012345\" MetricName=\"MetadataNoToken\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.InstanceId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "MetadataNoToken (SUM)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 78,
+                                "width": 12,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/EC2,InstanceId} InstanceId=\"i-abcdefg012345\" MetricName=\"MetadataNoTokenRejected\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.InstanceId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "MetadataNoTokenRejected (SUM)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 52,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/EC2,InstanceId} InstanceId=\"i-abcdefg012345\" MetricName=\"NetworkIn\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.InstanceId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "NetworkIn (SUM)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 8,
+                                "y": 52,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/EC2,InstanceId} InstanceId=\"i-abcdefg012345\" MetricName=\"NetworkOut\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.InstanceId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "NetworkOut (SUM)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 16,
+                                "y": 52,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/EC2,InstanceId} InstanceId=\"i-abcdefg012345\" MetricName=\"NetworkPacketsIn\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.InstanceId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "NetworkPacketsIn (SUM)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 58,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/EC2,InstanceId} InstanceId=\"i-abcdefg012345\" MetricName=\"NetworkPacketsOut\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.InstanceId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "NetworkPacketsOut (SUM)"
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 64,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "# Status Checks",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 65,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/EC2,InstanceId} InstanceId=\"i-abcdefg012345\" MetricName=\"StatusCheckFailed\"', 'Maximum', 60), MAX, DESC))",
+                                                "label": "${PROP('Dim.InstanceId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "StatusCheckFailed (MAX)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 8,
+                                "y": 65,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/EC2,InstanceId} InstanceId=\"i-abcdefg012345\" MetricName=\"StatusCheckFailed_Instance\"', 'Maximum', 60), MAX, DESC))",
+                                                "label": "${PROP('Dim.InstanceId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "StatusCheckFailed_Instance (MAX)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 1,
+                                "width": 12,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/EC2,InstanceId} InstanceId=\"i-abcdefg012345\" MetricName=\"DedicatedHostCPUUtilization\"', 'Maximum', 60), MAX, DESC))",
+                                                "label": "${PROP('Dim.InstanceId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "DedicatedHostCPUUtilization (MAX)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 16,
+                                "y": 65,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/EC2,InstanceId} InstanceId=\"i-abcdefg012345\" MetricName=\"StatusCheckFailed_System\"', 'Maximum', 60), MAX, DESC))",
+                                                "label": "${PROP('Dim.InstanceId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "StatusCheckFailed_System (MAX)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 71,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/EC2,InstanceId} InstanceId=\"i-abcdefg012345\" MetricName=\"StatusCheckFailed_AttachedEBS\"', 'Maximum', 60), MAX, DESC))",
+                                                "label": "${PROP('Dim.InstanceId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "StatusCheckFailed_AttachedEBS (MAX)"
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 84,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "# EC2 Usage",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 8,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "# CPU Credit",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 9,
+                                "width": 8,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/EC2,InstanceId} InstanceId=\"i-abcdefg012345\" MetricName=\"CPUCreditUsage\"', 'Average', 300), AVG, DESC))",
+                                                "label": "${PROP('Dim.InstanceId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "CPUCreditUsage (AVG)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 8,
+                                "y": 9,
+                                "width": 8,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/EC2,InstanceId} InstanceId=\"i-abcdefg012345\" MetricName=\"CPUCreditBalance\"', 'Average', 300), AVG, DESC))",
+                                                "label": "${PROP('Dim.InstanceId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "CPUCreditBalance (AVG)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 16,
+                                "y": 9,
+                                "width": 8,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/EC2,InstanceId} InstanceId=\"i-abcdefg012345\" MetricName=\"CPUSurplusCreditBalance\"', 'Average', 300), AVG, DESC))",
+                                                "label": "${PROP('Dim.InstanceId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "CPUSurplusCreditBalance (AVG)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 16,
+                                "width": 8,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/EC2,InstanceId} InstanceId=\"i-abcdefg012345\" MetricName=\"CPUSurplusCreditsCharged\"', 'Average', 300), AVG, DESC))",
+                                                "label": "${PROP('Dim.InstanceId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "CPUSurplusCreditsCharged (AVG)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 16,
+                                "y": 85,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/Usage,Type,Resource,Service,Class} MetricName=\"CallCount\" Service=\"EC2\" Type=\"API\" Class=\"None\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.Resource')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "AWS/Usage:EC2 API CallCount (SUM)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 85,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/Usage,Type,Resource,Service,Class} MetricName=\"ThrottleCount\" Service=\"EC2\" Type=\"API\" Class=\"None\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.Resource')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "AWS/Usage:EC2 API ThrottleCount (SUM)",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 8,
+                                "y": 85,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/Usage,Type,Resource,Service,Class} MetricName=\"ErrorCount\" Service=\"EC2\" Type=\"API\" Class=\"None\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.Resource')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "AWS/Usage:EC2 API ErrorCount (SUM)",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 97,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/Usage,Type,Resource,Service,Class} MetricName=\"ResourceCount\" Service=\"EC2\" Type=\"Resource\" Class=\"Standard/OnDemand\"', 'Average', 300), AVG, DESC))",
+                                                "label": "${PROP('Dim.Resource')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "AWS/Usage:EC2 ResourceCount Standard/OnDemand (AVG)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 103,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/Usage,Type,Resource,Service,Class} MetricName=\"ResourceCount\" Service=\"EC2\" Type=\"Resource\" Class=\"Standard/OnDemand\"', 'Average', 300), AVG, DESC))",
+                                                "label": "${PROP('Dim.Resource')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "AWS/Usage:EC2 ResourceCount Standard/OnDemand (AVG)",
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 8,
+                                "y": 97,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/Usage,Type,Resource,Service,Class} MetricName=\"ResourceCount\" Service=\"EC2\" Type=\"Resource\" Class=\"NetworkAddressUsage\"', 'Average', 60), AVG, DESC))",
+                                                "label": "${PROP('Dim.Resource')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "AWS/Usage:EC2 ResourceCount NetworkAddressUsage (AVG)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 8,
+                                "y": 103,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/Usage,Type,Resource,Service,Class} MetricName=\"ResourceCount\" Service=\"EC2\" Type=\"Resource\" Class=\"NetworkAddressUsage\"', 'Average', 60), AVG, DESC))",
+                                                "label": "${PROP('Dim.Resource')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "AWS/Usage:EC2 ResourceCount NetworkAddressUsage (AVG)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 16,
+                                "y": 91,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/Usage,Type,Resource,Service,Class} MetricName=\"ResourceCount\" Service=\"EC2\" Type=\"Resource\" Class=\"NetworkAddressUsagePeered\"', 'Average', 60), AVG, DESC))",
+                                                "label": "${PROP('Dim.Resource')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "AWS/Usage:EC2 ResourceCount NetworkAddressUsagePeered (AVG)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 16,
+                                "y": 97,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/Usage,Type,Resource,Service,Class} MetricName=\"ResourceCount\" Service=\"EC2\" Type=\"Resource\" Class=\"NetworkAddressUsagePeered\"', 'Average', 60), AVG, DESC))",
+                                                "label": "${PROP('Dim.Resource')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "AWS/Usage:EC2 ResourceCount NetworkAddressUsagePeered (AVG)"
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 23,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "# Disk: EBS Metrics for Nitro Instances",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 24,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/EC2,InstanceId} InstanceId=\"i-abcdefg012345\" MetricName=\"EBSReadOps\"', 'Average', 60), AVG, DESC))",
+                                                "label": "${PROP('Dim.InstanceId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "EBSReadOps (AVG)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 8,
+                                "y": 24,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/EC2,InstanceId} InstanceId=\"i-abcdefg012345\" MetricName=\"EBSWriteOps\"', 'Average', 60), AVG, DESC))",
+                                                "label": "${PROP('Dim.InstanceId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "EBSWriteOps (AVG)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 30,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/EC2,InstanceId} InstanceId=\"i-abcdefg012345\" MetricName=\"EBSReadBytes\"', 'Average', 60), AVG, DESC))",
+                                                "label": "${PROP('Dim.InstanceId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "EBSReadBytes (AVG)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 16,
+                                "y": 24,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/EC2,InstanceId} InstanceId=\"i-abcdefg012345\" MetricName=\"EBSIOBalance%\"', 'Maximum', 60), MAX, DESC))",
+                                                "label": "${PROP('Dim.InstanceId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "EBSIOBalance% (MAX)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 16,
+                                "y": 30,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/EC2,InstanceId} InstanceId=\"i-abcdefg012345\" MetricName=\"EBSByteBalance%\"', 'Maximum', 60), MAX, DESC))",
+                                                "label": "${PROP('Dim.InstanceId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "EBSByteBalance% (MAX)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 8,
+                                "y": 30,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/EC2,InstanceId} InstanceId=\"i-abcdefg012345\" MetricName=\"EBSWriteBytes\"', 'Average', 60), AVG, DESC))",
+                                                "label": "${PROP('Dim.InstanceId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "EBSWriteBytes (AVG)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 91,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/Usage,Type,Resource,Service,Class} MetricName=\"ThrottleCount\" Service=\"EC2\" Type=\"API\" Class=\"None\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.Resource')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "AWS/Usage:EC2 API ThrottleCount (SUM)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 8,
+                                "y": 91,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/Usage,Type,Resource,Service,Class} MetricName=\"ErrorCount\" Service=\"EC2\" Type=\"API\" Class=\"None\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.Resource')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "accountId": "123456789012",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "AWS/Usage:EC2 API ErrorCount (SUM)"
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        }
+    }
+}

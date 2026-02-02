@@ -1,0 +1,102 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "EventBridge Rules to monitor Network Manager changes. Specificially, any Network Manager changes, Topology changes, Status Updates and Routing Updates.",
+    "Resources": {
+        "AnyNetworkManagerChanges": {
+            "Type": "AWS::Events::Rule",
+            "Properties": {
+                "Name": "Network_Manager_All_Events",
+                "EventPattern": "{\"source\":[\"aws.networkmanager\"]}",
+                "State": "ENABLED",
+                "Description": "capture any Network Manager event",
+                "EventBusName": "default",
+                "Targets": [
+                    {
+                        "Id": "Id56841159-09db-438b-b884-47e318b5fa45",
+                        "Arn": {
+                            "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/events/network_manager_all_events"
+                        }
+                    }
+                ]
+            }
+        },
+        "CWLAllEvents": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+                "LogGroupName": "/aws/events/network_manager_all_events"
+            }
+        },
+        "TopologyChanges": {
+            "Type": "AWS::Events::Rule",
+            "Properties": {
+                "Name": "Network_Manager_Topology_Changes",
+                "EventPattern": "{\"source\":[\"aws.networkmanager\"],\"detail-type\":[\"Network Manager Topology Change\"]}",
+                "State": "ENABLED",
+                "Description": "capture Network Manger Topology Changes",
+                "EventBusName": "default",
+                "Targets": [
+                    {
+                        "Id": "Id528ee821-c72e-4e00-8197-2d31dfc73923",
+                        "Arn": {
+                            "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/events/network_manager_topology_changes"
+                        }
+                    }
+                ]
+            }
+        },
+        "CWLTopologyChanges": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+                "LogGroupName": "/aws/events/network_manager_topology_changes"
+            }
+        },
+        "StatusUpdates": {
+            "Type": "AWS::Events::Rule",
+            "Properties": {
+                "Name": "Network_Manager_Status_Updates",
+                "EventPattern": "{\"source\":[\"aws.networkmanager\"],\"detail-type\":[\"Network Manager Status Update\"]}",
+                "State": "ENABLED",
+                "Description": "capture Network Manger Status Updates",
+                "EventBusName": "default",
+                "Targets": [
+                    {
+                        "Id": "Ided5d9deb-7b0b-4131-a780-124ddec8ea8d",
+                        "Arn": {
+                            "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/events/network_manager_status_updates"
+                        }
+                    }
+                ]
+            }
+        },
+        "CWLStatusUpdates": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+                "LogGroupName": "/aws/events/network_manager_status_updates"
+            }
+        },
+        "RoutingUpdates": {
+            "Type": "AWS::Events::Rule",
+            "Properties": {
+                "Name": "Network_Manager_Routing_Updates",
+                "EventPattern": "{\"source\":[\"aws.networkmanager\"],\"detail-type\":[\"Network Manager Routing Update\"]}",
+                "State": "ENABLED",
+                "Description": "capture Network Manger Routing Updates",
+                "EventBusName": "default",
+                "Targets": [
+                    {
+                        "Id": "Id4be04cbb-7611-4073-b56a-78264cd1517a",
+                        "Arn": {
+                            "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/events/network_manager_routing_updates"
+                        }
+                    }
+                ]
+            }
+        },
+         "CWLRoutingUpdates": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+                "LogGroupName": "/aws/events/network_manager_routing_updates"
+            }
+        }
+    }
+}

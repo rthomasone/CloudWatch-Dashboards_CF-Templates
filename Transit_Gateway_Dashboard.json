@@ -1,0 +1,1300 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "CloudWatch Dashboards to visualize Transit Gateway (TGW) resources. Both dashboards leverage Dashboard Variables to filter on the desired resources. Dashboard 'Transit_Gateway_All_Resources' visualizes ALL Transit Gateway resources in the target region. Dashboard 'Transit_Gateway_Individual_Resources' provides additional filters to isolate a specific Transit Gateway.",
+    "Transform": "AWS::LanguageExtensions",
+    "Parameters": {
+        "DefaultRegion": {
+            "Description": "Select the default region hosting the Transit Gateways to be monitored.",
+            "Type": "String",
+            "Default": "us-east-1"
+        },
+        "DefaultTGW": {
+            "Description": "Optional. Select the default Transit Gateways to be monitored. (e.g. tgw/ALB-ABC/0123456789abcdef)",
+            "Type": "String",
+            "Default": ""
+        }
+    },
+    "Resources": {
+        "CWDashboardTGWAll": {
+            "Type": "AWS::CloudWatch::Dashboard",
+            "Properties": {
+                "DashboardName": "Transit_Gateway_All_Resources",
+                "DashboardBody": {
+                    "Fn::ToJsonString": {
+                        "variables": [
+                            {
+                                "type": "pattern",
+                                "pattern": "us-east-1",
+                                "inputType": "select",
+                                "id": "Region",
+                                "label": "Region",
+                                "defaultValue": {
+                                    "Ref": "DefaultRegion"
+                                },
+                                "visible": true,
+                                "values": [
+                                    {
+                                        "value": "us-east-1",
+                                        "label": "N. Virginia"
+                                    },
+                                    {
+                                        "value": "us-east-2",
+                                        "label": "Ohio"
+                                    },
+                                    {
+                                        "value": "us-west-1",
+                                        "label": "N.California"
+                                    },
+                                    {
+                                        "value": "us-west-2",
+                                        "label": "Oregon"
+                                    },
+                                    {
+                                        "value": "ap-east-1",
+                                        "label": "Hong Kong"
+                                    },
+                                    {
+                                        "value": "ap-south-1",
+                                        "label": "Mumbai"
+                                    },
+                                    {
+                                        "value": "ap-northeast-3",
+                                        "label": "Osaka"
+                                    },
+                                    {
+                                        "value": "ap-northeast-2",
+                                        "label": "Seoul"
+                                    },
+                                    {
+                                        "value": "ap-southeast-1",
+                                        "label": "Singapore"
+                                    },
+                                    {
+                                        "value": "ap-southeast-2",
+                                        "label": "Sydney"
+                                    },
+                                    {
+                                        "value": "ap-noutheast-1",
+                                        "label": "Toyko"
+                                    },
+                                    {
+                                        "value": "ca-central-1",
+                                        "label": "Canada"
+                                    },
+                                    {
+                                        "value": "eu-central-1",
+                                        "label": "Frankfurt"
+                                    },
+                                    {
+                                        "value": "eu-west-1",
+                                        "label": "Ireland"
+                                    },
+                                    {
+                                        "value": "eu-west-2",
+                                        "label": "London"
+                                    },
+                                    {
+                                        "value": "eu-west-3",
+                                        "label": "Paris"
+                                    },
+                                    {
+                                        "value": "eu-north-1",
+                                        "label": "Stockholm"
+                                    },
+                                    {
+                                        "value": "sa-east-1",
+                                        "label": "South America"
+                                    }
+                                ],
+                                "value": "us-east-1",
+                                "customValues": "us-east-1, N. Virginia\nus-east-2, Ohio\nus-west-1, N.California\nca-central-1, Canada\nus-west-2, Oregon\neu-west-1, Ireland\neu-west-2, London\neu-central-1, Frankfurt"
+                            }
+                        ],
+                        "widgets": [
+                            {
+                                "height": 6,
+                                "width": 6,
+                                "y": 1,
+                                "x": 6,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/TransitGateway,TransitGateway} MetricName=\"PacketDropCountTTLExpired\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.TransitGateway')}",
+                                                "id": "e1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "PacketDropCountTTLExpired"
+                                }
+                            },
+                            {
+                                "height": 6,
+                                "width": 6,
+                                "y": 7,
+                                "x": 0,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/TransitGateway,TransitGateway} MetricName=\"BytesDropCountNoRoute\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.TransitGateway')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "BytesDropCountNoRoute",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "height": 6,
+                                "width": 6,
+                                "y": 1,
+                                "x": 12,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/TransitGateway,TransitGateway} MetricName=\"BytesDropCountBlackhole\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.TransitGateway')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "BytesDropCountBlackhole",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "height": 6,
+                                "width": 6,
+                                "y": 7,
+                                "x": 12,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/TransitGateway,TransitGateway} MetricName=\"BytesIn\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.TransitGateway')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "pie",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "BytesIn"
+                                }
+                            },
+                            {
+                                "height": 6,
+                                "width": 6,
+                                "y": 7,
+                                "x": 18,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/TransitGateway,TransitGateway} MetricName=\"BytesOut\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.TransitGateway')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "pie",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "BytesOut"
+                                }
+                            },
+                            {
+                                "height": 6,
+                                "width": 6,
+                                "y": 1,
+                                "x": 0,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/TransitGateway,TransitGateway} MetricName=\"PacketDropCountTTLExpired\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.TransitGateway')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "PacketDropCountTTLExpired",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "height": 6,
+                                "width": 6,
+                                "y": 1,
+                                "x": 18,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/TransitGateway,TransitGateway} MetricName=\"BytesDropCountBlackhole\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.TransitGateway')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "BytesDropCountBlackhole"
+                                }
+                            },
+                            {
+                                "height": 6,
+                                "width": 6,
+                                "y": 7,
+                                "x": 6,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/TransitGateway,TransitGateway} MetricName=\"BytesDropCountNoRoute\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.TransitGateway')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "BytesDropCountNoRoute"
+                                }
+                            },
+                            {
+                                "height": 6,
+                                "width": 6,
+                                "y": 13,
+                                "x": 0,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/TransitGateway,TransitGateway} MetricName=\"BytesIn\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.TransitGateway')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "BytesIn"
+                                }
+                            },
+                            {
+                                "height": 6,
+                                "width": 6,
+                                "y": 13,
+                                "x": 6,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/TransitGateway,TransitGateway} MetricName=\"BytesOut\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.TransitGateway')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "BytesOut"
+                                }
+                            },
+                            {
+                                "height": 1,
+                                "width": 24,
+                                "y": 0,
+                                "x": 0,
+                                "type": "text",
+                                "properties": {
+                                    "markdown": "# Transit Gateway-level Metrics",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "height": 1,
+                                "width": 24,
+                                "y": 19,
+                                "x": 0,
+                                "type": "text",
+                                "properties": {
+                                    "markdown": "# Attachment-level Metrics",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "height": 6,
+                                "width": 8,
+                                "y": 20,
+                                "x": 0,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/TransitGateway,TransitGateway,TransitGatewayAttachment} MetricName=\"PacketDropCountTTLExpired\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.TransitGateway')} ${PROP('Dim.TransitGatewayAttachment')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "PacketDropCountTTLExpired",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "height": 6,
+                                "width": 8,
+                                "y": 20,
+                                "x": 8,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/TransitGateway,TransitGateway,TransitGatewayAttachment} MetricName=\"BytesDropCountBlackhole\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.TransitGateway')} ${PROP('Dim.TransitGatewayAttachment')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "BytesDropCountBlackhole",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "height": 6,
+                                "width": 8,
+                                "y": 20,
+                                "x": 16,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/TransitGateway,TransitGateway,TransitGatewayAttachment} MetricName=\"BytesDropCountNoRoute\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.TransitGateway')} ${PROP('Dim.TransitGatewayAttachment')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "BytesDropCountNoRoute",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "height": 6,
+                                "width": 8,
+                                "y": 26,
+                                "x": 0,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/TransitGateway,TransitGateway,TransitGatewayAttachment} MetricName=\"PacketDropCountTTLExpired\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.TransitGateway')} ${PROP('Dim.TransitGatewayAttachment')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "PacketDropCountTTLExpired"
+                                }
+                            },
+                            {
+                                "height": 6,
+                                "width": 8,
+                                "y": 26,
+                                "x": 8,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/TransitGateway,TransitGateway,TransitGatewayAttachment} MetricName=\"BytesDropCountBlackhole\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.TransitGateway')} ${PROP('Dim.TransitGatewayAttachment')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "BytesDropCountBlackhole"
+                                }
+                            },
+                            {
+                                "height": 6,
+                                "width": 8,
+                                "y": 26,
+                                "x": 16,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/TransitGateway,TransitGateway,TransitGatewayAttachment} MetricName=\"BytesDropCountNoRoute\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.TransitGateway')} ${PROP('Dim.TransitGatewayAttachment')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "BytesDropCountNoRoute"
+                                }
+                            },
+                            {
+                                "height": 6,
+                                "width": 18,
+                                "y": 32,
+                                "x": 6,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/TransitGateway,TransitGateway,TransitGatewayAttachment} MetricName=\"BytesIn\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.TransitGateway')} ${PROP('Dim.TransitGatewayAttachment')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "BytesIn"
+                                }
+                            },
+                            {
+                                "height": 6,
+                                "width": 6,
+                                "y": 38,
+                                "x": 0,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/TransitGateway,TransitGateway,TransitGatewayAttachment} MetricName=\"BytesOut\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.TransitGateway')} ${PROP('Dim.TransitGatewayAttachment')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "pie",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "BytesOut"
+                                }
+                            },
+                            {
+                                "height": 6,
+                                "width": 6,
+                                "y": 32,
+                                "x": 0,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/TransitGateway,TransitGateway,TransitGatewayAttachment} MetricName=\"BytesIn\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.TransitGateway')} ${PROP('Dim.TransitGatewayAttachment')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "pie",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "BytesIn"
+                                }
+                            },
+                            {
+                                "height": 6,
+                                "width": 18,
+                                "y": 38,
+                                "x": 6,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/TransitGateway,TransitGateway,TransitGatewayAttachment} MetricName=\"BytesOut\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.TransitGateway')} ${PROP('Dim.TransitGatewayAttachment')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "BytesOut"
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        },
+        "CWDashboardTGWIndividual": {
+            "Type": "AWS::CloudWatch::Dashboard",
+            "Properties": {
+                "DashboardName": "Transit_Gateway_Individual_Resources",
+                "DashboardBody": {
+                    "Fn::ToJsonString": {
+                        "variables": [
+                            {
+                                "type": "pattern",
+                                "pattern": "us-east-1",
+                                "inputType": "select",
+                                "id": "Region",
+                                "label": "Region",
+                                "defaultValue": {
+                                    "Ref": "DefaultRegion"
+                                },
+                                "visible": true,
+                                "values": [
+                                    {
+                                        "value": "us-east-1",
+                                        "label": "N. Virginia"
+                                    },
+                                    {
+                                        "value": "us-east-2",
+                                        "label": "Ohio"
+                                    },
+                                    {
+                                        "value": "us-west-1",
+                                        "label": "N.California"
+                                    },
+                                    {
+                                        "value": "us-west-2",
+                                        "label": "Oregon"
+                                    },
+                                    {
+                                        "value": "ap-east-1",
+                                        "label": "Hong Kong"
+                                    },
+                                    {
+                                        "value": "ap-south-1",
+                                        "label": "Mumbai"
+                                    },
+                                    {
+                                        "value": "ap-northeast-3",
+                                        "label": "Osaka"
+                                    },
+                                    {
+                                        "value": "ap-northeast-2",
+                                        "label": "Seoul"
+                                    },
+                                    {
+                                        "value": "ap-southeast-1",
+                                        "label": "Singapore"
+                                    },
+                                    {
+                                        "value": "ap-southeast-2",
+                                        "label": "Sydney"
+                                    },
+                                    {
+                                        "value": "ap-noutheast-1",
+                                        "label": "Toyko"
+                                    },
+                                    {
+                                        "value": "ca-central-1",
+                                        "label": "Canada"
+                                    },
+                                    {
+                                        "value": "eu-central-1",
+                                        "label": "Frankfurt"
+                                    },
+                                    {
+                                        "value": "eu-west-1",
+                                        "label": "Ireland"
+                                    },
+                                    {
+                                        "value": "eu-west-2",
+                                        "label": "London"
+                                    },
+                                    {
+                                        "value": "eu-west-3",
+                                        "label": "Paris"
+                                    },
+                                    {
+                                        "value": "eu-north-1",
+                                        "label": "Stockholm"
+                                    },
+                                    {
+                                        "value": "sa-east-1",
+                                        "label": "South America"
+                                    }
+                                ],
+                                "value": "us-east-1",
+                                "customValues": "us-east-1, N. Virginia\nus-east-2, Ohio\nus-west-1, N.California\nca-central-1, Canada\nus-west-2, Oregon\neu-west-1, Ireland\neu-west-2, London\neu-central-1, Frankfurt"
+                            },
+                            {
+                                "type": "property",
+                                "property": "TransitGateway",
+                                "inputType": "select",
+                                "id": "TransitGateway",
+                                "label": "TransitGateway",
+                                "defaultValue": {
+                                    "Ref": "DefaultTGW"
+                                },
+                                "visible": true,
+                                "search": "{AWS/TransitGateway,TransitGateway,TransitGatewayAttachment} MetricName=PacketsIn",
+                                "populateFrom": "TransitGateway"
+                            }
+                        ],
+                        "widgets": [
+                            {
+                                "height": 6,
+                                "width": 6,
+                                "y": 1,
+                                "x": 6,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/TransitGateway,TransitGateway} MetricName=\"PacketDropCountTTLExpired\" TransitGateway=\"tgw-one\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.TransitGateway')}",
+                                                "id": "e1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "PacketDropCountTTLExpired"
+                                }
+                            },
+                            {
+                                "height": 6,
+                                "width": 6,
+                                "y": 7,
+                                "x": 0,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/TransitGateway,TransitGateway} MetricName=\"BytesDropCountNoRoute\" TransitGateway=\"tgw-one\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.TransitGateway')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "BytesDropCountNoRoute",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "height": 6,
+                                "width": 6,
+                                "y": 1,
+                                "x": 12,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/TransitGateway,TransitGateway} MetricName=\"BytesDropCountBlackhole\" TransitGateway=\"tgw-one\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.TransitGateway')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "BytesDropCountBlackhole",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "height": 6,
+                                "width": 6,
+                                "y": 7,
+                                "x": 12,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/TransitGateway,TransitGateway} MetricName=\"BytesIn\" TransitGateway=\"tgw-one\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.TransitGateway')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "pie",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "BytesIn"
+                                }
+                            },
+                            {
+                                "height": 6,
+                                "width": 6,
+                                "y": 7,
+                                "x": 18,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/TransitGateway,TransitGateway} MetricName=\"BytesOut\" TransitGateway=\"tgw-one\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.TransitGateway')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "pie",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "BytesOut"
+                                }
+                            },
+                            {
+                                "height": 6,
+                                "width": 6,
+                                "y": 1,
+                                "x": 0,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/TransitGateway,TransitGateway} MetricName=\"PacketDropCountTTLExpired\" TransitGateway=\"tgw-one\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.TransitGateway')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "PacketDropCountTTLExpired",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "height": 6,
+                                "width": 6,
+                                "y": 1,
+                                "x": 18,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/TransitGateway,TransitGateway} MetricName=\"BytesDropCountBlackhole\" TransitGateway=\"tgw-one\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.TransitGateway')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "BytesDropCountBlackhole"
+                                }
+                            },
+                            {
+                                "height": 6,
+                                "width": 6,
+                                "y": 7,
+                                "x": 6,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/TransitGateway,TransitGateway} MetricName=\"BytesDropCountNoRoute\" TransitGateway=\"tgw-one\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.TransitGateway')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "BytesDropCountNoRoute"
+                                }
+                            },
+                            {
+                                "height": 6,
+                                "width": 6,
+                                "y": 13,
+                                "x": 0,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/TransitGateway,TransitGateway} MetricName=\"BytesIn\" TransitGateway=\"tgw-one\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.TransitGateway')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "BytesIn"
+                                }
+                            },
+                            {
+                                "height": 6,
+                                "width": 6,
+                                "y": 13,
+                                "x": 6,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/TransitGateway,TransitGateway} MetricName=\"BytesOut\" TransitGateway=\"tgw-one\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.TransitGateway')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "BytesOut"
+                                }
+                            },
+                            {
+                                "height": 1,
+                                "width": 24,
+                                "y": 0,
+                                "x": 0,
+                                "type": "text",
+                                "properties": {
+                                    "markdown": "# Transit Gateway-level Metrics",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "height": 1,
+                                "width": 24,
+                                "y": 19,
+                                "x": 0,
+                                "type": "text",
+                                "properties": {
+                                    "markdown": "# Attachment-level Metrics",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "height": 6,
+                                "width": 8,
+                                "y": 20,
+                                "x": 0,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/TransitGateway,TransitGateway,TransitGatewayAttachment} MetricName=\"PacketDropCountTTLExpired\" TransitGateway=\"tgw-one\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.TransitGatewayAttachment')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "PacketDropCountTTLExpired",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "height": 6,
+                                "width": 8,
+                                "y": 20,
+                                "x": 8,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/TransitGateway,TransitGateway,TransitGatewayAttachment} MetricName=\"BytesDropCountBlackhole\" TransitGateway=\"tgw-one\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.TransitGatewayAttachment')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "BytesDropCountBlackhole",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "height": 6,
+                                "width": 8,
+                                "y": 20,
+                                "x": 16,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/TransitGateway,TransitGateway,TransitGatewayAttachment} MetricName=\"BytesDropCountNoRoute\" TransitGateway=\"tgw-one\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.TransitGatewayAttachment')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "BytesDropCountNoRoute",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "height": 6,
+                                "width": 8,
+                                "y": 26,
+                                "x": 0,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/TransitGateway,TransitGateway,TransitGatewayAttachment} MetricName=\"PacketDropCountTTLExpired\" TransitGateway=\"tgw-one\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.TransitGatewayAttachment')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "PacketDropCountTTLExpired"
+                                }
+                            },
+                            {
+                                "height": 6,
+                                "width": 8,
+                                "y": 26,
+                                "x": 8,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/TransitGateway,TransitGateway,TransitGatewayAttachment} MetricName=\"BytesDropCountBlackhole\" TransitGateway=\"tgw-one\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.TransitGatewayAttachment')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "BytesDropCountBlackhole"
+                                }
+                            },
+                            {
+                                "height": 6,
+                                "width": 8,
+                                "y": 26,
+                                "x": 16,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/TransitGateway,TransitGateway,TransitGatewayAttachment} MetricName=\"BytesDropCountNoRoute\" TransitGateway=\"tgw-one\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.TransitGatewayAttachment')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "BytesDropCountNoRoute"
+                                }
+                            },
+                            {
+                                "height": 6,
+                                "width": 18,
+                                "y": 32,
+                                "x": 6,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/TransitGateway,TransitGateway,TransitGatewayAttachment} MetricName=\"BytesIn\" TransitGateway=\"tgw-one\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.TransitGatewayAttachment')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "BytesIn"
+                                }
+                            },
+                            {
+                                "height": 6,
+                                "width": 6,
+                                "y": 38,
+                                "x": 0,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/TransitGateway,TransitGateway,TransitGatewayAttachment} MetricName=\"BytesOut\" TransitGateway=\"tgw-one\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.TransitGatewayAttachment')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "pie",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "BytesOut"
+                                }
+                            },
+                            {
+                                "height": 6,
+                                "width": 6,
+                                "y": 32,
+                                "x": 0,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/TransitGateway,TransitGateway,TransitGatewayAttachment} MetricName=\"BytesIn\" TransitGateway=\"tgw-one\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.TransitGatewayAttachment')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "pie",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "BytesIn"
+                                }
+                            },
+                            {
+                                "height": 6,
+                                "width": 18,
+                                "y": 38,
+                                "x": 6,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/TransitGateway,TransitGateway,TransitGatewayAttachment} MetricName=\"BytesOut\" TransitGateway=\"tgw-one\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.TransitGatewayAttachment')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "BytesOut"
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        }
+    }
+}

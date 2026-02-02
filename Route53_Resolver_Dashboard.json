@@ -1,0 +1,686 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "CloudWatch Dashboards to visualize Route 53 Resolver resources. Both dashboards leverage Dashboard Variables to filter on the desired resources. Dashboard 'Route53_Resolver_All_Resources' visualizes ALL endpoints and resolver IP's. Dashboard 'Route53_Resolver__Individual_Resources' provides additional filters to isolate a specific endpoint and resolver IP",
+    "Transform": "AWS::LanguageExtensions",
+    "Parameters": {
+        "DefaultEndpointID": {
+            "Description": "Optional. Select the default Route53 Resolver EndpointID to be monitored. (e.g. rslvr-in-12345678abcdefghi)",
+            "Type": "String",
+            "Default": ""
+        },
+        "DefaultResolverID": {
+            "Description": "Optional. Select the default Route53 Resolver Resolver ID to be monitored. (e.g. rni-12345678abcdefghi)",
+            "Type": "String",
+            "Default": ""
+        }
+    },
+    "Resources": {
+        "CWDashboardRouter53ResolverAll": {
+            "Type": "AWS::CloudWatch::Dashboard",
+            "Properties": {
+                "DashboardName": "Route53_Resolver_All_Resources",
+                "DashboardBody": "{\n    \"widgets\": [\n        {\n            \"type\": \"metric\",\n            \"x\": 16,\n            \"y\": 9,\n            \"width\": 8,\n            \"height\": 7,\n            \"properties\": {\n                \"metrics\": [\n                    [ \"AWS/Route53Resolver\", \"InboundQueryVolume\", { \"region\": \"us-east-1\" } ]\n                ],\n                \"view\": \"singleValue\",\n                \"stacked\": false,\n                \"region\": \"us-east-1\",\n                \"stat\": \"Sum\",\n                \"period\": 60,\n                \"title\": \"InboundQueryVolume\",\n                \"setPeriodToTimeRange\": true,\n                \"sparkline\": false\n            }\n        },\n        {\n            \"type\": \"text\",\n            \"x\": 0,\n            \"y\": 8,\n            \"width\": 24,\n            \"height\": 1,\n            \"properties\": {\n                \"markdown\": \"## Aggregrate Query Volume\",\n                \"background\": \"transparent\"\n            }\n        },\n        {\n            \"type\": \"metric\",\n            \"x\": 8,\n            \"y\": 9,\n            \"width\": 8,\n            \"height\": 7,\n            \"properties\": {\n                \"view\": \"singleValue\",\n                \"stacked\": false,\n                \"region\": \"us-east-1\",\n                \"stat\": \"Sum\",\n                \"period\": 60,\n                \"title\": \"OutboundQueryVolume\",\n                \"metrics\": [\n                    [ \"AWS/Route53Resolver\", \"OutboundQueryVolume\", { \"region\": \"us-east-1\" } ]\n                ],\n                \"setPeriodToTimeRange\": true,\n                \"sparkline\": false\n            }\n        },\n        {\n            \"type\": \"metric\",\n            \"x\": 0,\n            \"y\": 16,\n            \"width\": 8,\n            \"height\": 7,\n            \"properties\": {\n                \"view\": \"timeSeries\",\n                \"stacked\": false,\n                \"region\": \"us-east-1\",\n                \"stat\": \"Sum\",\n                \"period\": 60,\n                \"title\": \"OutboundQueryAggregateVolume\",\n                \"metrics\": [\n                    [ \"AWS/Route53Resolver\", \"OutboundQueryAggregateVolume\" ]\n                ]\n            }\n        },\n        {\n            \"type\": \"text\",\n            \"x\": 0,\n            \"y\": 23,\n            \"width\": 24,\n            \"height\": 1,\n            \"properties\": {\n                \"markdown\": \"## Endpoint: Query Volume\",\n                \"background\": \"transparent\"\n            }\n        },\n        {\n            \"type\": \"metric\",\n            \"x\": 16,\n            \"y\": 1,\n            \"width\": 8,\n            \"height\": 7,\n            \"properties\": {\n                \"sparkline\": false,\n                \"metrics\": [\n                    [ { \"expression\": \"REMOVE_EMPTY(SORT(SEARCH('{AWS/Route53Resolver,EndpointId} MetricName=\\\"EndpointHealthyENICount\\\"', 'Maximum', 60), MAX, DESC))\", \"label\": \"${PROP('Dim.EndpointId')}\", \"id\": \"e1\" } ]\n                ],\n                \"view\": \"timeSeries\",\n                \"stacked\": false,\n                \"region\": \"us-east-1\",\n                \"stat\": \"Minimum\",\n                \"period\": 60,\n                \"title\": \"EndpointHealthyENICount\",\n                \"setPeriodToTimeRange\": true\n            }\n        },\n        {\n            \"type\": \"text\",\n            \"x\": 0,\n            \"y\": 0,\n            \"width\": 24,\n            \"height\": 1,\n            \"properties\": {\n                \"markdown\": \"## Endpoints Health\",\n                \"background\": \"transparent\"\n            }\n        },\n        {\n            \"type\": \"metric\",\n            \"x\": 0,\n            \"y\": 1,\n            \"width\": 8,\n            \"height\": 7,\n            \"properties\": {\n                \"sparkline\": false,\n                \"metrics\": [\n                    [ { \"expression\": \"REMOVE_EMPTY(SORT(SEARCH('{AWS/Route53Resolver,EndpointId} MetricName=\\\"EndpointUnhealthyENICount\\\"', 'Minimum', 60), MIN, DESC))\", \"label\": \"${PROP('Dim.EndpointId')}\", \"id\": \"e1\" } ]\n                ],\n                \"view\": \"singleValue\",\n                \"stacked\": false,\n                \"region\": \"us-east-1\",\n                \"stat\": \"Maximum\",\n                \"period\": 60,\n                \"title\": \"EndpointUnhealthyENICount\",\n                \"setPeriodToTimeRange\": true\n            }\n        },\n        {\n            \"type\": \"metric\",\n            \"x\": 8,\n            \"y\": 1,\n            \"width\": 8,\n            \"height\": 7,\n            \"properties\": {\n                \"sparkline\": false,\n                \"metrics\": [\n                    [ { \"expression\": \"REMOVE_EMPTY(SORT(SEARCH('{AWS/Route53Resolver,EndpointId} MetricName=\\\"EndpointUnhealthyENICount\\\"', 'Minimum', 60), MIN, DESC))\", \"label\": \"${PROP('Dim.EndpointId')}\", \"id\": \"e1\", \"region\": \"us-east-1\" } ]\n                ],\n                \"view\": \"timeSeries\",\n                \"stacked\": false,\n                \"region\": \"us-east-1\",\n                \"stat\": \"Maximum\",\n                \"period\": 60,\n                \"title\": \"EndpointUnhealthyENICount\",\n                \"setPeriodToTimeRange\": true\n            }\n        },\n        {\n            \"type\": \"text\",\n            \"x\": 0,\n            \"y\": 38,\n            \"width\": 24,\n            \"height\": 1,\n            \"properties\": {\n                \"markdown\": \"## Resolver IP: Query Volume\",\n                \"background\": \"transparent\"\n            }\n        },\n        {\n            \"type\": \"metric\",\n            \"x\": 16,\n            \"y\": 24,\n            \"width\": 8,\n            \"height\": 7,\n            \"properties\": {\n                \"metrics\": [\n                    [ { \"expression\": \"REMOVE_EMPTY(SORT(SEARCH('{AWS/Route53Resolver,EndpointId} MetricName=\\\"InboundQueryVolume\\\"', 'Sum', 60), SUM, DESC))\", \"label\": \"${PROP('Dim.EndpointId')}\", \"id\": \"e1\", \"stat\": \"Sum\", \"region\": \"us-east-1\" } ]\n                ],\n                \"sparkline\": false,\n                \"view\": \"singleValue\",\n                \"stacked\": false,\n                \"region\": \"us-east-1\",\n                \"stat\": \"Sum\",\n                \"period\": 60,\n                \"title\": \"InboundQueryVolume\",\n                \"setPeriodToTimeRange\": true\n            }\n        },\n        {\n            \"type\": \"metric\",\n            \"x\": 0,\n            \"y\": 24,\n            \"width\": 8,\n            \"height\": 7,\n            \"properties\": {\n                \"metrics\": [\n                    [ { \"expression\": \"REMOVE_EMPTY(SORT(SEARCH('{AWS/Route53Resolver,EndpointId} MetricName=\\\"OutboundQueryAggregateVolume\\\"', 'Sum', 60), SUM, DESC))\", \"label\": \"${PROP('Dim.EndpointId')}\", \"id\": \"e1\", \"stat\": \"Sum\", \"region\": \"us-east-1\" } ]\n                ],\n                \"sparkline\": false,\n                \"view\": \"singleValue\",\n                \"stacked\": false,\n                \"region\": \"us-east-1\",\n                \"stat\": \"Sum\",\n                \"period\": 60,\n                \"title\": \"OutboundQueryAggregateVolume\",\n                \"setPeriodToTimeRange\": true\n            }\n        },\n        {\n            \"type\": \"metric\",\n            \"x\": 8,\n            \"y\": 24,\n            \"width\": 8,\n            \"height\": 7,\n            \"properties\": {\n                \"metrics\": [\n                    [ { \"expression\": \"REMOVE_EMPTY(SORT(SEARCH('{AWS/Route53Resolver,EndpointId} MetricName=\\\"OutboundQueryVolume\\\"', 'Sum', 60), SUM, DESC))\", \"label\": \"${PROP('Dim.EndpointId')}\", \"id\": \"e1\", \"stat\": \"Sum\", \"region\": \"us-east-1\" } ]\n                ],\n                \"sparkline\": false,\n                \"view\": \"singleValue\",\n                \"stacked\": false,\n                \"region\": \"us-east-1\",\n                \"stat\": \"Sum\",\n                \"period\": 60,\n                \"title\": \"OutboundQueryVolume\",\n                \"setPeriodToTimeRange\": true\n            }\n        },\n        {\n            \"type\": \"metric\",\n            \"x\": 16,\n            \"y\": 39,\n            \"width\": 8,\n            \"height\": 6,\n            \"properties\": {\n                \"metrics\": [\n                    [ { \"expression\": \"REMOVE_EMPTY(SORT(SEARCH('{AWS/Route53Resolver,RniId} MetricName=\\\"InboundQueryVolume\\\"', 'Sum', 60), SUM, DESC))\", \"label\": \"${PROP('Dim.RniId')}\", \"id\": \"e1\", \"stat\": \"Sum\", \"region\": \"us-east-1\" } ]\n                ],\n                \"sparkline\": false,\n                \"view\": \"singleValue\",\n                \"stacked\": false,\n                \"region\": \"us-east-1\",\n                \"stat\": \"Sum\",\n                \"period\": 60,\n                \"title\": \"InboundQueryVolume\",\n                \"setPeriodToTimeRange\": true\n            }\n        },\n        {\n            \"type\": \"metric\",\n            \"x\": 0,\n            \"y\": 39,\n            \"width\": 8,\n            \"height\": 6,\n            \"properties\": {\n                \"metrics\": [\n                    [ { \"expression\": \"REMOVE_EMPTY(SORT(SEARCH('{AWS/Route53Resolver,RniId} MetricName=\\\"OutboundQueryAggregateVolume\\\"', 'Sum', 60), SUM, DESC))\", \"label\": \"${PROP('Dim.RniId')}\", \"id\": \"e1\", \"stat\": \"Sum\", \"region\": \"us-east-1\" } ]\n                ],\n                \"sparkline\": false,\n                \"view\": \"singleValue\",\n                \"stacked\": false,\n                \"region\": \"us-east-1\",\n                \"stat\": \"Sum\",\n                \"period\": 60,\n                \"title\": \"OutboundQueryAggregateVolume\",\n                \"setPeriodToTimeRange\": true\n            }\n        },\n        {\n            \"type\": \"metric\",\n            \"x\": 8,\n            \"y\": 39,\n            \"width\": 8,\n            \"height\": 6,\n            \"properties\": {\n                \"metrics\": [\n                    [ { \"expression\": \"REMOVE_EMPTY(SORT(SEARCH('{AWS/Route53Resolver,RniId} MetricName=\\\"OutboundQueryAggregateVolume\\\"', 'Sum', 60), SUM, DESC))\", \"label\": \"${PROP('Dim.RniId')}\", \"id\": \"e1\", \"stat\": \"Sum\", \"region\": \"us-east-1\", \"visible\": false } ],\n                    [ { \"expression\": \"e1/60\", \"label\": \"${PROP('Dim.RniId')} per second*\", \"id\": \"e2\", \"region\": \"us-east-1\" } ]\n                ],\n                \"sparkline\": false,\n                \"view\": \"singleValue\",\n                \"stacked\": false,\n                \"region\": \"us-east-1\",\n                \"stat\": \"Sum\",\n                \"period\": 60,\n                \"title\": \"OutboundQueryAggregateVolume (estimated per second*)\",\n                \"setPeriodToTimeRange\": true,\n                \"annotations\": {\n                    \"horizontal\": [\n                        {\n                            \"label\": \"UDP Queries Quota\",\n                            \"value\": 10000\n                        }\n                    ]\n                }\n            }\n        },\n        {\n            \"type\": \"text\",\n            \"x\": 0,\n            \"y\": 51,\n            \"width\": 24,\n            \"height\": 1,\n            \"properties\": {\n                \"markdown\": \"# Resolver DNS Firewall Rule Group\"\n            }\n        },\n        {\n            \"type\": \"metric\",\n            \"x\": 6,\n            \"y\": 52,\n            \"width\": 18,\n            \"height\": 7,\n            \"properties\": {\n                \"metrics\": [\n                    [ { \"expression\": \"REMOVE_EMPTY(SORT(SEARCH('{AWS/Route53,FirewallRuleGroupId} MetricName=\\\"FirewallRuleGroupQueryVolume\\\"', 'Sum', 60), SUM, DESC))\", \"label\": \"${PROP('Dim.FirewallRuleGroupId')}\", \"id\": \"e1\" } ]\n                ],\n                \"view\": \"timeSeries\",\n                \"stacked\": false,\n                \"region\": \"us-east-1\",\n                \"stat\": \"Average\",\n                \"period\": 300,\n                \"title\": \"FirewallRuleGroupQueryVolume\"\n            }\n        },\n        {\n            \"type\": \"metric\",\n            \"x\": 16,\n            \"y\": 59,\n            \"width\": 8,\n            \"height\": 7,\n            \"properties\": {\n                \"metrics\": [\n                    [ { \"expression\": \"REMOVE_EMPTY(SORT(SEARCH('{AWS/Route53,VpcId} MetricName=\\\"VpcFirewallQueryVolume\\\"', 'Sum', 60), SUM, DESC))\", \"label\": \"${PROP('Dim.VpcId')}\", \"id\": \"e1\", \"region\": \"us-east-1\" } ]\n                ],\n                \"view\": \"timeSeries\",\n                \"stacked\": false,\n                \"region\": \"us-east-1\",\n                \"stat\": \"Average\",\n                \"period\": 300,\n                \"title\": \"VpcFirewallQueryVolume\"\n            }\n        },\n        {\n            \"type\": \"metric\",\n            \"x\": 8,\n            \"y\": 59,\n            \"width\": 8,\n            \"height\": 7,\n            \"properties\": {\n                \"metrics\": [\n                    [ { \"expression\": \"REMOVE_EMPTY(SORT(SEARCH('{AWS/Route53,FirewallRuleGroupId,VpcId} MetricName=\\\"FirewallRuleGroupVpcQueryVolume\\\"', 'Sum', 60), SUM, DESC))\", \"label\": \"${PROP('Dim.FirewallRuleGroupId')} ${PROP('Dim.VpcId')}\", \"id\": \"e1\", \"region\": \"us-east-1\" } ]\n                ],\n                \"view\": \"timeSeries\",\n                \"stacked\": false,\n                \"region\": \"us-east-1\",\n                \"stat\": \"Average\",\n                \"period\": 300,\n                \"title\": \"FirewallRuleGroupVpcQueryVolume\"\n            }\n        },\n        {\n            \"type\": \"metric\",\n            \"x\": 0,\n            \"y\": 59,\n            \"width\": 8,\n            \"height\": 7,\n            \"properties\": {\n                \"metrics\": [\n                    [ { \"expression\": \"REMOVE_EMPTY(SORT(SEARCH('{AWS/Route53,FirewallRuleGroupId,FirewallDomainListId} MetricName=\\\"FirewallRuleQueryVolume\\\"', 'Sum', 60), SUM, DESC))\", \"label\": \"${PROP('Dim.FirewallRuleGroupId')} ${PROP('Dim.FirewallDomainListId')}\", \"id\": \"e1\", \"region\": \"us-east-1\" } ]\n                ],\n                \"view\": \"timeSeries\",\n                \"stacked\": false,\n                \"region\": \"us-east-1\",\n                \"stat\": \"Average\",\n                \"period\": 300,\n                \"title\": \"FirewallRuleQueryVolume\"\n            }\n        },\n        {\n            \"type\": \"metric\",\n            \"x\": 0,\n            \"y\": 52,\n            \"width\": 6,\n            \"height\": 7,\n            \"properties\": {\n                \"metrics\": [\n                    [ { \"expression\": \"REMOVE_EMPTY(SORT(SEARCH('{AWS/Route53,FirewallRuleGroupId} MetricName=\\\"FirewallRuleGroupQueryVolume\\\"', 'Sum', 60), SUM, DESC))\", \"label\": \"${PROP('Dim.FirewallRuleGroupId')}\", \"id\": \"e1\", \"region\": \"us-east-1\" } ]\n                ],\n                \"view\": \"singleValue\",\n                \"stacked\": false,\n                \"region\": \"us-east-1\",\n                \"stat\": \"Average\",\n                \"period\": 300,\n                \"title\": \"FirewallRuleGroupQueryVolume\",\n                \"setPeriodToTimeRange\": true,\n                \"sparkline\": false\n            }\n        },\n        {\n            \"type\": \"metric\",\n            \"x\": 0,\n            \"y\": 9,\n            \"width\": 8,\n            \"height\": 7,\n            \"properties\": {\n                \"view\": \"singleValue\",\n                \"stacked\": false,\n                \"region\": \"us-east-1\",\n                \"stat\": \"Sum\",\n                \"period\": 60,\n                \"title\": \"OutboundQueryAggregateVolume\",\n                \"metrics\": [\n                    [ \"AWS/Route53Resolver\", \"OutboundQueryAggregateVolume\", { \"region\": \"us-east-1\" } ]\n                ],\n                \"setPeriodToTimeRange\": true,\n                \"sparkline\": false\n            }\n        },\n        {\n            \"type\": \"metric\",\n            \"x\": 8,\n            \"y\": 16,\n            \"width\": 8,\n            \"height\": 7,\n            \"properties\": {\n                \"view\": \"timeSeries\",\n                \"stacked\": false,\n                \"region\": \"us-east-1\",\n                \"stat\": \"Sum\",\n                \"period\": 60,\n                \"title\": \"OutboundQueryVolume\",\n                \"metrics\": [\n                    [ \"AWS/Route53Resolver\", \"OutboundQueryVolume\" ]\n                ]\n            }\n        },\n        {\n            \"type\": \"metric\",\n            \"x\": 16,\n            \"y\": 16,\n            \"width\": 8,\n            \"height\": 7,\n            \"properties\": {\n                \"metrics\": [\n                    [ \"AWS/Route53Resolver\", \"InboundQueryVolume\" ]\n                ],\n                \"view\": \"timeSeries\",\n                \"stacked\": false,\n                \"region\": \"us-east-1\",\n                \"stat\": \"Sum\",\n                \"period\": 60,\n                \"title\": \"InboundQueryVolume\"\n            }\n        },\n        {\n            \"type\": \"metric\",\n            \"x\": 0,\n            \"y\": 31,\n            \"width\": 8,\n            \"height\": 7,\n            \"properties\": {\n                \"metrics\": [\n                    [ { \"expression\": \"REMOVE_EMPTY(SORT(SEARCH('{AWS/Route53Resolver,EndpointId} MetricName=\\\"OutboundQueryAggregateVolume\\\"', 'Sum', 60), SUM, DESC))\", \"label\": \"${PROP('Dim.EndpointId')}\", \"id\": \"e1\", \"stat\": \"Sum\" } ]\n                ],\n                \"sparkline\": false,\n                \"view\": \"timeSeries\",\n                \"stacked\": false,\n                \"region\": \"us-east-1\",\n                \"stat\": \"Sum\",\n                \"period\": 60,\n                \"title\": \"OutboundQueryAggregateVolume\",\n                \"setPeriodToTimeRange\": true\n            }\n        },\n        {\n            \"type\": \"metric\",\n            \"x\": 8,\n            \"y\": 31,\n            \"width\": 8,\n            \"height\": 7,\n            \"properties\": {\n                \"metrics\": [\n                    [ { \"expression\": \"REMOVE_EMPTY(SORT(SEARCH('{AWS/Route53Resolver,EndpointId} MetricName=\\\"OutboundQueryVolume\\\"', 'Sum', 60), SUM, DESC))\", \"label\": \"${PROP('Dim.EndpointId')}\", \"id\": \"e1\", \"stat\": \"Sum\", \"region\": \"us-east-1\" } ]\n                ],\n                \"sparkline\": false,\n                \"view\": \"timeSeries\",\n                \"stacked\": false,\n                \"region\": \"us-east-1\",\n                \"stat\": \"Sum\",\n                \"period\": 60,\n                \"title\": \"OutboundQueryVolume\",\n                \"setPeriodToTimeRange\": true\n            }\n        },\n        {\n            \"type\": \"metric\",\n            \"x\": 16,\n            \"y\": 31,\n            \"width\": 8,\n            \"height\": 7,\n            \"properties\": {\n                \"metrics\": [\n                    [ { \"expression\": \"REMOVE_EMPTY(SORT(SEARCH('{AWS/Route53Resolver,EndpointId} MetricName=\\\"InboundQueryVolume\\\"', 'Sum', 60), SUM, DESC))\", \"label\": \"${PROP('Dim.EndpointId')}\", \"id\": \"e1\", \"stat\": \"Sum\", \"region\": \"us-east-1\" } ]\n                ],\n                \"sparkline\": false,\n                \"view\": \"timeSeries\",\n                \"stacked\": false,\n                \"region\": \"us-east-1\",\n                \"stat\": \"Sum\",\n                \"period\": 60,\n                \"title\": \"InboundQueryVolume\",\n                \"setPeriodToTimeRange\": true\n            }\n        },\n        {\n            \"type\": \"metric\",\n            \"x\": 0,\n            \"y\": 45,\n            \"width\": 8,\n            \"height\": 6,\n            \"properties\": {\n                \"metrics\": [\n                    [ { \"expression\": \"REMOVE_EMPTY(SORT(SEARCH('{AWS/Route53Resolver,RniId} MetricName=\\\"OutboundQueryAggregateVolume\\\"', 'Sum', 60), SUM, DESC))\", \"label\": \"${PROP('Dim.RniId')}\", \"id\": \"e1\", \"stat\": \"Sum\", \"region\": \"us-east-1\" } ]\n                ],\n                \"sparkline\": false,\n                \"view\": \"timeSeries\",\n                \"stacked\": false,\n                \"region\": \"us-east-1\",\n                \"stat\": \"Sum\",\n                \"period\": 60,\n                \"title\": \"OutboundQueryAggregateVolume\",\n                \"setPeriodToTimeRange\": true\n            }\n        },\n        {\n            \"type\": \"metric\",\n            \"x\": 8,\n            \"y\": 45,\n            \"width\": 8,\n            \"height\": 6,\n            \"properties\": {\n                \"metrics\": [\n                    [ { \"expression\": \"REMOVE_EMPTY(SORT(SEARCH('{AWS/Route53Resolver,RniId} MetricName=\\\"OutboundQueryAggregateVolume\\\"', 'Sum', 60), SUM, DESC))\", \"label\": \"${PROP('Dim.RniId')}\", \"id\": \"e1\", \"stat\": \"Sum\", \"region\": \"us-east-1\", \"visible\": false } ],\n                    [ { \"expression\": \"e1/60\", \"label\": \"${PROP('Dim.RniId')} per second*\", \"id\": \"e2\", \"region\": \"us-east-1\" } ]\n                ],\n                \"sparkline\": false,\n                \"view\": \"timeSeries\",\n                \"stacked\": false,\n                \"region\": \"us-east-1\",\n                \"stat\": \"Sum\",\n                \"period\": 60,\n                \"title\": \"OutboundQueryAggregateVolume (estimated per second*)\",\n                \"setPeriodToTimeRange\": true,\n                \"annotations\": {\n                    \"horizontal\": [\n                        {\n                            \"label\": \"UDP Queries Quota\",\n                            \"value\": 10000\n                        }\n                    ]\n                }\n            }\n        },\n        {\n            \"type\": \"metric\",\n            \"x\": 16,\n            \"y\": 45,\n            \"width\": 8,\n            \"height\": 6,\n            \"properties\": {\n                \"metrics\": [\n                    [ { \"expression\": \"REMOVE_EMPTY(SORT(SEARCH('{AWS/Route53Resolver,RniId} MetricName=\\\"InboundQueryVolume\\\"', 'Sum', 60), SUM, DESC))\", \"label\": \"${PROP('Dim.RniId')}\", \"id\": \"e1\", \"stat\": \"Sum\", \"region\": \"us-east-1\" } ]\n                ],\n                \"sparkline\": false,\n                \"view\": \"timeSeries\",\n                \"stacked\": false,\n                \"region\": \"us-east-1\",\n                \"stat\": \"Sum\",\n                \"period\": 60,\n                \"title\": \"InboundQueryVolume\",\n                \"setPeriodToTimeRange\": true\n            }\n        }\n    ]\n}"
+            }
+        },
+        "CWDashboardRouter53ResolverIndividual": {
+            "Type": "AWS::CloudWatch::Dashboard",
+            "Properties": {
+                "DashboardName": "Route53_Resolver_Individual_Resources",
+                "DashboardBody": {
+                    "Fn::ToJsonString": {
+                        "variables": [
+                            {
+                                "type": "property",
+                                "property": "EndpointId",
+                                "inputType": "select",
+                                "id": "EndpointId",
+                                "label": "EndpointId",
+                                "visible": true,
+                                "search": "{AWS/Route53Resolver,EndpointId} MetricName=EndpointUnhealthyENICount",
+                                "populateFrom": "EndpointId",
+                                "defaultValue": {
+                                    "Ref": "DefaultEndpointID"
+                                }
+                            },
+                            {
+                                "type": "property",
+                                "property": "RniId",
+                                "inputType": "select",
+                                "id": "RniId",
+                                "label": "RniId",
+                                "visible": true,
+                                "search": "{AWS/Route53Resolver,RniId} MetricName=OutboundQueryAggregateVolume",
+                                "populateFrom": "RniId",
+                                "defaultValue": {
+                                    "Ref": "DefaultResolverID"
+                                }
+                            }
+                        ],
+                        "widgets": [
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 8,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "## Endpoint: Query Volume",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 16,
+                                "y": 1,
+                                "width": 8,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/Route53Resolver,EndpointId} EndpointId=\"rslvr-end\" MetricName=\"EndpointHealthyENICount\"', 'Maximum', 60), MAX, DESC))",
+                                                "label": "${PROP('Dim.EndpointId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "sparkline": false,
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Minimum",
+                                    "period": 60,
+                                    "title": "EndpointHealthyENICount",
+                                    "setPeriodToTimeRange": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 0,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "## Endpoints Health",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 1,
+                                "width": 8,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/Route53Resolver,EndpointId} EndpointId=\"rslvr-end\" MetricName=\"EndpointUnhealthyENICount\"', 'Minimum', 60), MIN, DESC))",
+                                                "label": "${PROP('Dim.EndpointId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "sparkline": false,
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Maximum",
+                                    "period": 60,
+                                    "title": "EndpointUnhealthyENICount",
+                                    "setPeriodToTimeRange": true
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 8,
+                                "y": 1,
+                                "width": 8,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/Route53Resolver,EndpointId} EndpointId=\"rslvr-end\" MetricName=\"EndpointUnhealthyENICount\"', 'Minimum', 60), MIN, DESC))",
+                                                "label": "${PROP('Dim.EndpointId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "sparkline": false,
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Maximum",
+                                    "period": 60,
+                                    "title": "EndpointUnhealthyENICount",
+                                    "setPeriodToTimeRange": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 23,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "## Resolver IP: Query Volume",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 16,
+                                "y": 9,
+                                "width": 8,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/Route53Resolver,EndpointId} EndpointId=\"rslvr-end\" MetricName=\"InboundQueryVolume\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.EndpointId')}",
+                                                "id": "e1",
+                                                "stat": "Sum",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "sparkline": false,
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Sum",
+                                    "period": 60,
+                                    "title": "InboundQueryVolume",
+                                    "setPeriodToTimeRange": true
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 9,
+                                "width": 8,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/Route53Resolver,EndpointId} EndpointId=\"rslvr-end\" MetricName=\"OutboundQueryAggregateVolume\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.EndpointId')}",
+                                                "id": "e1",
+                                                "stat": "Sum",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "sparkline": false,
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Sum",
+                                    "period": 60,
+                                    "title": "OutboundQueryAggregateVolume",
+                                    "setPeriodToTimeRange": true
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 8,
+                                "y": 9,
+                                "width": 8,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/Route53Resolver,EndpointId} EndpointId=\"rslvr-end\" MetricName=\"OutboundQueryVolume\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.EndpointId')}",
+                                                "id": "e1",
+                                                "stat": "Sum",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "sparkline": false,
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Sum",
+                                    "period": 60,
+                                    "title": "OutboundQueryVolume",
+                                    "setPeriodToTimeRange": true
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 16,
+                                "y": 24,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/Route53Resolver,RniId} RniId=\"rniid\" MetricName=\"InboundQueryVolume\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.RniId')}",
+                                                "id": "e1",
+                                                "stat": "Sum",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "sparkline": false,
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Sum",
+                                    "period": 60,
+                                    "title": "InboundQueryVolume",
+                                    "setPeriodToTimeRange": true
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 24,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/Route53Resolver,RniId} RniId=\"rniid\" MetricName=\"OutboundQueryAggregateVolume\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.RniId')}",
+                                                "id": "e1",
+                                                "stat": "Sum",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "sparkline": false,
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Sum",
+                                    "period": 60,
+                                    "title": "OutboundQueryAggregateVolume",
+                                    "setPeriodToTimeRange": true
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 8,
+                                "y": 24,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/Route53Resolver,RniId} RniId=\"rniid\" MetricName=\"OutboundQueryAggregateVolume\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.RniId')}",
+                                                "id": "e1",
+                                                "stat": "Sum",
+                                                "region": "us-east-1",
+                                                "visible": false
+                                            }
+                                        ],
+                                        [
+                                            {
+                                                "expression": "e1/60",
+                                                "label": "${PROP('Dim.RniId')} per second*",
+                                                "id": "e2",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "sparkline": false,
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Sum",
+                                    "period": 60,
+                                    "title": "OutboundQueryAggregateVolume (estimated per second*)",
+                                    "setPeriodToTimeRange": true,
+                                    "annotations": {
+                                        "horizontal": [
+                                            {
+                                                "label": "UDP Queries Quota",
+                                                "value": 10000
+                                            }
+                                        ]
+                                    }
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 36,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "# Resolver DNS Firewall Rule Group"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 6,
+                                "y": 37,
+                                "width": 18,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/Route53,FirewallRuleGroupId} MetricName=\"FirewallRuleGroupQueryVolume\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.FirewallRuleGroupId')}",
+                                                "id": "e1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "FirewallRuleGroupQueryVolume"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 16,
+                                "y": 44,
+                                "width": 8,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/Route53,VpcId} MetricName=\"VpcFirewallQueryVolume\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.VpcId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "VpcFirewallQueryVolume"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 8,
+                                "y": 44,
+                                "width": 8,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/Route53,FirewallRuleGroupId,VpcId} MetricName=\"FirewallRuleGroupVpcQueryVolume\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.FirewallRuleGroupId')} ${PROP('Dim.VpcId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "FirewallRuleGroupVpcQueryVolume"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 44,
+                                "width": 8,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/Route53,FirewallRuleGroupId,FirewallDomainListId} MetricName=\"FirewallRuleQueryVolume\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.FirewallRuleGroupId')} ${PROP('Dim.FirewallDomainListId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "FirewallRuleQueryVolume"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 37,
+                                "width": 6,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/Route53,FirewallRuleGroupId} MetricName=\"FirewallRuleGroupQueryVolume\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.FirewallRuleGroupId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "FirewallRuleGroupQueryVolume",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 16,
+                                "width": 8,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/Route53Resolver,EndpointId} EndpointId=\"rslvr-end\" MetricName=\"OutboundQueryAggregateVolume\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.EndpointId')}",
+                                                "id": "e1",
+                                                "stat": "Sum",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "sparkline": false,
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Sum",
+                                    "period": 60,
+                                    "title": "OutboundQueryAggregateVolume",
+                                    "setPeriodToTimeRange": true
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 8,
+                                "y": 16,
+                                "width": 8,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/Route53Resolver,EndpointId} EndpointId=\"rslvr-end\" MetricName=\"OutboundQueryVolume\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.EndpointId')}",
+                                                "id": "e1",
+                                                "stat": "Sum",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "sparkline": false,
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Sum",
+                                    "period": 60,
+                                    "title": "OutboundQueryVolume",
+                                    "setPeriodToTimeRange": true
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 16,
+                                "y": 16,
+                                "width": 8,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/Route53Resolver,EndpointId} EndpointId=\"rslvr-end\" MetricName=\"InboundQueryVolume\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.EndpointId')}",
+                                                "id": "e1",
+                                                "stat": "Sum",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "sparkline": false,
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Sum",
+                                    "period": 60,
+                                    "title": "InboundQueryVolume",
+                                    "setPeriodToTimeRange": true
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 30,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/Route53Resolver,RniId} RniId=\"rniid\" MetricName=\"OutboundQueryAggregateVolume\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.RniId')}",
+                                                "id": "e1",
+                                                "stat": "Sum",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "sparkline": false,
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Sum",
+                                    "period": 60,
+                                    "title": "OutboundQueryAggregateVolume",
+                                    "setPeriodToTimeRange": true
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 8,
+                                "y": 30,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/Route53Resolver,RniId} RniId=\"rniid\" MetricName=\"OutboundQueryAggregateVolume\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.RniId')}",
+                                                "id": "e1",
+                                                "stat": "Sum",
+                                                "region": "us-east-1",
+                                                "visible": false
+                                            }
+                                        ],
+                                        [
+                                            {
+                                                "expression": "e1/60",
+                                                "label": "${PROP('Dim.RniId')} per second*",
+                                                "id": "e2",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "sparkline": false,
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Sum",
+                                    "period": 60,
+                                    "title": "OutboundQueryAggregateVolume (estimated per second*)",
+                                    "setPeriodToTimeRange": true,
+                                    "annotations": {
+                                        "horizontal": [
+                                            {
+                                                "label": "UDP Queries Quota",
+                                                "value": 10000
+                                            }
+                                        ]
+                                    }
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 16,
+                                "y": 30,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/Route53Resolver,RniId} RniId=\"rniid\" MetricName=\"InboundQueryVolume\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.RniId')}",
+                                                "id": "e1",
+                                                "stat": "Sum",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "sparkline": false,
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Sum",
+                                    "period": 60,
+                                    "title": "InboundQueryVolume",
+                                    "setPeriodToTimeRange": true
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,908 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "CloudWatch Dashboards to visualize Gateway Load Balancer (GWLB) resources. Both dashboards leverage Dashboard Variables to filter on the desired resources. Dashboard 'GWLB_All_Resources' visualizes ALL GWLB resources in the target region. Dashboard 'GWLB_Individual_Resources' provides additional filters to isolate a specific GWLB.",
+    "Transform": "AWS::LanguageExtensions",
+    "Parameters": {
+        "DefaultRegion": {
+            "Description": "Select the default region hosting the load balancers to be monitored.",
+            "Type": "String",
+            "Default": "us-east-1"
+        },
+        "DefaultGWLB": {
+            "Description": "Select the default load balancer to be monitored. (e.g. app/ALB-ABC/0123456789abcdef)",
+            "Type": "String",
+            "Default": ""
+        }
+    },
+    "Resources": {
+        "CWDashboardGWLBAll": {
+            "Type": "AWS::CloudWatch::Dashboard",
+            "Properties": {
+                "DashboardName": "GWLB_All_Resources",
+                "DashboardBody": {
+                    "Fn::ToJsonString": {
+                        "variables": [
+                            {
+                                "type": "pattern",
+                                "pattern": "us-east-1",
+                                "inputType": "select",
+                                "id": "Region",
+                                "label": "Region",
+                                "defaultValue": {
+                                    "Ref": "DefaultRegion"
+                                },
+                                "visible": true,
+                                "values": [
+                                    {
+                                        "value": "us-east-1",
+                                        "label": "N. Virginia"
+                                    },
+                                    {
+                                        "value": "us-east-2",
+                                        "label": "Ohio"
+                                    },
+                                    {
+                                        "value": "us-west-1",
+                                        "label": "N.California"
+                                    },
+                                    {
+                                        "value": "us-west-2",
+                                        "label": "Oregon"
+                                    },
+                                    {
+                                        "value": "ap-east-1",
+                                        "label": "Hong Kong"
+                                    },
+                                    {
+                                        "value": "ap-south-1",
+                                        "label": "Mumbai"
+                                    },
+                                    {
+                                        "value": "ap-northeast-3",
+                                        "label": "Osaka"
+                                    },
+                                    {
+                                        "value": "ap-northeast-2",
+                                        "label": "Seoul"
+                                    },
+                                    {
+                                        "value": "ap-southeast-1",
+                                        "label": "Singapore"
+                                    },
+                                    {
+                                        "value": "ap-southeast-2",
+                                        "label": "Sydney"
+                                    },
+                                    {
+                                        "value": "ap-noutheast-1",
+                                        "label": "Toyko"
+                                    },
+                                    {
+                                        "value": "ca-central-1",
+                                        "label": "Canada"
+                                    },
+                                    {
+                                        "value": "eu-central-1",
+                                        "label": "Frankfurt"
+                                    },
+                                    {
+                                        "value": "eu-west-1",
+                                        "label": "Ireland"
+                                    },
+                                    {
+                                        "value": "eu-west-2",
+                                        "label": "London"
+                                    },
+                                    {
+                                        "value": "eu-west-3",
+                                        "label": "Paris"
+                                    },
+                                    {
+                                        "value": "eu-north-1",
+                                        "label": "Stockholm"
+                                    },
+                                    {
+                                        "value": "sa-east-1",
+                                        "label": "South America"
+                                    }
+                                ],
+                                "value": "us-east-1",
+                                "customValues": "us-east-1, N. Virginia\nus-east-2, Ohio\nus-west-1, N.California\nca-central-1, Canada\nus-west-2, Oregon\neu-west-1, Ireland\neu-west-2, London\neu-central-1, Frankfurt"
+                            }
+                        ],
+                        "widgets": [
+                            {
+                                "height": 6,
+                                "width": 12,
+                                "y": 20,
+                                "x": 0,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/GatewayELB,TargetGroup,LoadBalancer} MetricName=\"HealthyHostCount\"', 'Minimum', 60), MIN, DESC))",
+                                                "label": "${PROP('Dim.LoadBalancer')} ${PROP('Dim.TargetGroup')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "period": 300,
+                                    "stat": "Average",
+                                    "title": "Healthy Targets"
+                                }
+                            },
+                            {
+                                "height": 1,
+                                "width": 24,
+                                "y": 0,
+                                "x": 0,
+                                "type": "text",
+                                "properties": {
+                                    "markdown": "## Load Balancer Metrics\n",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "height": 6,
+                                "width": 12,
+                                "y": 39,
+                                "x": 0,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/GatewayELB,LoadBalancer} MetricName=\"NewFlowCount\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.LoadBalancer')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Sum",
+                                    "period": 60,
+                                    "title": "NewFlowCount"
+                                }
+                            },
+                            {
+                                "height": 6,
+                                "width": 12,
+                                "y": 20,
+                                "x": 12,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/GatewayELB,TargetGroup,LoadBalancer} MetricName=\"UnHealthyHostCount\"', 'Maximum', 60), MAX, DESC))",
+                                                "label": "${PROP('Dim.LoadBalancer')} ${PROP('Dim.TargetGroup')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "period": 300,
+                                    "stat": "Average",
+                                    "title": "Unhealthy Targets"
+                                }
+                            },
+                            {
+                                "height": 6,
+                                "width": 19,
+                                "y": 1,
+                                "x": 5,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/GatewayELB,LoadBalancer} MetricName=\"PeakBytesPerSecond\"', 'Maximum', 60), MAX, DESC))",
+                                                "label": "${PROP('Dim.LoadBalancer')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "period": 300,
+                                    "stat": "Average",
+                                    "title": "PeakBytesPerSecond"
+                                }
+                            },
+                            {
+                                "height": 1,
+                                "width": 24,
+                                "y": 26,
+                                "x": 0,
+                                "type": "text",
+                                "properties": {
+                                    "markdown": "## Flow Count Metrics\n",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "height": 6,
+                                "width": 12,
+                                "y": 39,
+                                "x": 12,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/GatewayELB,LoadBalancer} MetricName=\"ActiveFlowCount\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.LoadBalancer')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Sum",
+                                    "period": 60,
+                                    "title": "ActiveFlowCount"
+                                }
+                            },
+                            {
+                                "height": 6,
+                                "width": 12,
+                                "y": 33,
+                                "x": 0,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/GatewayELB,LoadBalancer} MetricName=\"RejectedFlowCount\"', 'Sum', 60))",
+                                                "label": "${PROP('Dim.LoadBalancer')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Sum",
+                                    "period": 60,
+                                    "title": "RejectedFlowCount"
+                                }
+                            },
+                            {
+                                "height": 6,
+                                "width": 24,
+                                "y": 14,
+                                "x": 0,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/GatewayELB,TargetGroup,LoadBalancer} MetricName=\"UnHealthyHostCount\"', 'Maximum', 60), MAX, DESC))",
+                                                "label": "${PROP('Dim.LoadBalancer')} ${PROP('Dim.TargetGroup')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "period": 300,
+                                    "stat": "Average",
+                                    "title": "Unhealthy Targets by GWLB & Target Group",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "height": 6,
+                                "width": 12,
+                                "y": 33,
+                                "x": 12,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/GatewayELB,LoadBalancer} MetricName=\"RejectedFlowCount_TCP\"', 'Sum', 60))",
+                                                "label": "${PROP('Dim.LoadBalancer')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Sum",
+                                    "period": 60,
+                                    "title": "RejectedFlowCount_TCP"
+                                }
+                            },
+                            {
+                                "height": 6,
+                                "width": 24,
+                                "y": 27,
+                                "x": 0,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/GatewayELB,LoadBalancer} MetricName=\"RejectedFlowCount\"', 'Sum', 60))",
+                                                "label": "${PROP('Dim.LoadBalancer')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Sum",
+                                    "period": 60,
+                                    "title": "RejectedFlowCount",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "height": 6,
+                                "width": 19,
+                                "y": 7,
+                                "x": 5,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/GatewayELB,LoadBalancer} MetricName=\"ProcessedBytes\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.LoadBalancer')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "period": 300,
+                                    "stat": "Average",
+                                    "title": "ProcessedBytes"
+                                }
+                            },
+                            {
+                                "height": 1,
+                                "width": 24,
+                                "y": 13,
+                                "x": 0,
+                                "type": "text",
+                                "properties": {
+                                    "markdown": "## Target Group Metrics\n",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "height": 6,
+                                "width": 5,
+                                "y": 1,
+                                "x": 0,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/GatewayELB,LoadBalancer} MetricName=\"PeakBytesPerSecond\"', 'Maximum', 60), MAX, DESC))",
+                                                "label": "${PROP('Dim.LoadBalancer')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "pie",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "period": 300,
+                                    "stat": "Average",
+                                    "title": "PeakBytesPerSecond"
+                                }
+                            },
+                            {
+                                "height": 6,
+                                "width": 5,
+                                "y": 7,
+                                "x": 0,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/GatewayELB,LoadBalancer} MetricName=\"ProcessedBytes\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.LoadBalancer')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "pie",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "period": 300,
+                                    "stat": "Average",
+                                    "title": "ProcessedBytes"
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        },
+        "CWDashboardAGWLBIndividual": {
+            "Type": "AWS::CloudWatch::Dashboard",
+            "Properties": {
+                "DashboardName": "GWLB_Individual_Resources",
+                "DashboardBody": {
+                    "Fn::ToJsonString": {
+                        "variables": [
+                            {
+                                "type": "pattern",
+                                "pattern": "us-east-1",
+                                "inputType": "select",
+                                "id": "Region",
+                                "label": "Region",
+                                "defaultValue": {
+                                    "Ref": "DefaultRegion"
+                                },
+                                "visible": true,
+                                "values": [
+                                    {
+                                        "value": "us-east-1",
+                                        "label": "N. Virginia"
+                                    },
+                                    {
+                                        "value": "us-east-2",
+                                        "label": "Ohio"
+                                    },
+                                    {
+                                        "value": "us-west-1",
+                                        "label": "N.California"
+                                    },
+                                    {
+                                        "value": "us-west-2",
+                                        "label": "Oregon"
+                                    },
+                                    {
+                                        "value": "ap-east-1",
+                                        "label": "Hong Kong"
+                                    },
+                                    {
+                                        "value": "ap-south-1",
+                                        "label": "Mumbai"
+                                    },
+                                    {
+                                        "value": "ap-northeast-3",
+                                        "label": "Osaka"
+                                    },
+                                    {
+                                        "value": "ap-northeast-2",
+                                        "label": "Seoul"
+                                    },
+                                    {
+                                        "value": "ap-southeast-1",
+                                        "label": "Singapore"
+                                    },
+                                    {
+                                        "value": "ap-southeast-2",
+                                        "label": "Sydney"
+                                    },
+                                    {
+                                        "value": "ap-noutheast-1",
+                                        "label": "Toyko"
+                                    },
+                                    {
+                                        "value": "ca-central-1",
+                                        "label": "Canada"
+                                    },
+                                    {
+                                        "value": "eu-central-1",
+                                        "label": "Frankfurt"
+                                    },
+                                    {
+                                        "value": "eu-west-1",
+                                        "label": "Ireland"
+                                    },
+                                    {
+                                        "value": "eu-west-2",
+                                        "label": "London"
+                                    },
+                                    {
+                                        "value": "eu-west-3",
+                                        "label": "Paris"
+                                    },
+                                    {
+                                        "value": "eu-north-1",
+                                        "label": "Stockholm"
+                                    },
+                                    {
+                                        "value": "sa-east-1",
+                                        "label": "South America"
+                                    }
+                                ],
+                                "value": "us-east-1",
+                                "customValues": "us-east-1, N. Virginia\nus-east-2, Ohio\nus-west-1, N.California\nca-central-1, Canada\nus-west-2, Oregon\neu-west-1, Ireland\neu-west-2, London\neu-central-1, Frankfurt"
+                            },
+                            {
+                                "type": "property",
+                                "property": "LoadBalancer",
+                                "inputType": "select",
+                                "id": "LoadBalancer",
+                                "label": "LoadBalancer",
+                                "defaultValue": {
+                                    "Ref": "DefaultGWLB"
+                                },
+                                "visible": true,
+                                "search": "{AWS/GatewayELB,LoadBalancer} MetricName=PeakBytesPerSecond",
+                                "populateFrom": "LoadBalancer"
+                            }
+                        ],
+                        "widgets": [
+                            {
+                                "height": 7,
+                                "width": 12,
+                                "y": 28,
+                                "x": 0,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/GatewayELB,TargetGroup,LoadBalancer} MetricName=\"HealthyHostCount\" LoadBalancer=appname', 'Minimum', 60), MIN, DESC))",
+                                                "label": "${PROP('Dim.LoadBalancer')} ${PROP('Dim.TargetGroup')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "period": 300,
+                                    "stat": "Average",
+                                    "title": "Healthy Targets"
+                                }
+                            },
+                            {
+                                "height": 1,
+                                "width": 24,
+                                "y": 0,
+                                "x": 0,
+                                "type": "text",
+                                "properties": {
+                                    "markdown": "## Load Balancer Metrics\n",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "height": 6,
+                                "width": 12,
+                                "y": 49,
+                                "x": 0,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/GatewayELB,LoadBalancer} MetricName=\"NewFlowCount\" LoadBalancer=appname', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.LoadBalancer')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Sum",
+                                    "period": 60,
+                                    "title": "NewFlowCount"
+                                }
+                            },
+                            {
+                                "height": 7,
+                                "width": 12,
+                                "y": 28,
+                                "x": 12,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/GatewayELB,TargetGroup,LoadBalancer} MetricName=\"UnHealthyHostCount\" LoadBalancer=appname', 'Maximum', 60), MAX, DESC))",
+                                                "label": "${PROP('Dim.LoadBalancer')} ${PROP('Dim.TargetGroup')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "period": 300,
+                                    "stat": "Average",
+                                    "title": "Unhealthy Targets"
+                                }
+                            },
+                            {
+                                "height": 10,
+                                "width": 17,
+                                "y": 1,
+                                "x": 7,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/GatewayELB,LoadBalancer} MetricName=\"PeakBytesPerSecond\" LoadBalancer=appname', 'Maximum', 60), MAX, DESC))",
+                                                "label": "${PROP('Dim.LoadBalancer')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "period": 300,
+                                    "stat": "Average",
+                                    "title": "PeakBytesPerSecond"
+                                }
+                            },
+                            {
+                                "height": 1,
+                                "width": 24,
+                                "y": 35,
+                                "x": 0,
+                                "type": "text",
+                                "properties": {
+                                    "markdown": "## Flow Count Metrics\n",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "height": 6,
+                                "width": 12,
+                                "y": 49,
+                                "x": 12,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/GatewayELB,LoadBalancer} MetricName=\"ActiveFlowCount\" LoadBalancer=appname', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.LoadBalancer')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Sum",
+                                    "period": 60,
+                                    "title": "ActiveFlowCount"
+                                }
+                            },
+                            {
+                                "height": 6,
+                                "width": 12,
+                                "y": 43,
+                                "x": 0,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/GatewayELB,LoadBalancer} MetricName=\"RejectedFlowCount\"', 'Sum', 60))",
+                                                "label": "${PROP('Dim.LoadBalancer')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Sum",
+                                    "period": 60,
+                                    "title": "RejectedFlowCount"
+                                }
+                            },
+                            {
+                                "height": 7,
+                                "width": 24,
+                                "y": 21,
+                                "x": 0,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/GatewayELB,TargetGroup,LoadBalancer} MetricName=\"UnHealthyHostCount\" LoadBalancer=appname', 'Maximum', 60), MAX, DESC))",
+                                                "label": "${PROP('Dim.LoadBalancer')} ${PROP('Dim.TargetGroup')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "period": 300,
+                                    "stat": "Average",
+                                    "title": "Unhealthy Targets by GWLB & Target Group",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "height": 6,
+                                "width": 12,
+                                "y": 43,
+                                "x": 12,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/GatewayELB,LoadBalancer} MetricName=\"RejectedFlowCount_TCP\" LoadBalancer=appname', 'Sum', 60))",
+                                                "label": "${PROP('Dim.LoadBalancer')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Sum",
+                                    "period": 60,
+                                    "title": "RejectedFlowCount_TCP"
+                                }
+                            },
+                            {
+                                "height": 7,
+                                "width": 24,
+                                "y": 36,
+                                "x": 0,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/GatewayELB,LoadBalancer} MetricName=\"RejectedFlowCount\" LoadBalancer=appname', 'Sum', 60))",
+                                                "label": "${PROP('Dim.LoadBalancer')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Sum",
+                                    "period": 60,
+                                    "title": "RejectedFlowCount",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "height": 9,
+                                "width": 17,
+                                "y": 11,
+                                "x": 7,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/GatewayELB,LoadBalancer} MetricName=\"ProcessedBytes\" LoadBalancer=appname', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.LoadBalancer')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "period": 300,
+                                    "stat": "Average",
+                                    "title": "ProcessedBytes"
+                                }
+                            },
+                            {
+                                "height": 1,
+                                "width": 24,
+                                "y": 20,
+                                "x": 0,
+                                "type": "text",
+                                "properties": {
+                                    "markdown": "## Target Group Metrics\n",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "height": 10,
+                                "width": 7,
+                                "y": 1,
+                                "x": 0,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/GatewayELB,LoadBalancer} MetricName=\"PeakBytesPerSecond\" LoadBalancer=appname', 'Maximum', 60), MAX, DESC))",
+                                                "label": "${PROP('Dim.LoadBalancer')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "pie",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "period": 300,
+                                    "stat": "Average",
+                                    "title": "PeakBytesPerSecond"
+                                }
+                            },
+                            {
+                                "height": 9,
+                                "width": 7,
+                                "y": 11,
+                                "x": 0,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/GatewayELB,LoadBalancer} MetricName=\"ProcessedBytes\" LoadBalancer=appname', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.LoadBalancer')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "pie",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "period": 300,
+                                    "stat": "Average",
+                                    "title": "ProcessedBytes"
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        }
+    }
+}

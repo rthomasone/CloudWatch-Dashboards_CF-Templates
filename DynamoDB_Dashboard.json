@@ -1,0 +1,1413 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "CloudWatch Dashboards to visualize DynamoDB resources. Both dashboards leverage Dashboard Variables to filter on the desired resources. Dashboard 'DynamoDB_All_Resources' visualizes ALL resources in the target region. Dashboard 'DynamoDB_Individual_Resources' provides additional filters to isolate a specific table.",
+    "Transform": "AWS::LanguageExtensions",
+    "Parameters": {
+        "DefaultRegion": {
+            "Description": "Select the default region hosting the DynamoDB tables to be monitored.",
+            "Type": "String",
+            "Default": "us-east-1"
+        },
+        "DefaultTableName": {
+            "Description": "Select the default DynamoDB table to be monitored.",
+            "Type": "String",
+            "Default": ""
+        }
+    },
+    "Resources": {
+        "CWDashboardDynamoDBAll": {
+            "Type": "AWS::CloudWatch::Dashboard",
+            "Properties": {
+                "DashboardName": "DynamoDB_All_Resources",
+                "DashboardBody": {
+                    "Fn::ToJsonString": {
+                        "variables": [
+                            {
+                                "type": "property",
+                                "property": "region",
+                                "inputType": "select",
+                                "id": "Region",
+                                "label": "Region",
+                                "defaultValue": {
+                                    "Ref": "DefaultRegion"
+                                },
+                                "visible": true,
+                                "values": [
+                                    {
+                                        "value": "us-east-1",
+                                        "label": "N. Virginia"
+                                    },
+                                    {
+                                        "value": "us-east-2",
+                                        "label": "Ohio"
+                                    },
+                                    {
+                                        "value": "us-west-1",
+                                        "label": "N.California"
+                                    },
+                                    {
+                                        "value": "us-west-2",
+                                        "label": "Oregon"
+                                    },
+                                    {
+                                        "value": "ap-east-1",
+                                        "label": "Hong Kong"
+                                    },
+                                    {
+                                        "value": "ap-south-1",
+                                        "label": "Mumbai"
+                                    },
+                                    {
+                                        "value": "ap-northeast-3",
+                                        "label": "Osaka"
+                                    },
+                                    {
+                                        "value": "ap-northeast-2",
+                                        "label": "Seoul"
+                                    },
+                                    {
+                                        "value": "ap-southeast-1",
+                                        "label": "Singapore"
+                                    },
+                                    {
+                                        "value": "ap-southeast-2",
+                                        "label": "Sydney"
+                                    },
+                                    {
+                                        "value": "ap-noutheast-1",
+                                        "label": "Toyko"
+                                    },
+                                    {
+                                        "value": "ca-central-1",
+                                        "label": "Canada"
+                                    },
+                                    {
+                                        "value": "eu-central-1",
+                                        "label": "Frankfurt"
+                                    },
+                                    {
+                                        "value": "eu-west-1",
+                                        "label": "Ireland"
+                                    },
+                                    {
+                                        "value": "eu-west-2",
+                                        "label": "London"
+                                    },
+                                    {
+                                        "value": "eu-west-3",
+                                        "label": "Paris"
+                                    },
+                                    {
+                                        "value": "eu-north-1",
+                                        "label": "Stockholm"
+                                    },
+                                    {
+                                        "value": "sa-east-1",
+                                        "label": "South America"
+                                    }
+                                ]
+                            }
+                        ],
+                        "widgets": [
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 28,
+                                "width": 12,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/DynamoDB,TableName,Operation} Operation=\"GetItem\" MetricName=\"SuccessfulRequestLatency\"', 'Average', 60)), AVG, DESC)",
+                                                "label": "${PROP('Dim.TableName')}",
+                                                "id": "e1"
+                                            }
+                                        ]
+                                    ],
+                                    "legend": {
+                                        "position": "bottom"
+                                    },
+                                    "title": "GetItem SuccessfulRequestLatency: Average",
+                                    "region": "us-east-1",
+                                    "liveData": false,
+                                    "period": 60,
+                                    "timezone": "UTC",
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "stat": "Average"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 28,
+                                "width": 12,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/DynamoDB,TableName,Operation} Operation=\"PutItem\" MetricName=\"SuccessfulRequestLatency\"', 'Average', 60)), AVG, DESC)",
+                                                "label": "${PROP('Dim.TableName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "legend": {
+                                        "position": "bottom"
+                                    },
+                                    "title": "PutItem SuccessfulRequestLatency: Average",
+                                    "region": "us-east-1",
+                                    "liveData": false,
+                                    "period": 60,
+                                    "timezone": "UTC",
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "stat": "Average"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 47,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/DynamoDB,TableName,Operation} Operation=\"GetItem\" MetricName=\"ThrottledRequests\"', 'Sum', 60)), SUM, DESC)",
+                                                "label": "${PROP('Dim.TableName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "legend": {
+                                        "position": "bottom"
+                                    },
+                                    "title": "ThrottledRequests: GetItem (Sum)",
+                                    "region": "us-east-1",
+                                    "liveData": false,
+                                    "period": 60,
+                                    "timezone": "UTC",
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "stat": "Average"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 41,
+                                "width": 12,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/DynamoDB} MetricName=\"UserErrors\"', 'Sum', 60)), SUM, DESC)",
+                                                "label": "${PROP('MetricName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "legend": {
+                                        "position": "bottom"
+                                    },
+                                    "region": "us-east-1",
+                                    "liveData": false,
+                                    "period": 60,
+                                    "timezone": "UTC",
+                                    "title": "UserErrors: Sum",
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "stat": "Average"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 14,
+                                "width": 12,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/DynamoDB,TableName} MetricName=\"ConsumedReadCapacityUnits\"', 'Sum', 60)), SUM, DESC)",
+                                                "label": "${PROP('Dim.TableName')}",
+                                                "id": "e1"
+                                            }
+                                        ]
+                                    ],
+                                    "legend": {
+                                        "position": "bottom"
+                                    },
+                                    "region": "us-east-1",
+                                    "liveData": false,
+                                    "period": 60,
+                                    "timezone": "UTC",
+                                    "title": "ConsumedReadCapacityUnits: Sum",
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "stat": "Average"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 21,
+                                "width": 12,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/DynamoDB,TableName} MetricName=\"ProvisionedReadCapacityUnits\"', 'Average', 60)), AVG, DESC)",
+                                                "label": "${PROP('Dim.TableName')}",
+                                                "id": "e1"
+                                            }
+                                        ]
+                                    ],
+                                    "legend": {
+                                        "position": "bottom"
+                                    },
+                                    "region": "us-east-1",
+                                    "liveData": false,
+                                    "period": 60,
+                                    "timezone": "UTC",
+                                    "title": "ProvisionedReadCapacityUnits: Average",
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "stat": "Average"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 14,
+                                "width": 12,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/DynamoDB,TableName} MetricName=\"ConsumedWriteCapacityUnits\"', 'Sum', 60)), SUM, DESC)",
+                                                "label": "${PROP('Dim.TableName')}",
+                                                "id": "e1"
+                                            }
+                                        ]
+                                    ],
+                                    "legend": {
+                                        "position": "bottom"
+                                    },
+                                    "region": "us-east-1",
+                                    "liveData": false,
+                                    "period": 60,
+                                    "timezone": "UTC",
+                                    "title": "ConsumedWriteCapacityUnits: Sum",
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "stat": "Average"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 21,
+                                "width": 12,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/DynamoDB,TableName} MetricName=\"ProvisionedWriteCapacityUnits\"', 'Average', 60)), AVG, DESC)",
+                                                "label": "${PROP('Dim.TableName')}",
+                                                "id": "e1"
+                                            }
+                                        ]
+                                    ],
+                                    "legend": {
+                                        "position": "bottom"
+                                    },
+                                    "region": "us-east-1",
+                                    "liveData": false,
+                                    "period": 60,
+                                    "timezone": "UTC",
+                                    "title": "ProvisionedWriteCapacityUnits: Average",
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "stat": "Average"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 34,
+                                "width": 12,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/DynamoDB,TableName,StreamLabel} MetricName=\"ReturnedBytes\"', 'Average', 60)), AVG, DESC)",
+                                                "label": "${PROP('Dim.TableName')}",
+                                                "id": "e1"
+                                            }
+                                        ]
+                                    ],
+                                    "legend": {
+                                        "position": "bottom"
+                                    },
+                                    "region": "us-east-1",
+                                    "liveData": false,
+                                    "period": 60,
+                                    "timezone": "UTC",
+                                    "title": "ReturnedBytes: Average",
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "stat": "Average"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 34,
+                                "width": 12,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/DynamoDB,TableName,Operation} MetricName=\"ReturnedItemCount\"', 'Sum', 60)), SUM, DESC)",
+                                                "label": "${PROP('Dim.TableName')}",
+                                                "id": "e1"
+                                            }
+                                        ]
+                                    ],
+                                    "legend": {
+                                        "position": "bottom"
+                                    },
+                                    "title": "Scan ReturnedItemCount: Sum",
+                                    "region": "us-east-1",
+                                    "liveData": false,
+                                    "period": 60,
+                                    "timezone": "UTC",
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "stat": "Average"
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 40,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "# Throttles & Errors",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 13,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "# Consumed Capacity Units",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 41,
+                                "width": 12,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/DynamoDB} MetricName=\"SystemErrors\"', 'Sum', 60)), SUM, DESC)",
+                                                "label": "${PROP('Dim.TableName')} ${PROP('Dim.Operation')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "legend": {
+                                        "position": "bottom"
+                                    },
+                                    "region": "us-east-1",
+                                    "liveData": false,
+                                    "period": 60,
+                                    "timezone": "UTC",
+                                    "title": "SystemErrors: Sum",
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "stat": "Average"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 16,
+                                "y": 47,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/DynamoDB,TableName, DelegatedOperation} MetricName=\"ThrottledPutRecordCount\"', 'Sum', 60)), SUM, DESC)",
+                                                "label": "${PROP('Dim.TableName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "legend": {
+                                        "position": "bottom"
+                                    },
+                                    "title": "ThrottledPutRecordCount: Sum",
+                                    "region": "us-east-1",
+                                    "liveData": false,
+                                    "period": 60,
+                                    "timezone": "UTC",
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "stat": "Average"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 8,
+                                "y": 47,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/DynamoDB,TableName,Operation} Operation=\"PutItem\" MetricName=\"ThrottledRequests\"', 'Sum', 60)), SUM, DESC)",
+                                                "label": "${PROP('Dim.TableName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "legend": {
+                                        "position": "bottom"
+                                    },
+                                    "title": "ThrottledRequests: PutItem (Sum)",
+                                    "region": "us-east-1",
+                                    "liveData": false,
+                                    "period": 60,
+                                    "timezone": "UTC",
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "stat": "Average"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 53,
+                                "width": 12,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/DynamoDB,TableName} MetricName=\"ReadThrottleEvents\"', 'Sum', 60)), SUM, DESC)",
+                                                "label": "${PROP('Dim.TableName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "legend": {
+                                        "position": "bottom"
+                                    },
+                                    "title": "ReadThrottleEvents (Sum)",
+                                    "region": "us-east-1",
+                                    "liveData": false,
+                                    "period": 60,
+                                    "timezone": "UTC",
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "stat": "Average"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 53,
+                                "width": 12,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/DynamoDB,TableName} MetricName=\"WriteThrottleEvents\"', 'Sum', 60)), SUM, DESC)",
+                                                "label": "${PROP('Dim.TableName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "legend": {
+                                        "position": "bottom"
+                                    },
+                                    "title": "WriteThrottleEvents (Sum)",
+                                    "region": "us-east-1",
+                                    "liveData": false,
+                                    "period": 60,
+                                    "timezone": "UTC",
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "stat": "Average"
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 20,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "# Provisioned Capacity Units",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 27,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "# Latency",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 0,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "# Account-Level Metrics",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 1,
+                                "width": 12,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/DynamoDB} MetricName=\"AccountProvisionedReadCapacityUtilization\"', 'Maximum', 60)), MAX, DESC)",
+                                                "label": "${PROP('MetricName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "legend": {
+                                        "position": "bottom"
+                                    },
+                                    "title": "AccountProvisionedReadCapacityUtilization (Maximum)",
+                                    "region": "us-east-1",
+                                    "liveData": false,
+                                    "period": 60,
+                                    "timezone": "UTC",
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "stat": "Average"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 1,
+                                "width": 12,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/DynamoDB} MetricName=\"AccountProvisionedWriteCapacityUtilization\"', 'Maximum', 60)), MAX, DESC)",
+                                                "label": "${PROP('MetricName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "legend": {
+                                        "position": "bottom"
+                                    },
+                                    "title": "AccountProvisionedWriteCapacityUtilization (Maximum)",
+                                    "region": "us-east-1",
+                                    "liveData": false,
+                                    "period": 60,
+                                    "timezone": "UTC",
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "stat": "Average"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 7,
+                                "width": 12,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/DynamoDB} MetricName=\"AccountMaxReads\"', 'Maximum', 60)), MAX, DESC)",
+                                                "label": "${PROP('MetricName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ],
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/DynamoDB} MetricName=\"AccountMaxTableLevelReads\"', 'Maximum', 60)), MAX, DESC)",
+                                                "label": "${PROP('MetricName')}",
+                                                "id": "e2",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "legend": {
+                                        "position": "bottom"
+                                    },
+                                    "title": "Account Reads (Maximum)",
+                                    "region": "us-east-1",
+                                    "liveData": false,
+                                    "period": 60,
+                                    "timezone": "UTC",
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "stat": "Average"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 7,
+                                "width": 12,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/DynamoDB} MetricName=\"AccountMaxWrites\"', 'Maximum', 60)), MAX, DESC)",
+                                                "label": "${PROP('MetricName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ],
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/DynamoDB} MetricName=\"AccountMaxTableLevelWrites\"', 'Maximum', 60)), MAX, DESC)",
+                                                "label": "${PROP('MetricName')}",
+                                                "id": "e2",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "legend": {
+                                        "position": "bottom"
+                                    },
+                                    "title": "Account Writes (Maximum)",
+                                    "region": "us-east-1",
+                                    "liveData": false,
+                                    "period": 60,
+                                    "timezone": "UTC",
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "stat": "Average"
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        },
+        "CWDashboardDynamoDBIndividual": {
+            "Type": "AWS::CloudWatch::Dashboard",
+            "Properties": {
+                "DashboardName": "DynamoDB_Individual_Resources",
+                "DashboardBody": {
+                    "Fn::ToJsonString": {
+                        "variables": [
+                            {
+                                "type": "property",
+                                "property": "region",
+                                "inputType": "select",
+                                "id": "Region",
+                                "label": "Region",
+                                "defaultValue": "us-east-1",
+                                "visible": true,
+                                "values": [
+                                    {
+                                        "value": "us-east-1",
+                                        "label": "N. Virginia"
+                                    },
+                                    {
+                                        "value": "us-east-2",
+                                        "label": "Ohio"
+                                    },
+                                    {
+                                        "value": "us-west-1",
+                                        "label": "N.California"
+                                    },
+                                    {
+                                        "value": "us-west-2",
+                                        "label": "Oregon"
+                                    },
+                                    {
+                                        "value": "ap-east-1",
+                                        "label": "Hong Kong"
+                                    },
+                                    {
+                                        "value": "ap-south-1",
+                                        "label": "Mumbai"
+                                    },
+                                    {
+                                        "value": "ap-northeast-3",
+                                        "label": "Osaka"
+                                    },
+                                    {
+                                        "value": "ap-northeast-2",
+                                        "label": "Seoul"
+                                    },
+                                    {
+                                        "value": "ap-southeast-1",
+                                        "label": "Singapore"
+                                    },
+                                    {
+                                        "value": "ap-southeast-2",
+                                        "label": "Sydney"
+                                    },
+                                    {
+                                        "value": "ap-noutheast-1",
+                                        "label": "Toyko"
+                                    },
+                                    {
+                                        "value": "ca-central-1",
+                                        "label": "Canada"
+                                    },
+                                    {
+                                        "value": "eu-central-1",
+                                        "label": "Frankfurt"
+                                    },
+                                    {
+                                        "value": "eu-west-1",
+                                        "label": "Ireland"
+                                    },
+                                    {
+                                        "value": "eu-west-2",
+                                        "label": "London"
+                                    },
+                                    {
+                                        "value": "eu-west-3",
+                                        "label": "Paris"
+                                    },
+                                    {
+                                        "value": "eu-north-1",
+                                        "label": "Stockholm"
+                                    },
+                                    {
+                                        "value": "sa-east-1",
+                                        "label": "South America"
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "property",
+                                "property": "TableName",
+                                "inputType": "select",
+                                "id": "TableName",
+                                "label": "TableName",
+                                "defaultValue": {
+                                    "Ref": "DefaultTableName"
+                                },
+                                "visible": true,
+                                "inputPopulationType": "search",
+                                "search": "{AWS/DynamoDB,TableName}",
+                                "populateFrom": "TableName"
+                            }
+                        ],
+                        "widgets": [
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 15,
+                                "width": 12,
+                                "height": 3,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/DynamoDB,TableName,Operation} TableName=\"tablename\" Operation=\"GetItem\" MetricName=\"SuccessfulRequestLatency\"', 'Maximum', 60)), MAX, DESC)",
+                                                "label": "${PROP('MetricName')} Maximum",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ],
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/DynamoDB,TableName,Operation} TableName=\"tablename\" Operation=\"GetItem\" MetricName=\"SuccessfulRequestLatency\"', 'Average', 60)), AVG, DESC)",
+                                                "label": "${PROP('MetricName')} Average",
+                                                "id": "e2",
+                                                "region": "us-east-1"
+                                            }
+                                        ],
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/DynamoDB,TableName,Operation} TableName=\"tablename\" Operation=\"GetItem\" MetricName=\"SuccessfulRequestLatency\"', 'p90', 60))",
+                                                "label": "${PROP('MetricName')} p90",
+                                                "id": "e3",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "legend": {
+                                        "position": "bottom"
+                                    },
+                                    "title": "SuccessfulRequestLatency: GetItem",
+                                    "region": "us-east-1",
+                                    "liveData": false,
+                                    "period": 60,
+                                    "timezone": "UTC",
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "stat": "Average",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 15,
+                                "width": 12,
+                                "height": 3,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/DynamoDB,TableName,Operation} TableName=\"tablename\" Operation=\"PutItem\" MetricName=\"SuccessfulRequestLatency\"', 'Maximum', 60)), MAX, DESC)",
+                                                "label": "${PROP('MetricName')} Maximum",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ],
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/DynamoDB,TableName,Operation} TableName=\"tablename\" Operation=\"PutItem\" MetricName=\"SuccessfulRequestLatency\"', 'Average', 60)), AVG, DESC)",
+                                                "label": "${PROP('MetricName')} Average",
+                                                "id": "e2",
+                                                "region": "us-east-1"
+                                            }
+                                        ],
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/DynamoDB,TableName,Operation} TableName=\"tablename\" Operation=\"PutItem\" MetricName=\"SuccessfulRequestLatency\"', 'p90', 60))",
+                                                "label": "${PROP('MetricName')} p90",
+                                                "id": "e3",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "legend": {
+                                        "position": "bottom"
+                                    },
+                                    "title": "SuccessfulRequestLatency: PutItem",
+                                    "region": "us-east-1",
+                                    "liveData": false,
+                                    "period": 60,
+                                    "timezone": "UTC",
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "stat": "Average",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 31,
+                                "width": 12,
+                                "height": 5,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/DynamoDB} MetricName=\"UserErrors\"', 'Sum', 60)), SUM, DESC)",
+                                                "label": "${PROP('MetricName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "legend": {
+                                        "position": "bottom"
+                                    },
+                                    "region": "us-east-1",
+                                    "liveData": false,
+                                    "period": 60,
+                                    "timezone": "UTC",
+                                    "title": "UserErrors: Sum",
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "stat": "Average"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 1,
+                                "width": 12,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/DynamoDB,TableName} TableName=\"tablename\" MetricName=\"ConsumedReadCapacityUnits\"', 'Sum', 60)), SUM, DESC)",
+                                                "label": "${PROP('Dim.TableName')}",
+                                                "id": "e1"
+                                            }
+                                        ]
+                                    ],
+                                    "legend": {
+                                        "position": "bottom"
+                                    },
+                                    "region": "us-east-1",
+                                    "liveData": false,
+                                    "period": 60,
+                                    "timezone": "UTC",
+                                    "title": "ConsumedReadCapacityUnits: Sum",
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "stat": "Average"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 8,
+                                "width": 12,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/DynamoDB,TableName} TableName=\"tablename\" MetricName=\"ProvisionedReadCapacityUnits\"', 'Average', 60)), AVG, DESC)",
+                                                "label": "${PROP('Dim.TableName')}",
+                                                "id": "e1"
+                                            }
+                                        ]
+                                    ],
+                                    "legend": {
+                                        "position": "bottom"
+                                    },
+                                    "region": "us-east-1",
+                                    "liveData": false,
+                                    "period": 60,
+                                    "timezone": "UTC",
+                                    "title": "ProvisionedReadCapacityUnits: Average",
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "stat": "Average"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 1,
+                                "width": 12,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/DynamoDB,TableName} TableName=\"tablename\" MetricName=\"ConsumedWriteCapacityUnits\"', 'Sum', 60)), SUM, DESC)",
+                                                "label": "${PROP('Dim.TableName')}",
+                                                "id": "e1"
+                                            }
+                                        ]
+                                    ],
+                                    "legend": {
+                                        "position": "bottom"
+                                    },
+                                    "region": "us-east-1",
+                                    "liveData": false,
+                                    "period": 60,
+                                    "timezone": "UTC",
+                                    "title": "ConsumedWriteCapacityUnits: Sum",
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "stat": "Average"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 8,
+                                "width": 12,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/DynamoDB,TableName} TableName=\"tablename\" MetricName=\"ProvisionedWriteCapacityUnits\"', 'Average', 60)), AVG, DESC)",
+                                                "label": "${PROP('Dim.TableName')}",
+                                                "id": "e1"
+                                            }
+                                        ]
+                                    ],
+                                    "legend": {
+                                        "position": "bottom"
+                                    },
+                                    "region": "us-east-1",
+                                    "liveData": false,
+                                    "period": 60,
+                                    "timezone": "UTC",
+                                    "title": "ProvisionedWriteCapacityUnits: Average",
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "stat": "Average"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 24,
+                                "width": 12,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/DynamoDB,TableName,StreamLabel} TableName=\"tablename\" MetricName=\"ReturnedBytes\"', 'Average', 60)), AVG, DESC)",
+                                                "label": "${PROP('Dim.TableName')}",
+                                                "id": "e1"
+                                            }
+                                        ]
+                                    ],
+                                    "legend": {
+                                        "position": "bottom"
+                                    },
+                                    "region": "us-east-1",
+                                    "liveData": false,
+                                    "period": 60,
+                                    "timezone": "UTC",
+                                    "title": "ReturnedBytes: Average",
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "stat": "Average"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 24,
+                                "width": 12,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/DynamoDB,TableName,Operation} TableName=\"tablename\" MetricName=\"ReturnedItemCount\"', 'Sum', 60)), SUM, DESC)",
+                                                "label": "${PROP('Dim.TableName')}",
+                                                "id": "e1"
+                                            }
+                                        ]
+                                    ],
+                                    "legend": {
+                                        "position": "bottom"
+                                    },
+                                    "title": "Scan ReturnedItemCount: Sum",
+                                    "region": "us-east-1",
+                                    "liveData": false,
+                                    "period": 60,
+                                    "timezone": "UTC",
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "stat": "Average"
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 30,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "# Throttles & Errors",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 0,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "# Consumed Capacity Units",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 31,
+                                "width": 12,
+                                "height": 5,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/DynamoDB} TableName=\"tablename\" MetricName=\"SystemErrors\"', 'Sum', 60)), SUM, DESC)",
+                                                "label": "${PROP('Dim.TableName')} ${PROP('Dim.Operation')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "legend": {
+                                        "position": "bottom"
+                                    },
+                                    "region": "us-east-1",
+                                    "liveData": false,
+                                    "period": 60,
+                                    "timezone": "UTC",
+                                    "title": "SystemErrors: Sum",
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "stat": "Average"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 36,
+                                "width": 12,
+                                "height": 5,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/DynamoDB,TableName,Operation} TableName=\"tablename\" Operation=\"PutItem\" MetricName=\"ThrottledRequests\"', 'Sum', 60)), SUM, DESC)",
+                                                "label": "${PROP('MetricName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ],
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/DynamoDB,TableName, DelegatedOperation} TableName=\"tablename\" MetricName=\"ThrottledPutRecordCount\"', 'Sum', 60)), SUM, DESC)",
+                                                "label": "${PROP('MetricName')}",
+                                                "id": "e2",
+                                                "region": "us-east-1"
+                                            }
+                                        ],
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/DynamoDB,TableName,Operation} TableName=\"tablename\" Operation=\"GetItem\" MetricName=\"ThrottledRequests\"', 'Sum', 60)), SUM, DESC)",
+                                                "label": "${PROP('MetricName')}",
+                                                "id": "e3",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "legend": {
+                                        "position": "bottom"
+                                    },
+                                    "title": "Throttled Requests (Sum)",
+                                    "region": "us-east-1",
+                                    "liveData": false,
+                                    "period": 60,
+                                    "timezone": "UTC",
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "stat": "Average"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 36,
+                                "width": 12,
+                                "height": 5,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/DynamoDB,TableName}  TableName=\"tablename\" MetricName=\"WriteThrottleEvents\"', 'Sum', 60)), SUM, DESC)",
+                                                "label": "${PROP('MetricName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ],
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/DynamoDB,TableName}  TableName=\"tablename\" MetricName=\"ReadThrottleEvents\"', 'Sum', 60)), SUM, DESC)",
+                                                "label": "${PROP('MetricName')}",
+                                                "id": "e2",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "legend": {
+                                        "position": "bottom"
+                                    },
+                                    "title": "Throttle Read/Write Events (Sum)",
+                                    "region": "us-east-1",
+                                    "liveData": false,
+                                    "period": 60,
+                                    "timezone": "UTC",
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "stat": "Average"
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 7,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "# Provisioned Capacity Units",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 14,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "# Latency",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 18,
+                                "width": 12,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/DynamoDB,TableName,Operation} TableName=\"tablename\" Operation=\"GetItem\" MetricName=\"SuccessfulRequestLatency\"', 'Maximum', 60)), MAX, DESC)",
+                                                "label": "${PROP('MetricName')} Maximum",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ],
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/DynamoDB,TableName,Operation} TableName=\"tablename\" Operation=\"GetItem\" MetricName=\"SuccessfulRequestLatency\"', 'Average', 60)), AVG, DESC)",
+                                                "label": "${PROP('MetricName')} Average",
+                                                "id": "e2",
+                                                "region": "us-east-1"
+                                            }
+                                        ],
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/DynamoDB,TableName,Operation} TableName=\"tablename\" Operation=\"GetItem\" MetricName=\"SuccessfulRequestLatency\"', 'p90', 60))",
+                                                "label": "${PROP('MetricName')} p90",
+                                                "id": "e3",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "legend": {
+                                        "position": "bottom"
+                                    },
+                                    "title": "SuccessfulRequestLatency: GetItem",
+                                    "region": "us-east-1",
+                                    "liveData": false,
+                                    "period": 60,
+                                    "timezone": "UTC",
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "stat": "Average"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 18,
+                                "width": 12,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/DynamoDB,TableName,Operation} TableName=\"tablename\" Operation=\"PutItem\" MetricName=\"SuccessfulRequestLatency\"', 'Maximum', 60)), MAX, DESC)",
+                                                "label": "${PROP('MetricName')} Maximum",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ],
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/DynamoDB,TableName,Operation} TableName=\"tablename\" Operation=\"PutItem\" MetricName=\"SuccessfulRequestLatency\"', 'Average', 60)), AVG, DESC)",
+                                                "label": "${PROP('MetricName')} Average",
+                                                "id": "e2",
+                                                "region": "us-east-1"
+                                            }
+                                        ],
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/DynamoDB,TableName,Operation} TableName=\"tablename\" Operation=\"PutItem\" MetricName=\"SuccessfulRequestLatency\"', 'p90', 60))",
+                                                "label": "${PROP('MetricName')} p90",
+                                                "id": "e3",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "legend": {
+                                        "position": "bottom"
+                                    },
+                                    "title": "SuccessfulRequestLatency: PutItem",
+                                    "region": "us-east-1",
+                                    "liveData": false,
+                                    "period": 60,
+                                    "timezone": "UTC",
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "stat": "Average"
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        }
+    }
+}

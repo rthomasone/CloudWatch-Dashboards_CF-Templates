@@ -1,0 +1,478 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "CloudWatch Dashboards to visualize Route 53 hosted zones and health checks. Both dashboards leverage Dashboard Variables to filter on the desired resources. Dashboard 'Route53_All_Resources' visualizes ALL hosted zones and health checks. Dashboard 'Route53_Individual_Resources' provides additional filters to isolate a specific hosted zone and health check.",
+    "Transform": "AWS::LanguageExtensions",
+    "Parameters": {
+        "DefaultHostedZoneID": {
+            "Description": "Optional. Select the default Route53 Hosted Zone ID to be monitored (e.g. Z1234567ABCDEFG).",
+            "Type": "String",
+            "Default": ""
+        },
+        "DefaultHealthCheckID": {
+            "Description": "Optional. Select the default Route53 Healthcheck ID to be monitored. (e.g. abcedefg-1234-hijk-5678-lmnopqrstuvw)",
+            "Type": "String",
+            "Default": ""
+        }
+    },
+    "Resources": {
+        "CWDashboardRoute53All": {
+            "Type": "AWS::CloudWatch::Dashboard",
+            "Properties": {
+                "DashboardName": "Route53_All_Resources",
+                "DashboardBody": "{\n    \"widgets\": [\n        {\n            \"type\": \"metric\",\n            \"x\": 7,\n            \"y\": 1,\n            \"width\": 17,\n            \"height\": 8,\n            \"properties\": {\n                \"metrics\": [\n                    [ { \"expression\": \"REMOVE_EMPTY(SORT(SEARCH('{AWS/Route53,HostedZoneId} MetricName=\\\"DNSQueries\\\"', 'Sum', 60), SUM, DESC))\", \"label\": \"${PROP('Dim.HostedZoneId')}\", \"id\": \"e1\" } ]\n                ],\n                \"view\": \"timeSeries\",\n                \"stacked\": false,\n                \"region\": \"us-east-1\",\n                \"stat\": \"Average\",\n                \"period\": 300,\n                \"title\": \"DNSQueries\"\n            }\n        },\n        {\n            \"type\": \"text\",\n            \"x\": 0,\n            \"y\": 0,\n            \"width\": 24,\n            \"height\": 1,\n            \"properties\": {\n                \"markdown\": \"# Public Hosted Zones\"\n            }\n        },\n        {\n            \"type\": \"metric\",\n            \"x\": 0,\n            \"y\": 1,\n            \"width\": 7,\n            \"height\": 8,\n            \"properties\": {\n                \"metrics\": [\n                    [ { \"expression\": \"REMOVE_EMPTY(SORT(SEARCH('{AWS/Route53,HostedZoneId} MetricName=\\\"DNSQueries\\\"', 'Sum', 60), SUM, DESC))\", \"label\": \"${PROP('Dim.HostedZoneId')}\", \"id\": \"e1\", \"region\": \"us-east-1\" } ]\n                ],\n                \"view\": \"pie\",\n                \"stacked\": false,\n                \"region\": \"us-east-1\",\n                \"stat\": \"Average\",\n                \"period\": 300,\n                \"title\": \"DNSQueries\",\n                \"setPeriodToTimeRange\": true\n            }\n        },\n        {\n            \"type\": \"text\",\n            \"x\": 0,\n            \"y\": 9,\n            \"width\": 24,\n            \"height\": 1,\n            \"properties\": {\n                \"markdown\": \"# DNS Security Extensions\"\n            }\n        },\n        {\n            \"type\": \"text\",\n            \"x\": 0,\n            \"y\": 34,\n            \"width\": 24,\n            \"height\": 1,\n            \"properties\": {\n                \"markdown\": \"# Health Checks\"\n            }\n        },\n        {\n            \"type\": \"metric\",\n            \"x\": 7,\n            \"y\": 10,\n            \"width\": 17,\n            \"height\": 8,\n            \"properties\": {\n                \"metrics\": [\n                    [ { \"expression\": \"REMOVE_EMPTY(SORT(SEARCH('{AWS/Route53,HostedZoneId} MetricName=\\\"DNSSECInternalFailure\\\"', 'Sum', 60), SUM, DESC))\", \"label\": \"${PROP('Dim.HostedZoneId')}\", \"id\": \"e1\", \"region\": \"us-east-1\" } ]\n                ],\n                \"view\": \"timeSeries\",\n                \"stacked\": false,\n                \"region\": \"us-east-1\",\n                \"stat\": \"Average\",\n                \"period\": 300,\n                \"title\": \"DNSSECInternalFailure\"\n            }\n        },\n        {\n            \"type\": \"metric\",\n            \"x\": 0,\n            \"y\": 18,\n            \"width\": 7,\n            \"height\": 8,\n            \"properties\": {\n                \"metrics\": [\n                    [ { \"expression\": \"REMOVE_EMPTY(SORT(SEARCH('{AWS/Route53,HostedZoneId} MetricName=\\\"DNSSECKeySigningKeysNeedingAction\\\"', 'Sum', 60), SUM, DESC))\", \"label\": \"${PROP('Dim.HostedZoneId')}\", \"id\": \"e1\", \"region\": \"us-east-1\" } ]\n                ],\n                \"view\": \"singleValue\",\n                \"stacked\": false,\n                \"region\": \"us-east-1\",\n                \"stat\": \"Average\",\n                \"period\": 300,\n                \"title\": \"DNSSECKeySigningKeysNeedingAction\",\n                \"setPeriodToTimeRange\": true,\n                \"sparkline\": false\n            }\n        },\n        {\n            \"type\": \"metric\",\n            \"x\": 12,\n            \"y\": 26,\n            \"width\": 12,\n            \"height\": 8,\n            \"properties\": {\n                \"metrics\": [\n                    [ { \"expression\": \"REMOVE_EMPTY(SORT(SEARCH('{AWS/Route53,HostedZoneId} MetricName=\\\"DNSSECKeySigningKeyMaxNeedingActionAge\\\"', 'Sum', 60), SUM, DESC))\", \"label\": \"${PROP('Dim.HostedZoneId')}\", \"id\": \"e1\", \"region\": \"us-east-1\" } ]\n                ],\n                \"view\": \"timeSeries\",\n                \"stacked\": false,\n                \"region\": \"us-east-1\",\n                \"stat\": \"Average\",\n                \"period\": 300,\n                \"title\": \"DNSSECKeySigningKeyMaxNeedingActionAge\"\n            }\n        },\n        {\n            \"type\": \"metric\",\n            \"x\": 0,\n            \"y\": 26,\n            \"width\": 12,\n            \"height\": 8,\n            \"properties\": {\n                \"metrics\": [\n                    [ { \"expression\": \"REMOVE_EMPTY(SORT(SEARCH('{AWS/Route53,HostedZoneId} MetricName=\\\"DNSSECKeySigningKeyAge\\\"', 'Sum', 60), SUM, DESC))\", \"label\": \"${PROP('Dim.HostedZoneId')}\", \"id\": \"e1\", \"region\": \"us-east-1\" } ]\n                ],\n                \"view\": \"timeSeries\",\n                \"stacked\": false,\n                \"region\": \"us-east-1\",\n                \"stat\": \"Average\",\n                \"period\": 300,\n                \"title\": \"DNSSECKeySigningKeyAge\"\n            }\n        },\n        {\n            \"type\": \"metric\",\n            \"x\": 0,\n            \"y\": 10,\n            \"width\": 7,\n            \"height\": 8,\n            \"properties\": {\n                \"metrics\": [\n                    [ { \"expression\": \"REMOVE_EMPTY(SORT(SEARCH('{AWS/Route53,HostedZoneId} MetricName=\\\"DNSSECInternalFailure\\\"', 'Sum', 60), SUM, DESC))\", \"label\": \"${PROP('Dim.HostedZoneId')}\", \"id\": \"e1\", \"region\": \"us-east-1\" } ]\n                ],\n                \"view\": \"singleValue\",\n                \"stacked\": false,\n                \"region\": \"us-east-1\",\n                \"stat\": \"Average\",\n                \"period\": 300,\n                \"title\": \"DNSSECInternalFailure\",\n                \"setPeriodToTimeRange\": true,\n                \"sparkline\": false\n            }\n        },\n        {\n            \"type\": \"metric\",\n            \"x\": 7,\n            \"y\": 18,\n            \"width\": 17,\n            \"height\": 8,\n            \"properties\": {\n                \"metrics\": [\n                    [ { \"expression\": \"REMOVE_EMPTY(SORT(SEARCH('{AWS/Route53,HostedZoneId} MetricName=\\\"DNSSECKeySigningKeysNeedingAction\\\"', 'Sum', 60), SUM, DESC))\", \"label\": \"${PROP('Dim.HostedZoneId')}\", \"id\": \"e1\", \"region\": \"us-east-1\" } ]\n                ],\n                \"view\": \"timeSeries\",\n                \"stacked\": false,\n                \"region\": \"us-east-1\",\n                \"stat\": \"Average\",\n                \"period\": 300,\n                \"title\": \"DNSSECKeySigningKeysNeedingAction\"\n            }\n        },\n        {\n            \"type\": \"metric\",\n            \"x\": 0,\n            \"y\": 43,\n            \"width\": 6,\n            \"height\": 8,\n            \"properties\": {\n                \"metrics\": [\n                    [ { \"expression\": \"REMOVE_EMPTY(SORT(SEARCH('{AWS/Route53,HealthCheckId} MetricName=\\\"ChildHealthCheckHealthyCount\\\"', 'Average', 60), AVG, DESC))\", \"label\": \"${PROP('Dim.HealthCheckId')}\", \"id\": \"e1\", \"region\": \"us-east-1\" } ]\n                ],\n                \"view\": \"timeSeries\",\n                \"stacked\": false,\n                \"region\": \"us-east-1\",\n                \"stat\": \"Average\",\n                \"period\": 300,\n                \"title\": \"ChildHealthCheckHealthyCount (Avg)\"\n            }\n        },\n        {\n            \"type\": \"metric\",\n            \"x\": 6,\n            \"y\": 43,\n            \"width\": 6,\n            \"height\": 8,\n            \"properties\": {\n                \"metrics\": [\n                    [ { \"expression\": \"REMOVE_EMPTY(SORT(SEARCH('{AWS/Route53,HealthCheckId} MetricName=\\\"ConnectionTime\\\"', 'Average', 60), AVG, DESC))\", \"label\": \"${PROP('Dim.HealthCheckId')}\", \"id\": \"e1\", \"region\": \"us-east-1\" } ]\n                ],\n                \"view\": \"timeSeries\",\n                \"stacked\": false,\n                \"region\": \"us-east-1\",\n                \"stat\": \"Average\",\n                \"period\": 300,\n                \"title\": \"ConnectionTime (Avg)\"\n            }\n        },\n        {\n            \"type\": \"metric\",\n            \"x\": 18,\n            \"y\": 43,\n            \"width\": 6,\n            \"height\": 8,\n            \"properties\": {\n                \"metrics\": [\n                    [ { \"expression\": \"REMOVE_EMPTY(SORT(SEARCH('{AWS/Route53,HealthCheckId} MetricName=\\\"TimeToFirstByte\\\"', 'Average', 60), AVG, DESC))\", \"label\": \"${PROP('Dim.HealthCheckId')}\", \"id\": \"e1\", \"region\": \"us-east-1\" } ]\n                ],\n                \"view\": \"timeSeries\",\n                \"stacked\": false,\n                \"region\": \"us-east-1\",\n                \"stat\": \"Average\",\n                \"period\": 300,\n                \"title\": \"TimeToFirstByte (Avg)\"\n            }\n        },\n        {\n            \"type\": \"metric\",\n            \"x\": 12,\n            \"y\": 43,\n            \"width\": 6,\n            \"height\": 8,\n            \"properties\": {\n                \"metrics\": [\n                    [ { \"expression\": \"REMOVE_EMPTY(SORT(SEARCH('{AWS/Route53,HealthCheckId} MetricName=\\\"SSLHandshakeTime\\\"', 'Average', 60), AVG, DESC))\", \"label\": \"${PROP('Dim.HealthCheckId')}\", \"id\": \"e1\", \"region\": \"us-east-1\" } ]\n                ],\n                \"view\": \"timeSeries\",\n                \"stacked\": false,\n                \"region\": \"us-east-1\",\n                \"stat\": \"Average\",\n                \"period\": 300,\n                \"title\": \"SSLHandshakeTime (Avg)\"\n            }\n        },\n        {\n            \"type\": \"metric\",\n            \"x\": 8,\n            \"y\": 35,\n            \"width\": 8,\n            \"height\": 8,\n            \"properties\": {\n                \"metrics\": [\n                    [ { \"expression\": \"REMOVE_EMPTY(SORT(SEARCH('{AWS/Route53,HealthCheckId} MetricName=\\\"HealthCheckStatus\\\"', 'Minimum', 60), MIN, DESC))\", \"label\": \"${PROP('Dim.HealthCheckId')}\", \"id\": \"e1\", \"region\": \"us-east-1\" } ]\n                ],\n                \"view\": \"timeSeries\",\n                \"stacked\": false,\n                \"region\": \"us-east-1\",\n                \"stat\": \"Average\",\n                \"period\": 300,\n                \"title\": \"HealthCheckStatus (Min)\"\n            }\n        },\n        {\n            \"type\": \"metric\",\n            \"x\": 0,\n            \"y\": 35,\n            \"width\": 8,\n            \"height\": 8,\n            \"properties\": {\n                \"metrics\": [\n                    [ { \"expression\": \"REMOVE_EMPTY(SORT(SEARCH('{AWS/Route53,HealthCheckId} MetricName=\\\"HealthCheckStatus\\\"', 'Minimum', 60), MIN, DESC))\", \"label\": \"${PROP('Dim.HealthCheckId')}\", \"id\": \"e1\", \"region\": \"us-east-1\" } ]\n                ],\n                \"view\": \"singleValue\",\n                \"stacked\": false,\n                \"region\": \"us-east-1\",\n                \"stat\": \"Average\",\n                \"period\": 300,\n                \"title\": \"HealthCheckStatus (Min)\",\n                \"setPeriodToTimeRange\": false,\n                \"sparkline\": false\n            }\n        },\n        {\n            \"type\": \"metric\",\n            \"x\": 16,\n            \"y\": 35,\n            \"width\": 8,\n            \"height\": 8,\n            \"properties\": {\n                \"metrics\": [\n                    [ { \"expression\": \"REMOVE_EMPTY(SORT(SEARCH('{AWS/Route53,HealthCheckId} MetricName=\\\"HealthCheckPercentageHealthy\\\"', 'Average', 60), AVG, DESC))\", \"label\": \"${PROP('Dim.HealthCheckId')}\", \"id\": \"e1\", \"region\": \"us-east-1\" } ]\n                ],\n                \"view\": \"timeSeries\",\n                \"stacked\": false,\n                \"region\": \"us-east-1\",\n                \"stat\": \"Average\",\n                \"period\": 300,\n                \"title\": \"HealthCheckPercentageHealthy (Avg)\"\n            }\n        }\n    ]\n}"
+            }
+        },
+        "CWDashboardRoute53Individual": {
+            "Type": "AWS::CloudWatch::Dashboard",
+            "Properties": {
+                "DashboardName": "Route53_Individual_Resources",
+                "DashboardBody": {
+                    "Fn::ToJsonString": {
+                        "variables": [
+                            {
+                                "type": "property",
+                                "property": "HostedZoneId",
+                                "inputType": "select",
+                                "id": "HostedZoneId",
+                                "label": "HostedZoneId",
+                                "visible": true,
+                                "search": "{AWS/Route53,HostedZoneId} MetricName=DNSQueries",
+                                "populateFrom": "HostedZoneId",
+                                "defaultValue": {
+                                    "Ref": "DefaultHostedZoneID"
+                                }
+                            },
+                            {
+                                "type": "property",
+                                "property": "HealthCheckId",
+                                "inputType": "select",
+                                "id": "HealthCheckId",
+                                "label": "HealthCheckId",
+                                "visible": true,
+                                "search": "{AWS/Route53,HealthCheckId} MetricName=HealthCheckStatus",
+                                "populateFrom": "HealthCheckId",
+                                "defaultValue": {
+                                    "Ref": "DefaultHealthCheckID"
+                                }
+                            }
+                        ],
+                        "widgets": [
+                            {
+                                "type": "metric",
+                                "x": 7,
+                                "y": 1,
+                                "width": 17,
+                                "height": 8,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/Route53,HostedZoneId} HostedZoneId=\"myzone\" MetricName=\"DNSQueries\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.HostedZoneId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "DNSQueries"
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 0,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "# Public Hosted Zones"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 1,
+                                "width": 7,
+                                "height": 8,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/Route53,HostedZoneId} HostedZoneId=\"myzone\" MetricName=\"DNSQueries\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.HostedZoneId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "DNSQueries",
+                                    "setPeriodToTimeRange": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 9,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "# DNS Security Extensions"
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 34,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "# Health Checks"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 7,
+                                "y": 10,
+                                "width": 17,
+                                "height": 8,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/Route53,HostedZoneId} HostedZoneId=\"myzone\" MetricName=\"DNSSECInternalFailure\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.HostedZoneId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "DNSSECInternalFailure"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 18,
+                                "width": 7,
+                                "height": 8,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/Route53,HostedZoneId} HostedZoneId=\"myzone\" MetricName=\"DNSSECKeySigningKeysNeedingAction\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.HostedZoneId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "DNSSECKeySigningKeysNeedingAction",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 26,
+                                "width": 12,
+                                "height": 8,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/Route53,HostedZoneId} HostedZoneId=\"myzone\" MetricName=\"DNSSECKeySigningKeyMaxNeedingActionAge\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.HostedZoneId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "DNSSECKeySigningKeyMaxNeedingActionAge"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 26,
+                                "width": 12,
+                                "height": 8,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/Route53,HostedZoneId} HostedZoneId=\"myzone\" MetricName=\"DNSSECKeySigningKeyAge\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.HostedZoneId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "DNSSECKeySigningKeyAge"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 10,
+                                "width": 7,
+                                "height": 8,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/Route53,HostedZoneId} HostedZoneId=\"myzone\" MetricName=\"DNSSECInternalFailure\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.HostedZoneId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "DNSSECInternalFailure",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 7,
+                                "y": 18,
+                                "width": 17,
+                                "height": 8,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/Route53,HostedZoneId} HostedZoneId=\"myzone\" MetricName=\"DNSSECKeySigningKeysNeedingAction\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.HostedZoneId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "DNSSECKeySigningKeysNeedingAction"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 43,
+                                "width": 6,
+                                "height": 8,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/Route53,HealthCheckId} HealthCheckId=\"healthcheck\" MetricName=\"ChildHealthCheckHealthyCount\"', 'Average', 60), AVG, DESC))",
+                                                "label": "${PROP('Dim.HealthCheckId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "ChildHealthCheckHealthyCount (Avg)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 6,
+                                "y": 43,
+                                "width": 6,
+                                "height": 8,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/Route53,HealthCheckId} HealthCheckId=\"healthcheck\" MetricName=\"ConnectionTime\"', 'Average', 60), AVG, DESC))",
+                                                "label": "${PROP('Dim.HealthCheckId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "ConnectionTime (Avg)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 18,
+                                "y": 43,
+                                "width": 6,
+                                "height": 8,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/Route53,HealthCheckId} HealthCheckId=\"healthcheck\" MetricName=\"TimeToFirstByte\"', 'Average', 60), AVG, DESC))",
+                                                "label": "${PROP('Dim.HealthCheckId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "TimeToFirstByte (Avg)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 43,
+                                "width": 6,
+                                "height": 8,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/Route53,HealthCheckId} HealthCheckId=\"healthcheck\" MetricName=\"SSLHandshakeTime\"', 'Average', 60), AVG, DESC))",
+                                                "label": "${PROP('Dim.HealthCheckId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "SSLHandshakeTime (Avg)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 8,
+                                "y": 35,
+                                "width": 8,
+                                "height": 8,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/Route53,HealthCheckId} HealthCheckId=\"healthcheck\" MetricName=\"HealthCheckStatus\"', 'Minimum', 60), MIN, DESC))",
+                                                "label": "${PROP('Dim.HealthCheckId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "HealthCheckStatus (Min)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 35,
+                                "width": 8,
+                                "height": 8,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/Route53,HealthCheckId} HealthCheckId=\"healthcheck\" MetricName=\"HealthCheckStatus\"', 'Minimum', 60), MIN, DESC))",
+                                                "label": "${PROP('Dim.HealthCheckId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "HealthCheckStatus (Min)",
+                                    "setPeriodToTimeRange": false,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 16,
+                                "y": 35,
+                                "width": 8,
+                                "height": 8,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/Route53,HealthCheckId} HealthCheckId=\"healthcheck\" MetricName=\"HealthCheckPercentageHealthy\"', 'Average', 60), AVG, DESC))",
+                                                "label": "${PROP('Dim.HealthCheckId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "HealthCheckPercentageHealthy (Avg)"
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        }
+    }
+}

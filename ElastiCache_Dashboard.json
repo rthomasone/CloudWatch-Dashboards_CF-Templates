@@ -1,0 +1,1250 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "CloudWatch Dashboards to visualize ElastiCache resources. Both dashboards leverage Dashboard Variables to filter on the desired resources. Dashboard 'ElastiCache_All_Resources' visualizes ALL resources in the target region. Dashboard 'ElastiCache_Individual_Resources' provides additional filters to isolate a specific resources.",
+    "Transform": "AWS::LanguageExtensions",
+    "Parameters": {
+        "DefaultRegion": {
+            "Description": "Select the default region hosting the cluster to be monitored.",
+            "Type": "String",
+            "Default": "us-east-1"
+        },
+        "DefaultCacheClusterId": {
+            "Description": "Select the default cluster to be monitored. (e.g. cluster-1)",
+            "Type": "String",
+            "Default": ""
+        }
+    },
+    "Resources": {
+        "CWDashboardElastiCacheAll": {
+            "Type": "AWS::CloudWatch::Dashboard",
+            "Properties": {
+                "DashboardName": "ElastiCache_All_Resources",
+                "DashboardBody": {
+                    "Fn::ToJsonString": {
+                        "variables": [
+                            {
+                                "type": "property",
+                                "property": "region",
+                                "inputType": "select",
+                                "id": "Region",
+                                "label": "Region",
+                                "defaultValue": {
+                                    "Ref": "DefaultRegion"
+                                },
+                                "visible": true,
+                                "values": [
+                                    {
+                                        "value": "us-east-1",
+                                        "label": "N. Virginia"
+                                    },
+                                    {
+                                        "value": "us-east-2",
+                                        "label": "Ohio"
+                                    },
+                                    {
+                                        "value": "us-west-1",
+                                        "label": "N.California"
+                                    },
+                                    {
+                                        "value": "us-west-2",
+                                        "label": "Oregon"
+                                    },
+                                    {
+                                        "value": "ap-east-1",
+                                        "label": "Hong Kong"
+                                    },
+                                    {
+                                        "value": "ap-south-1",
+                                        "label": "Mumbai"
+                                    },
+                                    {
+                                        "value": "ap-northeast-3",
+                                        "label": "Osaka"
+                                    },
+                                    {
+                                        "value": "ap-northeast-2",
+                                        "label": "Seoul"
+                                    },
+                                    {
+                                        "value": "ap-southeast-1",
+                                        "label": "Singapore"
+                                    },
+                                    {
+                                        "value": "ap-southeast-2",
+                                        "label": "Sydney"
+                                    },
+                                    {
+                                        "value": "ap-noutheast-1",
+                                        "label": "Toyko"
+                                    },
+                                    {
+                                        "value": "ca-central-1",
+                                        "label": "Canada"
+                                    },
+                                    {
+                                        "value": "eu-central-1",
+                                        "label": "Frankfurt"
+                                    },
+                                    {
+                                        "value": "eu-west-1",
+                                        "label": "Ireland"
+                                    },
+                                    {
+                                        "value": "eu-west-2",
+                                        "label": "London"
+                                    },
+                                    {
+                                        "value": "eu-west-3",
+                                        "label": "Paris"
+                                    },
+                                    {
+                                        "value": "eu-north-1",
+                                        "label": "Stockholm"
+                                    },
+                                    {
+                                        "value": "sa-east-1",
+                                        "label": "South America"
+                                    }
+                                ]
+                            }
+                        ],
+                        "widgets": [
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 1,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/ElastiCache,CacheClusterId} MetricName=\"CPUUtilization\"', 'Average', 60)), AVG, DESC)",
+                                                "label": "${PROP('Dim.CacheClusterId')}",
+                                                "id": "e1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "CPUUtilization (Average)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 6,
+                                "y": 1,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/ElastiCache,CacheClusterId} MetricName=\"FreeableMemory\"', 'Average', 60)), AVG, DESC)",
+                                                "label": "${PROP('Dim.CacheClusterId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "FreeableMemory (Average)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 7,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/ElastiCache,CacheClusterId} MetricName=\"NetworkBytesIn\"', 'Sum', 60)), SUM, DESC)",
+                                                "label": "${PROP('Dim.CacheClusterId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "NetworkBytesIn (Sum)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 6,
+                                "y": 7,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/ElastiCache,CacheClusterId} MetricName=\"NetworkBytesOut\"', 'Sum', 60)), SUM, DESC)",
+                                                "label": "${PROP('Dim.CacheClusterId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "NetworkBytesOut (Sum)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 1,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/ElastiCache,CacheClusterId} MetricName=\"SwapUsage\"', 'Average', 60)), AVG, DESC)",
+                                                "label": "${PROP('Dim.CacheClusterId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "SwapUsage (Average)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 7,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/ElastiCache,CacheClusterId} MetricName=\"NetworkBandwidthInAllowanceExceeded\"', 'Sum', 60)), SUM, DESC)",
+                                                "label": "${PROP('Dim.CacheClusterId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "NetworkBandwidthInAllowanceExceeded (Sum)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 18,
+                                "y": 7,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/ElastiCache,CacheClusterId} MetricName=\"NetworkBandwidthOutAllowanceExceeded\"', 'Sum', 60)), SUM, DESC)",
+                                                "label": "${PROP('Dim.CacheClusterId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "NetworkBandwidthOutAllowanceExceeded (Sum)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 18,
+                                "y": 1,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/ElastiCache,CacheClusterId} MetricName=\"NetworkConntrackAllowanceExceeded\"', 'Sum', 60)), SUM, DESC)",
+                                                "label": "${PROP('Dim.CacheClusterId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "NetworkConntrackAllowanceExceeded (Sum)"
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 0,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "# Host Metrics",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 13,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "# Redis Metrics",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 14,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/ElastiCache,CacheClusterId,CacheNodeId} MetricName=\"Reclaimed\"', 'Sum', 60)), SUM, DESC)",
+                                                "label": "${PROP('Dim.CacheClusterId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "Reclaimed (Sum)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 6,
+                                "y": 14,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/ElastiCache,CacheClusterId,CacheNodeId} MetricName=\"CacheHits\"', 'Sum', 60)), SUM, DESC)",
+                                                "label": "${PROP('Dim.CacheClusterId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "CacheHits (Sum)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 14,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/ElastiCache,CacheClusterId,CacheNodeId} MetricName=\"CacheMisses\"', 'Sum', 60)), SUM, DESC)",
+                                                "label": "${PROP('Dim.CacheClusterId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "CacheMisses (Sum)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 20,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/ElastiCache,CacheClusterId,CacheNodeId} MetricName=\"CurrConnections\"', 'Sum', 60)), SUM, DESC)",
+                                                "label": "${PROP('Dim.CacheClusterId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "CurrConnections (Sum)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 27,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/ElastiCache,CacheClusterId,CacheNodeId} MetricName=\"ReplicationBytes\"', 'Sum', 60)), SUM, DESC)",
+                                                "label": "${PROP('Dim.CacheClusterId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "ReplicationBytes (Sum)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 6,
+                                "y": 27,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/ElastiCache,CacheClusterId,CacheNodeId} MetricName=\"ReplicationLag\"', 'Maximum', 60)), MAX, DESC)",
+                                                "label": "${PROP('Dim.CacheClusterId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "ReplicationLag (Max)"
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 26,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "# Replication",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 18,
+                                "y": 14,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/ElastiCache,CacheClusterId,CacheNodeId} MetricName=\"BytesUsedForCache\"', 'Sum', 60)), SUM, DESC)",
+                                                "label": "${PROP('Dim.CacheClusterId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "BytesUsedForCache (Sum)"
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 33,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "# Errors",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 6,
+                                "y": 34,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/ElastiCache,CacheClusterId,CacheNodeId} MetricName=\"Evictions\"', 'Sum', 60)), SUM, DESC)",
+                                                "label": "${PROP('Dim.CacheClusterId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "Evictions (Sum)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 34,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/ElastiCache,CacheClusterId,CacheNodeId} MetricName=\"ErrorCount\"', 'Sum', 60)), SUM, DESC)",
+                                                "label": "${PROP('Dim.CacheClusterId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "ErrorCount (Sum)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 34,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/ElastiCache,CacheClusterId,CacheNodeId} MetricName=\"AuthenticationFailures\"', 'Sum', 60)), SUM, DESC)",
+                                                "label": "${PROP('Dim.CacheClusterId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "AuthenticationFailures (Sum)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 18,
+                                "y": 34,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/ElastiCache,CacheClusterId,CacheNodeId} MetricName=\"CommandAuthorizationFailures\"', 'Sum', 60)), SUM, DESC)",
+                                                "label": "${PROP('Dim.CacheClusterId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "CommandAuthorizationFailures (Sum)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 40,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/ElastiCache,CacheClusterId,CacheNodeId} MetricName=\"ChannelAuthorizationFailures\"', 'Sum', 60)), SUM, DESC)",
+                                                "label": "${PROP('Dim.CacheClusterId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "ChannelAuthorizationFailures (Sum)"
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        },
+        "CWDashboardElastiCacheIndividual": {
+            "Type": "AWS::CloudWatch::Dashboard",
+            "Properties": {
+                "DashboardName": "ElastiCache_Individual_Resources",
+                "DashboardBody": {
+                    "Fn::ToJsonString": {
+                        "variables": [
+                            {
+                                "type": "property",
+                                "property": "region",
+                                "inputType": "select",
+                                "id": "Region",
+                                "label": "Region",
+                                "defaultValue": {
+                                    "Ref": "DefaultRegion"
+                                },
+                                "visible": true,
+                                "values": [
+                                    {
+                                        "value": "us-east-1",
+                                        "label": "N. Virginia"
+                                    },
+                                    {
+                                        "value": "us-east-2",
+                                        "label": "Ohio"
+                                    },
+                                    {
+                                        "value": "us-west-1",
+                                        "label": "N.California"
+                                    },
+                                    {
+                                        "value": "us-west-2",
+                                        "label": "Oregon"
+                                    },
+                                    {
+                                        "value": "ap-east-1",
+                                        "label": "Hong Kong"
+                                    },
+                                    {
+                                        "value": "ap-south-1",
+                                        "label": "Mumbai"
+                                    },
+                                    {
+                                        "value": "ap-northeast-3",
+                                        "label": "Osaka"
+                                    },
+                                    {
+                                        "value": "ap-northeast-2",
+                                        "label": "Seoul"
+                                    },
+                                    {
+                                        "value": "ap-southeast-1",
+                                        "label": "Singapore"
+                                    },
+                                    {
+                                        "value": "ap-southeast-2",
+                                        "label": "Sydney"
+                                    },
+                                    {
+                                        "value": "ap-noutheast-1",
+                                        "label": "Toyko"
+                                    },
+                                    {
+                                        "value": "ca-central-1",
+                                        "label": "Canada"
+                                    },
+                                    {
+                                        "value": "eu-central-1",
+                                        "label": "Frankfurt"
+                                    },
+                                    {
+                                        "value": "eu-west-1",
+                                        "label": "Ireland"
+                                    },
+                                    {
+                                        "value": "eu-west-2",
+                                        "label": "London"
+                                    },
+                                    {
+                                        "value": "eu-west-3",
+                                        "label": "Paris"
+                                    },
+                                    {
+                                        "value": "eu-north-1",
+                                        "label": "Stockholm"
+                                    },
+                                    {
+                                        "value": "sa-east-1",
+                                        "label": "South America"
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "property",
+                                "property": "CacheClusterId",
+                                "inputType": "select",
+                                "id": "CacheClusterId",
+                                "label": "CacheClusterId",
+                                "defaultValue": {
+                                    "Ref": "DefaultCacheClusterId"
+                                },
+                                "visible": true,
+                                "inputPopulationType": "search",
+                                "search": "{AWS/ElastiCache,CacheClusterId}",
+                                "populateFrom": "CacheClusterId"
+                            }
+                        ],
+                        "widgets": [
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 1,
+                                "width": 12,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/ElastiCache,CacheClusterId} MetricName=\"CPUUtilization\" CacheClusterId=\"clusterone\"', 'Average', 60)), AVG, DESC)",
+                                                "label": "${PROP('Dim.CacheClusterId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "CPUUtilization (Average)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 1,
+                                "width": 12,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/ElastiCache,CacheClusterId} MetricName=\"FreeableMemory\" CacheClusterId=\"clusterone\"', 'Average', 60)), AVG, DESC)",
+                                                "label": "${PROP('MetricName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ],
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/ElastiCache,CacheClusterId} MetricName=\"SwapUsage\" CacheClusterId=\"clusterone\"', 'Average', 60)), AVG, DESC)",
+                                                "label": "${PROP('MetricName')}",
+                                                "id": "e2",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "FreeableMemory & Swap (Average)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 7,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/ElastiCache,CacheClusterId} MetricName=\"NetworkBytesIn\" CacheClusterId=\"clusterone\"', 'Sum', 60)), SUM, DESC)",
+                                                "label": "${PROP('MetricName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ],
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/ElastiCache,CacheClusterId} MetricName=\"NetworkBytesOut\" CacheClusterId=\"clusterone\"', 'Sum', 60)), SUM, DESC)",
+                                                "label": "${PROP('MetricName')}",
+                                                "id": "e2",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "Network Bytes In & Out (Sum)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 8,
+                                "y": 7,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/ElastiCache,CacheClusterId} MetricName=\"NetworkBandwidthInAllowanceExceeded\" CacheClusterId=\"clusterone\"', 'Sum', 60)), SUM, DESC)",
+                                                "label": "${PROP('MetricName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ],
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/ElastiCache,CacheClusterId} MetricName=\"NetworkBandwidthOutAllowanceExceeded\" CacheClusterId=\"clusterone\"', 'Sum', 60)), SUM, DESC)",
+                                                "label": "${PROP('MetricName')}",
+                                                "id": "e2",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "Network Bandwidth  Allowance Exceeded (Sum)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 16,
+                                "y": 7,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/ElastiCache,CacheClusterId} MetricName=\"NetworkConntrackAllowanceExceeded\" CacheClusterId=\"clusterone\"', 'Sum', 60)), SUM, DESC)",
+                                                "label": "${PROP('Dim.CacheClusterId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "NetworkConntrackAllowanceExceeded (Sum)"
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 0,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "# Host Metrics",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 13,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "# Redis Metrics",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 20,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/ElastiCache,CacheClusterId,CacheNodeId} MetricName=\"Reclaimed\" CacheClusterId=\"clusterone\"', 'Sum', 60)), SUM, DESC)",
+                                                "label": "${PROP('Dim.CacheClusterId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "Reclaimed (Sum)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 14,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/ElastiCache,CacheClusterId,CacheNodeId} MetricName=\"CacheHits\" CacheClusterId=\"clusterone\"', 'Sum', 60)), SUM, DESC)",
+                                                "label": "${PROP('MetricName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ],
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/ElastiCache,CacheClusterId,CacheNodeId} MetricName=\"CacheMisses\" CacheClusterId=\"clusterone\"', 'Sum', 60)), SUM, DESC)",
+                                                "label": "${PROP('MetricName')}",
+                                                "id": "e2",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "Cache Hits & Misses (Sum)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 8,
+                                "y": 14,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/ElastiCache,CacheClusterId,CacheNodeId} MetricName=\"CurrConnections\" CacheClusterId=\"clusterone\"', 'Sum', 60)), SUM, DESC)",
+                                                "label": "${PROP('Dim.CacheClusterId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "CurrConnections (Sum)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 27,
+                                "width": 12,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/ElastiCache,CacheClusterId,CacheNodeId} MetricName=\"ReplicationBytes\" CacheClusterId=\"clusterone\"', 'Sum', 60)), SUM, DESC)",
+                                                "label": "${PROP('Dim.CacheClusterId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "ReplicationBytes (Sum)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 27,
+                                "width": 12,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/ElastiCache,CacheClusterId,CacheNodeId} MetricName=\"ReplicationLag\" CacheClusterId=\"clusterone\"', 'Maximum', 60)), MAX, DESC)",
+                                                "label": "${PROP('MetricName')} Maximum",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "ReplicationLag (Max)"
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 26,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "# Replication",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 16,
+                                "y": 14,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/ElastiCache,CacheClusterId,CacheNodeId} MetricName=\"BytesUsedForCache\" CacheClusterId=\"clusterone\"', 'Sum', 60)), SUM, DESC)",
+                                                "label": "${PROP('Dim.CacheClusterId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "BytesUsedForCache (Sum)"
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 33,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "# Errors",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 6,
+                                "y": 34,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/ElastiCache,CacheClusterId,CacheNodeId} MetricName=\"Evictions\" CacheClusterId=\"clusterone\"', 'Sum', 60)), SUM, DESC)",
+                                                "label": "${PROP('Dim.CacheClusterId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "Evictions (Sum)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 34,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/ElastiCache,CacheClusterId,CacheNodeId} MetricName=\"ErrorCount\" CacheClusterId=\"clusterone\"', 'Sum', 60)), SUM, DESC)",
+                                                "label": "${PROP('Dim.CacheClusterId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "ErrorCount (Sum)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 34,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/ElastiCache,CacheClusterId,CacheNodeId} MetricName=\"AuthenticationFailures\" CacheClusterId=\"clusterone\"', 'Sum', 60)), SUM, DESC)",
+                                                "label": "${PROP('Dim.CacheClusterId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "AuthenticationFailures (Sum)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 18,
+                                "y": 34,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/ElastiCache,CacheClusterId,CacheNodeId} MetricName=\"CommandAuthorizationFailures\" CacheClusterId=\"clusterone\"', 'Sum', 60)), SUM, DESC)",
+                                                "label": "${PROP('Dim.CacheClusterId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "CommandAuthorizationFailures (Sum)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 40,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/ElastiCache,CacheClusterId,CacheNodeId} MetricName=\"ChannelAuthorizationFailures\" CacheClusterId=\"clusterone\"', 'Sum', 60)), SUM, DESC)",
+                                                "label": "${PROP('Dim.CacheClusterId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "ChannelAuthorizationFailures (Sum)"
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        }
+    }
+}

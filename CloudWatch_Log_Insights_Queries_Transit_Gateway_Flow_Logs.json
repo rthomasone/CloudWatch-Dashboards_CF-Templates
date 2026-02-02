@@ -1,0 +1,217 @@
+{
+	"AWSTemplateFormatVersion": "2010-09-09",
+	"Description": "Sample CloudWatch Log Insight Queries to analyze Transit Gateway Flow Logs.",
+	"Parameters": {
+		"LogGroupToQuery": {
+			"Type": "String",
+			"Description": "Select CloudWatch Log Group containing Transit Gateway Flow Logs.",
+			"Default": "TGW-Flow-Logs"
+		}
+	},
+	"Resources": {
+		"QueryLatestLogEvents": {
+			"Type": "AWS::Logs::QueryDefinition",
+			"Properties": {
+				"LogGroupNames": [
+					{
+						"Ref": "LogGroupToQuery"
+					}
+				],
+				"Name": "TGW-Latest-Log-Events",
+				"QueryString": {
+					"Fn::Join": [
+						"",
+						[
+							"#Latest Events\n",
+							"fields @timestamp, @message, @logStream, @log\n",
+							"| sort @timestamp desc\n",
+							"| limit 10000"
+						]
+					]
+				}
+			}
+		},
+		"QueryTokenizeFields": {
+			"Type": "AWS::Logs::QueryDefinition",
+			"Properties": {
+				"LogGroupNames": [
+					{
+						"Ref": "LogGroupToQuery"
+					}
+				],
+				"Name": "TGW-Tokenize-Fields",
+				"QueryString": {
+					"Fn::Join": [
+						"",
+						[
+							"#Break Out Individual Fields\n",
+							"parse @message '* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *' as version, resourcetype, accountid, tgwid, tgwattachmentid, tgwsrcvpcaccountid, tgwdstvpcaccountid, tgwsrcvpcid, tgwdstvpcid, tgwsrcsubnetid, tgwdstsubnetid, tgwsrceni, tgwdsteni, tgwsrcazid, tgwdstazid, tgwpairattachmentid, srcaddr, dstaddr, srcport, dstport, protocol, packets, bytes, start, end, logstatus, type, packetslostnoroute, packetslostblackhole, packetslostmtuexceeded, packetslostttlexpired, tcpflags, region, flowdirection, pktsrcawsservice, pktdstawsservice"
+						]
+					]
+				}
+			}
+		},
+		"QueryTCPRSTFlagFilter": {
+			"Type": "AWS::Logs::QueryDefinition",
+			"Properties": {
+				"LogGroupNames": [
+					{
+						"Ref": "LogGroupToQuery"
+					}
+				],
+				"Name": "TGW-Filter-on-TCP-RST-Flag",
+				"QueryString": {
+					"Fn::Join": [
+						"",
+						[
+							"#Filter on TCP RST Flag\n",
+							"parse @message '* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *' as version, resourcetype, accountid, tgwid, tgwattachmentid, tgwsrcvpcaccountid, tgwdstvpcaccountid, tgwsrcvpcid, tgwdstvpcid, tgwsrcsubnetid, tgwdstsubnetid, tgwsrceni, tgwdsteni, tgwsrcazid, tgwdstazid, tgwpairattachmentid, srcaddr, dstaddr, srcport, dstport, protocol, packets, bytes, start, end, logstatus, type, packetslostnoroute, packetslostblackhole, packetslostmtuexceeded, packetslostttlexpired, tcpflags, region, flowdirection, pktsrcawsservice, pktdstawsservice\n",
+							"| filter tcp_flags = 4\n",
+							"| display @timestamp, tgwid, tgwattachmentid, tgwpairattachmentid, srcaddr, dstaddr, srcport, dstport, protocol, tcpflags, region, flowdirection\n",
+							"| limit 5"
+						]
+					]
+				}
+			}
+		},
+		"QueryPacketLostNoRouteFilter": {
+			"Type": "AWS::Logs::QueryDefinition",
+			"Properties": {
+				"LogGroupNames": [
+					{
+						"Ref": "LogGroupToQuery"
+					}
+				],
+				"Name": "TGW-Filter-PacketLostNoRoute",
+				"QueryString": {
+					"Fn::Join": [
+						"",
+						[
+							"#PacketLostNoRoute: Output Flow Details\n",
+							"parse @message '* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *' as Version, ResourceType, Accountid, TGW_ID, TGW_Attachment_ID, Souce_VPC_Account_ID, Dest_VPC_Account_ID, Source_VPC, Destination_VPC, Source_Subnet, Dest_Subnet, Source_ENI, Dest_ENI, Source_AZ, Dest_AZ, TGW_Pair_Attachment_ID, Source_IP, Dest_IP, Source_Port, Dest_Port, Protocol, Packets, Bytes, Start, End, LogStatus, Type, PacketsLostNoRoute, PacketsLostBlackhole, PacketsLostMTUExceeded, PacketsLostTTLexpired, TCPflags, Region, FlowDirection, pktsrcawsservice, pktdstawsservice\n",
+							"| filter PacketsLostNoRoute = 1\n",
+							"| display Souce_VPC_Account_ID, TGW_Attachment_ID, Source_VPC, Source_ENI, Source_IP, Dest_IP, Source_IP, Dest_IP, Protocol, Dest_Port, FlowDirection\n",
+							"| sort by @timestamp desc"
+						]
+					]
+				}
+			}
+		},
+		"QueryPacketLostNoRouteAggregateOne": {
+			"Type": "AWS::Logs::QueryDefinition",
+			"Properties": {
+				"LogGroupNames": [
+					{
+						"Ref": "LogGroupToQuery"
+					}
+				],
+				"Name": "TGW-Aggregate-PacketLostNoRoute-1",
+				"QueryString": {
+					"Fn::Join": [
+						"",
+						[
+							"#PacketLostNoRoute: Aggregated on Account ID, TGW ID, Source VPC, Destination VPC, Source IP, Destination IP, Protocol\n",
+							"parse @message '* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *' as Version, ResourceType, Accountid, TGW_ID, TGW_Attachment_ID, Souce_VPC_Account_ID, Dest_VPC_Account_ID, Source_VPC, Destination_VPC, Source_Subnet, Dest_Subnet, Source_ENI, Dest_ENI, Source_AZ, Dest_AZ, TGW_Pair_Attachment_ID, Source_IP, Dest_IP, Source_Port, Dest_Port, Protocol, Packets, Bytes, Start, End, LogStatus, Type, PacketsLostNoRoute, PacketsLostBlackhole, PacketsLostMTUExceeded, PacketsLostTTLexpired, TCPflags, Region, FlowDirection, pktsrcawsservice, pktdstawsservice\n",
+							"| filter PacketsLostNoRoute = 1\n",
+							"| stats sum(Bytes) as DataTransferred by Souce_VPC_Account_ID, TGW_Attachment_ID, Source_VPC, Source_ENI, Source_IP, Dest_IP, Source_IP, Dest_IP, Protocol, FlowDirection\n",
+							"| sort by DataTransferred desc"
+						]
+					]
+				}
+			}
+		},
+		"QueryPacketLostNoRouteAggregateTwo": {
+			"Type": "AWS::Logs::QueryDefinition",
+			"Properties": {
+				"LogGroupNames": [
+					{
+						"Ref": "LogGroupToQuery"
+					}
+				],
+				"Name": "TGW-Aggregate-PacketLostNoRoute-2",
+				"QueryString": {
+					"Fn::Join": [
+						"",
+						[
+							"#PacketLostNoRoute: Summarize On TGW_ID, TGW_Attachment_ID, Source_IP & Destination_IP\n",
+							"parse @message '* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *' as version, resourcetype, accountid, tgwid, tgwattachmentid, tgwsrcvpcaccountid, tgwdstvpcaccountid, tgwsrcvpcid, tgwdstvpcid, tgwsrcsubnetid, tgwdstsubnetid, tgwsrceni, tgwdsteni, tgwsrcazid, tgwdstazid, tgwpairattachmentid, srcaddr, dstaddr, srcport, dstport, protocol, packets, bytes, start, end, logstatus, type, packetslostnoroute, packetslostblackhole, packetslostmtuexceeded, packetslostttlexpired, tcpflags, region, flowdirection, pktsrcawsservice, pktdstawsservice\n",
+							"| filter packetslostnoroute != '0'\n",
+							"| stats count(*) as NumberofFlows by tgwid as TGW_ID, tgwattachmentid as TGW_Attachment_ID, srcaddr as Source_IP, dstaddr as Destination_IP\n",
+							"| sort NumberofFlows desc"
+						]
+					]
+				}
+			}
+		},
+		"QueryTopInboundHTTPClient": {
+			"Type": "AWS::Logs::QueryDefinition",
+			"Properties": {
+				"LogGroupNames": [
+					{
+						"Ref": "LogGroupToQuery"
+					}
+				],
+				"Name": "TGW-Top-Inbound-HTTP-Client",
+				"QueryString": {
+					"Fn::Join": [
+						"",
+						[
+							"#Top Inbound HTTP Clients by Volume\n",
+							"parse @message '* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *' as version, resourcetype, accountid, tgwid, tgwattachmentid, tgwsrcvpcaccountid, tgwdstvpcaccountid, tgwsrcvpcid, tgwdstvpcid, tgwsrcsubnetid, tgwdstsubnetid, tgwsrceni, tgwdsteni, tgwsrcazid, tgwdstazid, tgwpairattachmentid, srcaddr, dstaddr, srcport, dstport, protocol, packets, bytes, start, end, logstatus, type, packetslostnoroute, packetslostblackhole, packetslostmtuexceeded, packetslostttlexpired, tcpflags, region, flowdirection, pktsrcawsservice, pktdstawsservice\n",
+							"| filter protocol = 6 and dstport = 80 and flowdirection = 'ingress'\n",
+							"| stats sum(bytes) as Data_Transferred by srcaddr as Source_IP, tgwdstvpcid as Destination_VPC, dstaddr as Destinaton_IP\n",
+							"| sort by Data_Transferred desc"
+						]
+					]
+				}
+			}
+		},
+		"QueryTopInboundProtocolPort": {
+			"Type": "AWS::Logs::QueryDefinition",
+			"Properties": {
+				"LogGroupNames": [
+					{
+						"Ref": "LogGroupToQuery"
+					}
+				],
+				"Name": "TGW-Top-Inbound-Protocol-Port",
+				"QueryString": {
+					"Fn::Join": [
+						"",
+						[
+							"#Top Inbound Protocols & Ports by Volume\n",
+							"parse @message '* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *' as version, resourcetype, accountid, tgwid, tgwattachmentid, tgwsrcvpcaccountid, tgwdstvpcaccountid, tgwsrcvpcid, tgwdstvpcid, tgwsrcsubnetid, tgwdstsubnetid, tgwsrceni, tgwdsteni, tgwsrcazid, tgwdstazid, tgwpairattachmentid, srcaddr, dstaddr, srcport, dstport, protocol, packets, bytes, start, end, logstatus, type, packetslostnoroute, packetslostblackhole, packetslostmtuexceeded, packetslostttlexpired, tcpflags, region, flowdirection, pktsrcawsservice, pktdstawsservice\n",
+							"| filter flowdirection = 'ingress'\n",
+							"| stats sum(bytes) as Data_Transferred by protocol, srcport as Source_Port\n",
+							"| sort by Data_Transferred desc\n",
+							"| limit 10"
+						]
+					]
+				}
+			}
+		},
+		"QueryTopAttachmentIDPairs": {
+			"Type": "AWS::Logs::QueryDefinition",
+			"Properties": {
+				"LogGroupNames": [
+					{
+						"Ref": "LogGroupToQuery"
+					}
+				],
+				"Name": "TGW-Top-Attachment-ID",
+				"QueryString": {
+					"Fn::Join": [
+						"",
+						[
+							"#Top Talkers by Inbound Data Transferred & Attachment ID Pair\n",
+							"parse @message '* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *' as version, resourcetype, accountid, tgwid, tgwattachmentid, tgwsrcvpcaccountid, tgwdstvpcaccountid, tgwsrcvpcid, tgwdstvpcid, tgwsrcsubnetid, tgwdstsubnetid, tgwsrceni, tgwdsteni, tgwsrcazid, tgwdstazid, tgwpairattachmentid, srcaddr, dstaddr, srcport, dstport, protocol, packets, bytes, start, end, logstatus, type, packetslostnoroute, packetslostblackhole, packetslostmtuexceeded, packetslostttlexpired, tcpflags, region, flowdirection, pktsrcawsservice, pktdstawsservice\n",
+							"| filter tgwid = 'tgw-0d23b252d62a9fdc5' and flowdirection = 'ingress'\n",
+							"| stats sum(bytes) as Data_Transferred by tgwattachmentid as TGW_Attachment_ID, tgwpairattachmentid as Pair_TGW_Attachment_ID\n",
+							"| sort by Data_Transferred desc\n"
+						]
+					]
+				}
+			}
+		}
+	}
+}

@@ -1,0 +1,2593 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "CloudWatch Dashboards to visualize Web Application Firewall (WAF) resources. Both dashboards leverage Dashboard Variables to filter on the desired resources. Dashboard 'WAF_All_Resources' visualizes ALL WAF resources in the target region. Dashboard 'WAF_Individual_Resources' provides additional filters to isolate a specific webACL.",
+    "Transform": "AWS::LanguageExtensions",
+    "Parameters": {
+        "DefaultRegion": {
+            "Description": "Select the default region hosting the load balancers to be monitored.",
+            "Type": "String",
+            "Default": "us-east-1"
+        },
+        "DefaultWebACL": {
+            "Description": "If WAF is associated with the default load balancer, select the corresponding WebACL. (e.g. sample-waf-name)",
+            "Type": "String",
+            "Default": ""
+        }
+    },
+    "Resources": {
+        "CWDashboardWAFAll": {
+            "Type": "AWS::CloudWatch::Dashboard",
+            "Properties": {
+                "DashboardName": "WAF_All_Resources",
+                "DashboardBody": {
+                    "Fn::ToJsonString": {
+                        "variables": [
+                            {
+                                "type": "property",
+                                "property": "region",
+                                "inputType": "select",
+                                "id": "Region",
+                                "label": "Region",
+                                "defaultValue": {
+                                    "Ref": "DefaultRegion"
+                                },
+                                "visible": true,
+                                "values": [
+                                    {
+                                        "value": "us-east-1",
+                                        "label": "N. Virginia"
+                                    },
+                                    {
+                                        "value": "us-east-2",
+                                        "label": "Ohio"
+                                    },
+                                    {
+                                        "value": "us-west-1",
+                                        "label": "N.California"
+                                    },
+                                    {
+                                        "value": "us-west-2",
+                                        "label": "Oregon"
+                                    },
+                                    {
+                                        "value": "ap-east-1",
+                                        "label": "Hong Kong"
+                                    },
+                                    {
+                                        "value": "ap-south-1",
+                                        "label": "Mumbai"
+                                    },
+                                    {
+                                        "value": "ap-northeast-3",
+                                        "label": "Osaka"
+                                    },
+                                    {
+                                        "value": "ap-northeast-2",
+                                        "label": "Seoul"
+                                    },
+                                    {
+                                        "value": "ap-southeast-1",
+                                        "label": "Singapore"
+                                    },
+                                    {
+                                        "value": "ap-southeast-2",
+                                        "label": "Sydney"
+                                    },
+                                    {
+                                        "value": "ap-noutheast-1",
+                                        "label": "Toyko"
+                                    },
+                                    {
+                                        "value": "ca-central-1",
+                                        "label": "Canada"
+                                    },
+                                    {
+                                        "value": "eu-central-1",
+                                        "label": "Frankfurt"
+                                    },
+                                    {
+                                        "value": "eu-west-1",
+                                        "label": "Ireland"
+                                    },
+                                    {
+                                        "value": "eu-west-2",
+                                        "label": "London"
+                                    },
+                                    {
+                                        "value": "eu-west-3",
+                                        "label": "Paris"
+                                    },
+                                    {
+                                        "value": "eu-north-1",
+                                        "label": "Stockholm"
+                                    },
+                                    {
+                                        "value": "sa-east-1",
+                                        "label": "South America"
+                                    }
+                                ]
+                            }
+                        ],
+                        "widgets": [
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 1,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/WAFV2,WebACL,Region,Rule} MetricName=\"AllowedRequests\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.WebACL')} ${PROP('Dim.Rule')} ${PROP('Dim.Region')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "bar",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "AllowedRequests (WebACL, Rule, Region)",
+                                    "setPeriodToTimeRange": true
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 72,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/WAFV2,Resource,ResourceType} MetricName=\"AllowedRequests\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.ResourceType')}: ${PROP('Dim.Resource')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "pie",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "AllowedRequests (ResourceType, Resource))",
+                                    "setPeriodToTimeRange": true
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 26,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/WAFV2,RuleGroup,Region,Rule} MetricName=\"AllowedRequests\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.RuleGroup')} ${PROP('Dim.Rule')} ${PROP('Dim.Region')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "AllowedRequests (RuleGroup,Rule, Region)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 59,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/WAFV2,WebACL,Country, Region} MetricName=\"AllowedRequests\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.WebACL')} ${PROP('Dim.Country')} ${PROP('Dim.Region')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "pie",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "AllowedRequests (WebACL,Country,Region)",
+                                    "setPeriodToTimeRange": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 0,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "# WebACL, Rule, Region",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 8,
+                                "y": 1,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/WAFV2,WebACL,Region,Rule} MetricName=\"BlockedRequests\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.WebACL')} ${PROP('Dim.Rule')} ${PROP('Dim.Region')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "bar",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "BlockedRequests (WebACL, Rule, Region)",
+                                    "setPeriodToTimeRange": true,
+                                    "labels": {
+                                        "visible": false
+                                    }
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 16,
+                                "y": 1,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/WAFV2,WebACL,Region,Rule} MetricName=\"CountedRequests\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.WebACL')} ${PROP('Dim.Rule')} ${PROP('Dim.Region')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "bar",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "CountedRequests (WebACL, Rule, Region)",
+                                    "setPeriodToTimeRange": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 25,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "# Rulegroup, Rule, Region",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 58,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "# WebACL, Country, Region",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 71,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "# ResourceType, Resource",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 6,
+                                "y": 26,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/WAFV2,RuleGroup,Region,Rule} MetricName=\"BlockedRequests\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.RuleGroup')} ${PROP('Dim.Rule')} ${PROP('Dim.Region')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "BlockedRequests (RuleGroup,Rule, Region)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 26,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/WAFV2,RuleGroup,Region,Rule} MetricName=\"CountedRequests\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.RuleGroup')} ${PROP('Dim.Rule')} ${PROP('Dim.Region')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "CountedRequests (RuleGroup,Rule, Region)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 18,
+                                "y": 26,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/WAFV2,RuleGroup,Region,Rule} MetricName=\"PassedRequests\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.RuleGroup')} ${PROP('Dim.Rule')} ${PROP('Dim.Region')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "PassedRequests (RuleGroup,Rule, Region)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 8,
+                                "y": 59,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/WAFV2,WebACL,Country, Region} MetricName=\"BlockedRequests\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.WebACL')} ${PROP('Dim.Country')} ${PROP('Dim.Region')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "pie",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "BlockedRequests (WebACL,Country,Region)",
+                                    "setPeriodToTimeRange": true
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 16,
+                                "y": 59,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/WAFV2,WebACL,Country, Region} MetricName=\"CountedRequests\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.WebACL')} ${PROP('Dim.Country')} ${PROP('Dim.Region')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "pie",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "CountedRequests (WebACL,Country,Region)",
+                                    "setPeriodToTimeRange": true
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 8,
+                                "y": 72,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/WAFV2,Resource,ResourceType} MetricName=\"BlockedRequests\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.ResourceType')}: ${PROP('Dim.Resource')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "pie",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "BlockedRequests (ResourceType, Resource))",
+                                    "setPeriodToTimeRange": true
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 16,
+                                "y": 72,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/WAFV2,Resource,ResourceType} MetricName=\"CountedRequests\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.ResourceType')}: ${PROP('Dim.Resource')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "pie",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "CountedRequests (ResourceType, Resource))",
+                                    "setPeriodToTimeRange": true
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 13,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/WAFV2,WebACL,Region,Rule} MetricName=\"CaptchaRequests\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.WebACL')} ${PROP('Dim.Rule')} ${PROP('Dim.Region')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "CaptchaRequests (WebACL, Rule, Region)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 6,
+                                "y": 13,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/WAFV2,WebACL,Region,Rule} MetricName=\"CaptchasAttempted\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.WebACL')} ${PROP('Dim.Rule')} ${PROP('Dim.Region')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "CaptchasAttempted (WebACL, Rule, Region)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 13,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/WAFV2,WebACL,Region,Rule} MetricName=\"CaptchasSolved\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.WebACL')} ${PROP('Dim.Rule')} ${PROP('Dim.Region')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "CaptchasSolved (WebACL, Rule, Region)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 18,
+                                "y": 13,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/WAFV2,WebACL,Region,Rule} MetricName=\"RequestsWithValidCaptchaToken\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.WebACL')} ${PROP('Dim.Rule')} ${PROP('Dim.Region')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "RequestsWithValidCaptchaToken (WebACL, Rule, Region)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 19,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/WAFV2,WebACL,Region,Rule} MetricName=\"ChallengeRequests\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.WebACL')} ${PROP('Dim.Rule')} ${PROP('Dim.Region')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "ChallengeRequests (WebACL, Rule, Region)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 6,
+                                "y": 19,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/WAFV2,WebACL,Region,Rule} MetricName=\"ChallengesAttempted\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.WebACL')} ${PROP('Dim.Rule')} ${PROP('Dim.Region')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "ChallengesAttempted (WebACL, Rule, Region)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 19,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/WAFV2,WebACL,Region,Rule} MetricName=\"ChallengesSolved\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.WebACL')} ${PROP('Dim.Rule')} ${PROP('Dim.Region')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "ChallengesSolved (WebACL, Rule, Region)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 18,
+                                "y": 19,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/WAFV2,WebACL,Region,Rule} MetricName=\"RequestsWithValidChallengeToken\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.WebACL')} ${PROP('Dim.Rule')} ${PROP('Dim.Region')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "RequestsWithValidChallengeToken (WebACL, Rule, Region)"
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 32,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "# WebACL, ManagedRuleGroup, ManagedRuleGroupRule, Region",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 33,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/WAFV2,WebACL,ManagedRuleGroup,ManagedRuleGroupRule,Region} MetricName=\"AllowedRequests\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.WebACL')} ${PROP('Dim.ManagedRuleGroup')} ${PROP('Dim.ManagedRuleGroupRule')} ${PROP('Dim.Region')}",
+                                                "id": "e1",
+                                                "region": "eu-west-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "pie",
+                                    "stacked": false,
+                                    "region": "eu-west-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "AllowedRequests (RuleGroup,Rule, Region)",
+                                    "setPeriodToTimeRange": true
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 6,
+                                "y": 33,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/WAFV2,WebACL,ManagedRuleGroup,ManagedRuleGroupRule,Region} MetricName=\"BlockedRequests\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.WebACL')} ${PROP('Dim.ManagedRuleGroup')} ${PROP('Dim.ManagedRuleGroupRule')} ${PROP('Dim.Region')}",
+                                                "id": "e1",
+                                                "region": "eu-west-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "pie",
+                                    "stacked": false,
+                                    "region": "eu-west-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "BlockedRequests (RuleGroup,Rule, Region)",
+                                    "setPeriodToTimeRange": true
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 33,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/WAFV2,WebACL,ManagedRuleGroup,ManagedRuleGroupRule,Region} MetricName=\"CountedRequests\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.WebACL')} ${PROP('Dim.ManagedRuleGroup')} ${PROP('Dim.ManagedRuleGroupRule')} ${PROP('Dim.Region')}",
+                                                "id": "e1",
+                                                "region": "eu-west-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "pie",
+                                    "stacked": false,
+                                    "region": "eu-west-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "CountedRequests (RuleGroup,Rule, Region)",
+                                    "setPeriodToTimeRange": true
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 18,
+                                "y": 33,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/WAFV2,WebACL,ManagedRuleGroup,ManagedRuleGroupRule,Region} MetricName=\"PassedRequests\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.WebACL')} ${PROP('Dim.ManagedRuleGroup')} ${PROP('Dim.ManagedRuleGroupRule')} ${PROP('Dim.Region')}",
+                                                "id": "e1",
+                                                "region": "eu-west-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "pie",
+                                    "stacked": false,
+                                    "region": "eu-west-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "PassedRequests (RuleGroup,Rule, Region)",
+                                    "setPeriodToTimeRange": true
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 65,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/WAFV2,WebACL,Country, Region} MetricName=\"AllowedRequests\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.WebACL')} ${PROP('Dim.Country')} ${PROP('Dim.Region')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "AllowedRequests (WebACL,Country,Region)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 8,
+                                "y": 65,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/WAFV2,WebACL,Country, Region} MetricName=\"BlockedRequests\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.WebACL')} ${PROP('Dim.Country')} ${PROP('Dim.Region')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "BlockedRequests (WebACL,Country,Region)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 16,
+                                "y": 65,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/WAFV2,WebACL,Country, Region} MetricName=\"CountedRequests\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.WebACL')} ${PROP('Dim.Country')} ${PROP('Dim.Region')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "CountedRequests (WebACL,Country,Region)"
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 45,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "# WebACL, VulnerabilityCategory, Region, ",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 46,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/WAFV2,WebACL,VulnerabilityCategory,Region} MetricName=\"AllowedRequests\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.WebACL')} ${PROP('Dim.VulnerabilityCategory')} ${PROP('Dim.Region')}",
+                                                "id": "e1",
+                                                "region": "eu-west-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "pie",
+                                    "stacked": false,
+                                    "region": "eu-west-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "AllowedRequests (WebACL,VulnerabilityCategory,Region)",
+                                    "setPeriodToTimeRange": true
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 8,
+                                "y": 46,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/WAFV2,WebACL,VulnerabilityCategory,Region} MetricName=\"BlockedRequests\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.WebACL')} ${PROP('Dim.VulnerabilityCategory')} ${PROP('Dim.Region')}",
+                                                "id": "e1",
+                                                "region": "eu-west-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "pie",
+                                    "stacked": false,
+                                    "region": "eu-west-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "BlockedRequests (WebACL,VulnerabilityCategory,Region)",
+                                    "setPeriodToTimeRange": true
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 16,
+                                "y": 46,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/WAFV2,WebACL,VulnerabilityCategory,Region} MetricName=\"CountedRequests\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.WebACL')} ${PROP('Dim.VulnerabilityCategory')} ${PROP('Dim.Region')}",
+                                                "id": "e1",
+                                                "region": "eu-west-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "pie",
+                                    "stacked": false,
+                                    "region": "eu-west-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "CountedRequests (WebACL,VulnerabilityCategory,Region)",
+                                    "setPeriodToTimeRange": true
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 7,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/WAFV2,WebACL,Region,Rule} MetricName=\"AllowedRequests\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.WebACL')} ${PROP('Dim.Rule')} ${PROP('Dim.Region')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "AllowedRequests (WebACL, Rule, Region)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 8,
+                                "y": 7,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/WAFV2,WebACL,Region,Rule} MetricName=\"BlockedRequests\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.WebACL')} ${PROP('Dim.Rule')} ${PROP('Dim.Region')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "BlockedRequests (WebACL, Rule, Region)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 16,
+                                "y": 7,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/WAFV2,WebACL,Region,Rule} MetricName=\"CountedRequests\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.WebACL')} ${PROP('Dim.Rule')} ${PROP('Dim.Region')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "CountedRequests (WebACL, Rule, Region)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 52,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/WAFV2,WebACL,VulnerabilityCategory,Region} MetricName=\"AllowedRequests\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.WebACL')} ${PROP('Dim.VulnerabilityCategory')} ${PROP('Dim.Region')}",
+                                                "id": "e1",
+                                                "region": "eu-west-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "eu-west-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "AllowedRequests (WebACL,VulnerabilityCategory,Region)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 8,
+                                "y": 52,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/WAFV2,WebACL,VulnerabilityCategory,Region} MetricName=\"BlockedRequests\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.WebACL')} ${PROP('Dim.VulnerabilityCategory')} ${PROP('Dim.Region')}",
+                                                "id": "e1",
+                                                "region": "eu-west-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "eu-west-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "BlockedRequests (WebACL,VulnerabilityCategory,Region)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 16,
+                                "y": 52,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/WAFV2,WebACL,VulnerabilityCategory,Region} MetricName=\"CountedRequests\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.WebACL')} ${PROP('Dim.VulnerabilityCategory')} ${PROP('Dim.Region')}",
+                                                "id": "e1",
+                                                "region": "eu-west-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "eu-west-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "CountedRequests (WebACL,VulnerabilityCategory,Region)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 39,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/WAFV2,WebACL,ManagedRuleGroup,ManagedRuleGroupRule,Region} MetricName=\"AllowedRequests\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.WebACL')} ${PROP('Dim.ManagedRuleGroup')} ${PROP('Dim.ManagedRuleGroupRule')} ${PROP('Dim.Region')}",
+                                                "id": "e1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "eu-west-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "AllowedRequests (RuleGroup,Rule, Region)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 6,
+                                "y": 39,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/WAFV2,WebACL,ManagedRuleGroup,ManagedRuleGroupRule,Region} MetricName=\"BlockedRequests\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.WebACL')} ${PROP('Dim.ManagedRuleGroup')} ${PROP('Dim.ManagedRuleGroupRule')} ${PROP('Dim.Region')}",
+                                                "id": "e1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "eu-west-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "BlockedRequests (RuleGroup,Rule, Region)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 39,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/WAFV2,WebACL,ManagedRuleGroup,ManagedRuleGroupRule,Region} MetricName=\"CountedRequests\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.WebACL')} ${PROP('Dim.ManagedRuleGroup')} ${PROP('Dim.ManagedRuleGroupRule')} ${PROP('Dim.Region')}",
+                                                "id": "e1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "eu-west-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "CountedRequests (RuleGroup,Rule, Region)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 18,
+                                "y": 39,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/WAFV2,WebACL,ManagedRuleGroup,ManagedRuleGroupRule,Region} MetricName=\"PassedRequests\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.WebACL')} ${PROP('Dim.ManagedRuleGroup')} ${PROP('Dim.ManagedRuleGroupRule')} ${PROP('Dim.Region')}",
+                                                "id": "e1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "eu-west-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "PassedRequests (RuleGroup,Rule, Region)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 78,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/WAFV2,Resource,ResourceType} MetricName=\"AllowedRequests\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.ResourceType')}: ${PROP('Dim.Resource')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "AllowedRequests (ResourceType, Resource))"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 8,
+                                "y": 78,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/WAFV2,Resource,ResourceType} MetricName=\"BlockedRequests\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.ResourceType')}: ${PROP('Dim.Resource')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "BlockedRequests (ResourceType, Resource))"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 16,
+                                "y": 78,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/WAFV2,Resource,ResourceType} MetricName=\"CountedRequests\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.ResourceType')}: ${PROP('Dim.Resource')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "CountedRequests (ResourceType, Resource))"
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        },
+        "CWDashboardWAFIndividual": {
+            "Type": "AWS::CloudWatch::Dashboard",
+            "Properties": {
+                "DashboardName": "WAF_Individual_Resources",
+                "DashboardBody": {
+                    "Fn::ToJsonString": {
+                        "variables": [
+                            {
+                                "type": "property",
+                                "property": "region",
+                                "inputType": "select",
+                                "id": "Region",
+                                "label": "Region",
+                                "defaultValue": {
+                                    "Ref": "DefaultRegion"
+                                },
+                                "visible": true,
+                                "values": [
+                                    {
+                                        "value": "us-east-1",
+                                        "label": "N. Virginia"
+                                    },
+                                    {
+                                        "value": "us-east-2",
+                                        "label": "Ohio"
+                                    },
+                                    {
+                                        "value": "us-west-1",
+                                        "label": "N.California"
+                                    },
+                                    {
+                                        "value": "us-west-2",
+                                        "label": "Oregon"
+                                    },
+                                    {
+                                        "value": "ap-east-1",
+                                        "label": "Hong Kong"
+                                    },
+                                    {
+                                        "value": "ap-south-1",
+                                        "label": "Mumbai"
+                                    },
+                                    {
+                                        "value": "ap-northeast-3",
+                                        "label": "Osaka"
+                                    },
+                                    {
+                                        "value": "ap-northeast-2",
+                                        "label": "Seoul"
+                                    },
+                                    {
+                                        "value": "ap-southeast-1",
+                                        "label": "Singapore"
+                                    },
+                                    {
+                                        "value": "ap-southeast-2",
+                                        "label": "Sydney"
+                                    },
+                                    {
+                                        "value": "ap-noutheast-1",
+                                        "label": "Toyko"
+                                    },
+                                    {
+                                        "value": "ca-central-1",
+                                        "label": "Canada"
+                                    },
+                                    {
+                                        "value": "eu-central-1",
+                                        "label": "Frankfurt"
+                                    },
+                                    {
+                                        "value": "eu-west-1",
+                                        "label": "Ireland"
+                                    },
+                                    {
+                                        "value": "eu-west-2",
+                                        "label": "London"
+                                    },
+                                    {
+                                        "value": "eu-west-3",
+                                        "label": "Paris"
+                                    },
+                                    {
+                                        "value": "eu-north-1",
+                                        "label": "Stockholm"
+                                    },
+                                    {
+                                        "value": "sa-east-1",
+                                        "label": "South America"
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "property",
+                                "property": "WebACL",
+                                "inputType": "select",
+                                "id": "WebACL",
+                                "label": "WebACL",
+                                "defaultValue": {
+                                    "Ref": "DefaultWebACL"
+                                },
+                                "visible": true,
+                                "inputPopulationType": "search",
+                                "search": "{AWS/WAFV2,Region,Rule,WebACL}",
+                                "populateFrom": "WebACL"
+                            }
+                        ],
+                        "widgets": [
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 1,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/WAFV2,WebACL,Region,Rule} MetricName=\"AllowedRequests\" WebACL=\"aclname\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.WebACL')} ${PROP('Dim.Rule')} ${PROP('Dim.Region')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "bar",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "AllowedRequests (WebACL, Rule, Region)",
+                                    "setPeriodToTimeRange": true
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 72,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/WAFV2,Resource,ResourceType} MetricName=\"AllowedRequests\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.ResourceType')}: ${PROP('Dim.Resource')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "pie",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "AllowedRequests (ResourceType, Resource))",
+                                    "setPeriodToTimeRange": true
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 26,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/WAFV2,RuleGroup,Region,Rule} MetricName=\"AllowedRequests\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.RuleGroup')} ${PROP('Dim.Rule')} ${PROP('Dim.Region')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "AllowedRequests (RuleGroup,Rule, Region)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 59,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/WAFV2,WebACL,Country, Region} MetricName=\"AllowedRequests\" WebACL=\"aclname\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.WebACL')} ${PROP('Dim.Country')} ${PROP('Dim.Region')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "pie",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "AllowedRequests (WebACL,Country,Region)",
+                                    "setPeriodToTimeRange": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 0,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "# WebACL, Rule, Region",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 8,
+                                "y": 1,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/WAFV2,WebACL,Region,Rule} MetricName=\"BlockedRequests\" WebACL=\"aclname\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.WebACL')} ${PROP('Dim.Rule')} ${PROP('Dim.Region')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "bar",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "BlockedRequests (WebACL, Rule, Region)",
+                                    "setPeriodToTimeRange": true,
+                                    "labels": {
+                                        "visible": false
+                                    }
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 16,
+                                "y": 1,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/WAFV2,WebACL,Region,Rule} MetricName=\"CountedRequests\" WebACL=\"aclname\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.WebACL')} ${PROP('Dim.Rule')} ${PROP('Dim.Region')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "bar",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "CountedRequests (WebACL, Rule, Region)",
+                                    "setPeriodToTimeRange": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 25,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "# Rulegroup, Rule, Region",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 58,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "# WebACL, Country, Region",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 71,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "# ResourceType, Resource",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 6,
+                                "y": 26,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/WAFV2,RuleGroup,Region,Rule} MetricName=\"BlockedRequests\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.RuleGroup')} ${PROP('Dim.Rule')} ${PROP('Dim.Region')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "BlockedRequests (RuleGroup,Rule, Region)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 26,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/WAFV2,RuleGroup,Region,Rule} MetricName=\"CountedRequests\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.RuleGroup')} ${PROP('Dim.Rule')} ${PROP('Dim.Region')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "CountedRequests (RuleGroup,Rule, Region)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 18,
+                                "y": 26,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/WAFV2,RuleGroup,Region,Rule} MetricName=\"PassedRequests\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.RuleGroup')} ${PROP('Dim.Rule')} ${PROP('Dim.Region')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "PassedRequests (RuleGroup,Rule, Region)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 8,
+                                "y": 59,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/WAFV2,WebACL,Country, Region} MetricName=\"BlockedRequests\" WebACL=\"aclname\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.WebACL')} ${PROP('Dim.Country')} ${PROP('Dim.Region')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "pie",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "BlockedRequests (WebACL,Country,Region)",
+                                    "setPeriodToTimeRange": true
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 16,
+                                "y": 59,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/WAFV2,WebACL,Country, Region} MetricName=\"CountedRequests\" WebACL=\"aclname\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.WebACL')} ${PROP('Dim.Country')} ${PROP('Dim.Region')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "pie",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "CountedRequests (WebACL,Country,Region)",
+                                    "setPeriodToTimeRange": true
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 8,
+                                "y": 72,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/WAFV2,Resource,ResourceType} MetricName=\"BlockedRequests\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.ResourceType')}: ${PROP('Dim.Resource')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "pie",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "BlockedRequests (ResourceType, Resource))",
+                                    "setPeriodToTimeRange": true
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 16,
+                                "y": 72,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/WAFV2,Resource,ResourceType} MetricName=\"CountedRequests\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.ResourceType')}: ${PROP('Dim.Resource')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "pie",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "CountedRequests (ResourceType, Resource))",
+                                    "setPeriodToTimeRange": true
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 13,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/WAFV2,WebACL,Region,Rule} MetricName=\"CaptchaRequests\" WebACL=\"aclname\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.WebACL')} ${PROP('Dim.Rule')} ${PROP('Dim.Region')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "CaptchaRequests (WebACL, Rule, Region)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 6,
+                                "y": 13,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/WAFV2,WebACL,Region,Rule} MetricName=\"CaptchasAttempted\" WebACL=\"aclname\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.WebACL')} ${PROP('Dim.Rule')} ${PROP('Dim.Region')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "CaptchasAttempted (WebACL, Rule, Region)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 13,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/WAFV2,WebACL,Region,Rule} MetricName=\"CaptchasSolved\" WebACL=\"aclname\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.WebACL')} ${PROP('Dim.Rule')} ${PROP('Dim.Region')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "CaptchasSolved (WebACL, Rule, Region)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 18,
+                                "y": 13,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/WAFV2,WebACL,Region,Rule} MetricName=\"RequestsWithValidCaptchaToken\" WebACL=\"aclname\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.WebACL')} ${PROP('Dim.Rule')} ${PROP('Dim.Region')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "RequestsWithValidCaptchaToken (WebACL, Rule, Region)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 19,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/WAFV2,WebACL,Region,Rule} MetricName=\"ChallengeRequests\" WebACL=\"aclname\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.WebACL')} ${PROP('Dim.Rule')} ${PROP('Dim.Region')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "ChallengeRequests (WebACL, Rule, Region)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 6,
+                                "y": 19,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/WAFV2,WebACL,Region,Rule} MetricName=\"ChallengesAttempted\" WebACL=\"aclname\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.WebACL')} ${PROP('Dim.Rule')} ${PROP('Dim.Region')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "ChallengesAttempted (WebACL, Rule, Region)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 19,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/WAFV2,WebACL,Region,Rule} MetricName=\"ChallengesSolved\" WebACL=\"aclname\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.WebACL')} ${PROP('Dim.Rule')} ${PROP('Dim.Region')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "ChallengesSolved (WebACL, Rule, Region)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 18,
+                                "y": 19,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/WAFV2,WebACL,Region,Rule} MetricName=\"RequestsWithValidChallengeToken\" WebACL=\"aclname\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.WebACL')} ${PROP('Dim.Rule')} ${PROP('Dim.Region')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "RequestsWithValidChallengeToken (WebACL, Rule, Region)"
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 32,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "# WebACL, ManagedRuleGroup, ManagedRuleGroupRule, Region",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 33,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/WAFV2,WebACL,ManagedRuleGroup,ManagedRuleGroupRule,Region} MetricName=\"AllowedRequests\" WebACL=\"aclname\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.WebACL')} ${PROP('Dim.ManagedRuleGroup')} ${PROP('Dim.ManagedRuleGroupRule')} ${PROP('Dim.Region')}",
+                                                "id": "e1",
+                                                "region": "eu-west-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "pie",
+                                    "stacked": false,
+                                    "region": "eu-west-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "AllowedRequests (RuleGroup,Rule, Region)",
+                                    "setPeriodToTimeRange": true
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 6,
+                                "y": 33,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/WAFV2,WebACL,ManagedRuleGroup,ManagedRuleGroupRule,Region} MetricName=\"BlockedRequests\" WebACL=\"aclname\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.WebACL')} ${PROP('Dim.ManagedRuleGroup')} ${PROP('Dim.ManagedRuleGroupRule')} ${PROP('Dim.Region')}",
+                                                "id": "e1",
+                                                "region": "eu-west-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "pie",
+                                    "stacked": false,
+                                    "region": "eu-west-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "BlockedRequests (RuleGroup,Rule, Region)",
+                                    "setPeriodToTimeRange": true
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 33,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/WAFV2,WebACL,ManagedRuleGroup,ManagedRuleGroupRule,Region} MetricName=\"CountedRequests\" WebACL=\"aclname\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.WebACL')} ${PROP('Dim.ManagedRuleGroup')} ${PROP('Dim.ManagedRuleGroupRule')} ${PROP('Dim.Region')}",
+                                                "id": "e1",
+                                                "region": "eu-west-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "pie",
+                                    "stacked": false,
+                                    "region": "eu-west-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "CountedRequests (RuleGroup,Rule, Region)",
+                                    "setPeriodToTimeRange": true
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 18,
+                                "y": 33,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/WAFV2,WebACL,ManagedRuleGroup,ManagedRuleGroupRule,Region} MetricName=\"PassedRequests\" WebACL=\"aclname\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.WebACL')} ${PROP('Dim.ManagedRuleGroup')} ${PROP('Dim.ManagedRuleGroupRule')} ${PROP('Dim.Region')}",
+                                                "id": "e1",
+                                                "region": "eu-west-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "pie",
+                                    "stacked": false,
+                                    "region": "eu-west-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "PassedRequests (RuleGroup,Rule, Region)",
+                                    "setPeriodToTimeRange": true
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 65,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/WAFV2,WebACL,Country, Region} MetricName=\"AllowedRequests\" WebACL=\"aclname\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.WebACL')} ${PROP('Dim.Country')} ${PROP('Dim.Region')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "AllowedRequests (WebACL,Country,Region)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 8,
+                                "y": 65,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/WAFV2,WebACL,Country, Region} MetricName=\"BlockedRequests\" WebACL=\"aclname\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.WebACL')} ${PROP('Dim.Country')} ${PROP('Dim.Region')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "BlockedRequests (WebACL,Country,Region)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 16,
+                                "y": 65,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/WAFV2,WebACL,Country, Region} MetricName=\"CountedRequests\" WebACL=\"aclname\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.WebACL')} ${PROP('Dim.Country')} ${PROP('Dim.Region')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "CountedRequests (WebACL,Country,Region)"
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 45,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "# WebACL, VulnerabilityCategory, Region, ",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 46,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/WAFV2,WebACL,VulnerabilityCategory,Region} MetricName=\"AllowedRequests\" WebACL=\"aclname\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.WebACL')} ${PROP('Dim.VulnerabilityCategory')} ${PROP('Dim.Region')}",
+                                                "id": "e1",
+                                                "region": "eu-west-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "pie",
+                                    "stacked": false,
+                                    "region": "eu-west-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "AllowedRequests (WebACL,VulnerabilityCategory,Region)",
+                                    "setPeriodToTimeRange": true
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 8,
+                                "y": 46,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/WAFV2,WebACL,VulnerabilityCategory,Region} MetricName=\"BlockedRequests\" WebACL=\"aclname\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.WebACL')} ${PROP('Dim.VulnerabilityCategory')} ${PROP('Dim.Region')}",
+                                                "id": "e1",
+                                                "region": "eu-west-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "pie",
+                                    "stacked": false,
+                                    "region": "eu-west-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "BlockedRequests (WebACL,VulnerabilityCategory,Region)",
+                                    "setPeriodToTimeRange": true
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 16,
+                                "y": 46,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/WAFV2,WebACL,VulnerabilityCategory,Region} MetricName=\"CountedRequests\" WebACL=\"aclname\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.WebACL')} ${PROP('Dim.VulnerabilityCategory')} ${PROP('Dim.Region')}",
+                                                "id": "e1",
+                                                "region": "eu-west-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "pie",
+                                    "stacked": false,
+                                    "region": "eu-west-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "CountedRequests (WebACL,VulnerabilityCategory,Region)",
+                                    "setPeriodToTimeRange": true
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 7,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/WAFV2,WebACL,Region,Rule} MetricName=\"AllowedRequests\" WebACL=\"aclname\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.WebACL')} ${PROP('Dim.Rule')} ${PROP('Dim.Region')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "AllowedRequests (WebACL, Rule, Region)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 8,
+                                "y": 7,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/WAFV2,WebACL,Region,Rule} MetricName=\"BlockedRequests\" WebACL=\"aclname\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.WebACL')} ${PROP('Dim.Rule')} ${PROP('Dim.Region')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "BlockedRequests (WebACL, Rule, Region)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 16,
+                                "y": 7,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/WAFV2,WebACL,Region,Rule} MetricName=\"CountedRequests\" WebACL=\"aclname\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.WebACL')} ${PROP('Dim.Rule')} ${PROP('Dim.Region')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "CountedRequests (WebACL, Rule, Region)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 52,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/WAFV2,WebACL,VulnerabilityCategory,Region} MetricName=\"AllowedRequests\" WebACL=\"aclname\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.WebACL')} ${PROP('Dim.VulnerabilityCategory')} ${PROP('Dim.Region')}",
+                                                "id": "e1",
+                                                "region": "eu-west-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "eu-west-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "AllowedRequests (WebACL,VulnerabilityCategory,Region)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 8,
+                                "y": 52,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/WAFV2,WebACL,VulnerabilityCategory,Region} MetricName=\"BlockedRequests\" WebACL=\"aclname\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.WebACL')} ${PROP('Dim.VulnerabilityCategory')} ${PROP('Dim.Region')}",
+                                                "id": "e1",
+                                                "region": "eu-west-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "eu-west-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "BlockedRequests (WebACL,VulnerabilityCategory,Region)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 16,
+                                "y": 52,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/WAFV2,WebACL,VulnerabilityCategory,Region} MetricName=\"CountedRequests\" WebACL=\"aclname\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.WebACL')} ${PROP('Dim.VulnerabilityCategory')} ${PROP('Dim.Region')}",
+                                                "id": "e1",
+                                                "region": "eu-west-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "eu-west-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "CountedRequests (WebACL,VulnerabilityCategory,Region)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 39,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/WAFV2,WebACL,ManagedRuleGroup,ManagedRuleGroupRule,Region} MetricName=\"AllowedRequests\" WebACL=\"aclname\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.WebACL')} ${PROP('Dim.ManagedRuleGroup')} ${PROP('Dim.ManagedRuleGroupRule')} ${PROP('Dim.Region')}",
+                                                "id": "e1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "eu-west-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "AllowedRequests (RuleGroup,Rule, Region)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 6,
+                                "y": 39,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/WAFV2,WebACL,ManagedRuleGroup,ManagedRuleGroupRule,Region} MetricName=\"BlockedRequests\" WebACL=\"aclname\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.WebACL')} ${PROP('Dim.ManagedRuleGroup')} ${PROP('Dim.ManagedRuleGroupRule')} ${PROP('Dim.Region')}",
+                                                "id": "e1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "eu-west-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "BlockedRequests (RuleGroup,Rule, Region)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 39,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/WAFV2,WebACL,ManagedRuleGroup,ManagedRuleGroupRule,Region} MetricName=\"CountedRequests\" WebACL=\"aclname\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.WebACL')} ${PROP('Dim.ManagedRuleGroup')} ${PROP('Dim.ManagedRuleGroupRule')} ${PROP('Dim.Region')}",
+                                                "id": "e1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "eu-west-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "CountedRequests (RuleGroup,Rule, Region)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 18,
+                                "y": 39,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/WAFV2,WebACL,ManagedRuleGroup,ManagedRuleGroupRule,Region} MetricName=\"PassedRequests\" WebACL=\"aclname\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.WebACL')} ${PROP('Dim.ManagedRuleGroup')} ${PROP('Dim.ManagedRuleGroupRule')} ${PROP('Dim.Region')}",
+                                                "id": "e1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "eu-west-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "PassedRequests (RuleGroup,Rule, Region)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 78,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/WAFV2,Resource,ResourceType} MetricName=\"AllowedRequests\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.ResourceType')}: ${PROP('Dim.Resource')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "AllowedRequests (ResourceType, Resource))"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 8,
+                                "y": 78,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/WAFV2,Resource,ResourceType} MetricName=\"BlockedRequests\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.ResourceType')}: ${PROP('Dim.Resource')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "BlockedRequests (ResourceType, Resource))"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 16,
+                                "y": 78,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/WAFV2,Resource,ResourceType} MetricName=\"CountedRequests\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.ResourceType')}: ${PROP('Dim.Resource')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "CountedRequests (ResourceType, Resource))"
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,1326 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "CloudWatch Dashboards to visualize NAT Gateway resources. Both dashboards leverage Dashboard Variables to filter on the desired resources. Dashboard 'NAT_All_Resources' visualizes ALL NAT resources in the target region. Dashboard 'NAT_Individual_Resources' provides additional filters to isolate a specific NAT.",
+    "Transform": "AWS::LanguageExtensions",
+    "Parameters": {
+        "DefaultRegion": {
+            "Description": "Select the default region hosting the NAT Gateways to be monitored.",
+            "Type": "String",
+            "Default": "us-east-1"
+        },
+        "DefaultNAT": {
+            "Description": "Select the default NAT Gateway to be monitored. (e.g. nat-0123456789abcdefg)",
+            "Type": "String",
+            "Default": ""
+        }
+    },
+    "Resources": {
+        "CWDashboardALBAll": {
+            "Type": "AWS::CloudWatch::Dashboard",
+            "Properties": {
+                "DashboardName": "NAT_All_Resources",
+                "DashboardBody": {
+                    "Fn::ToJsonString": {
+                        "variables": [
+                            {
+                                "type": "pattern",
+                                "pattern": "us-east-1",
+                                "inputType": "select",
+                                "id": "Region",
+                                "label": "Region",
+                                "defaultValue": {
+                                    "Ref": "DefaultRegion"
+                                },
+                                "visible": true,
+                                "values": [
+                                    {
+                                        "value": "us-east-1",
+                                        "label": "N. Virginia"
+                                    },
+                                    {
+                                        "value": "us-east-2",
+                                        "label": "Ohio"
+                                    },
+                                    {
+                                        "value": "us-west-1",
+                                        "label": "N.California"
+                                    },
+                                    {
+                                        "value": "us-west-2",
+                                        "label": "Oregon"
+                                    },
+                                    {
+                                        "value": "ap-east-1",
+                                        "label": "Hong Kong"
+                                    },
+                                    {
+                                        "value": "ap-south-1",
+                                        "label": "Mumbai"
+                                    },
+                                    {
+                                        "value": "ap-northeast-3",
+                                        "label": "Osaka"
+                                    },
+                                    {
+                                        "value": "ap-northeast-2",
+                                        "label": "Seoul"
+                                    },
+                                    {
+                                        "value": "ap-southeast-1",
+                                        "label": "Singapore"
+                                    },
+                                    {
+                                        "value": "ap-southeast-2",
+                                        "label": "Sydney"
+                                    },
+                                    {
+                                        "value": "ap-noutheast-1",
+                                        "label": "Toyko"
+                                    },
+                                    {
+                                        "value": "ca-central-1",
+                                        "label": "Canada"
+                                    },
+                                    {
+                                        "value": "eu-central-1",
+                                        "label": "Frankfurt"
+                                    },
+                                    {
+                                        "value": "eu-west-1",
+                                        "label": "Ireland"
+                                    },
+                                    {
+                                        "value": "eu-west-2",
+                                        "label": "London"
+                                    },
+                                    {
+                                        "value": "eu-west-3",
+                                        "label": "Paris"
+                                    },
+                                    {
+                                        "value": "eu-north-1",
+                                        "label": "Stockholm"
+                                    },
+                                    {
+                                        "value": "sa-east-1",
+                                        "label": "South America"
+                                    }
+                                ]
+                            }
+                        ],
+                        "widgets": [
+                            {
+                                "height": 5,
+                                "width": 8,
+                                "y": 12,
+                                "x": 0,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/NATGateway,NatGatewayId} MetricName=\"ActiveConnectionCount\"', 'Maximum', 60)), MAX, DESC)",
+                                                "label": "${PROP('Dim.NatGatewayId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Sum",
+                                    "period": 60,
+                                    "title": "ActiveConnectionCount"
+                                }
+                            },
+                            {
+                                "height": 5,
+                                "width": 12,
+                                "y": 1,
+                                "x": 12,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/NATGateway,NatGatewayId} MetricName=\"PacketsDropCount\"', 'Sum', 60)), SUM, DESC)",
+                                                "label": "${PROP('Dim.NatGatewayId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Sum",
+                                    "period": 60,
+                                    "title": "PacketsDropCount",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "height": 5,
+                                "width": 8,
+                                "y": 28,
+                                "x": 8,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/NATGateway,NatGatewayId} MetricName=\"BytesInFromDestination\"', 'Sum', 60)), SUM, DESC)",
+                                                "label": "${PROP('Dim.NatGatewayId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Sum",
+                                    "period": 60,
+                                    "title": "BytesInFromDestination"
+                                }
+                            },
+                            {
+                                "height": 5,
+                                "width": 8,
+                                "y": 23,
+                                "x": 8,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/NATGateway,NatGatewayId} MetricName=\"BytesInFromSource\"', 'Sum', 60)), SUM, DESC)",
+                                                "label": "${PROP('Dim.NatGatewayId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Sum",
+                                    "period": 60,
+                                    "title": "BytesInFromSource"
+                                }
+                            },
+                            {
+                                "height": 5,
+                                "width": 8,
+                                "y": 28,
+                                "x": 16,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/NATGateway,NatGatewayId} MetricName=\"BytesOutToDestination\"', 'Sum', 60)), SUM, DESC)",
+                                                "label": "${PROP('Dim.NatGatewayId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Sum",
+                                    "period": 60,
+                                    "title": "BytesOutToDestination"
+                                }
+                            },
+                            {
+                                "height": 5,
+                                "width": 8,
+                                "y": 23,
+                                "x": 16,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/NATGateway,NatGatewayId} MetricName=\"BytesOutToSource\"', 'Sum', 60)), SUM, DESC)",
+                                                "label": "${PROP('Dim.NatGatewayId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Sum",
+                                    "period": 60,
+                                    "title": "BytesOutToSource"
+                                }
+                            },
+                            {
+                                "height": 5,
+                                "width": 8,
+                                "y": 12,
+                                "x": 16,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/NATGateway,NatGatewayId} MetricName=\"ConnectionAttemptCount\"', 'Maximum', 60)), SUM, DESC)",
+                                                "label": "${PROP('Dim.NatGatewayId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Sum",
+                                    "period": 60,
+                                    "title": "ConnectionAttemptCount"
+                                }
+                            },
+                            {
+                                "height": 5,
+                                "width": 8,
+                                "y": 12,
+                                "x": 8,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/NATGateway,NatGatewayId} MetricName=\"ConnectionEstablishedCount\"', 'Sum', 60)), SUM, DESC)",
+                                                "label": "${PROP('Dim.NatGatewayId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Sum",
+                                    "period": 60,
+                                    "title": "ConnectionEstablishedCount"
+                                }
+                            },
+                            {
+                                "height": 5,
+                                "width": 12,
+                                "y": 6,
+                                "x": 0,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/NATGateway,NatGatewayId} MetricName=\"ErrorPortAllocation\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.NatGatewayId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Sum",
+                                    "period": 60,
+                                    "title": "ErrorPortAllocation"
+                                }
+                            },
+                            {
+                                "height": 5,
+                                "width": 8,
+                                "y": 17,
+                                "x": 0,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/NATGateway,NatGatewayId} MetricName=\"IdleTimeoutCount\"', 'Sum', 60)), SUM, DESC)",
+                                                "label": "${PROP('Dim.NatGatewayId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Sum",
+                                    "period": 60,
+                                    "title": "IdleTimeoutCount"
+                                }
+                            },
+                            {
+                                "height": 5,
+                                "width": 8,
+                                "y": 44,
+                                "x": 8,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/NATGateway,NatGatewayId} MetricName=\"PacketsInFromDestination\"', 'Sum', 60)), SUM, DESC)",
+                                                "label": "${PROP('Dim.NatGatewayId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Sum",
+                                    "period": 60,
+                                    "title": "PacketsInFromDestination"
+                                }
+                            },
+                            {
+                                "height": 5,
+                                "width": 8,
+                                "y": 39,
+                                "x": 8,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/NATGateway,NatGatewayId} MetricName=\"PacketsInFromSource\"', 'Sum', 60)), SUM, DESC)",
+                                                "label": "${PROP('Dim.NatGatewayId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Sum",
+                                    "period": 60,
+                                    "title": "PacketsInFromSource"
+                                }
+                            },
+                            {
+                                "height": 5,
+                                "width": 8,
+                                "y": 44,
+                                "x": 16,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/NATGateway,NatGatewayId} MetricName=\"PacketsOutToDestination\"', 'Sum', 60)), SUM, DESC)",
+                                                "label": "${PROP('Dim.NatGatewayId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Sum",
+                                    "period": 60,
+                                    "title": "PacketsOutToDestination"
+                                }
+                            },
+                            {
+                                "height": 5,
+                                "width": 8,
+                                "y": 39,
+                                "x": 16,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/NATGateway,NatGatewayId} MetricName=\"PacketsOutToSource\"', 'Sum', 60)), SUM, DESC)",
+                                                "label": "${PROP('Dim.NatGatewayId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Sum",
+                                    "period": 60,
+                                    "title": "PacketsOutToSource"
+                                }
+                            },
+                            {
+                                "height": 5,
+                                "width": 8,
+                                "y": 33,
+                                "x": 0,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/NATGateway,NatGatewayId} MetricName=\"PeakBytesPerSecond\"', 'Maximum', 60)), MAX, DESC)",
+                                                "label": "${PROP('Dim.NatGatewayId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Maximum",
+                                    "period": 60,
+                                    "title": "PeakBytesPerSecond"
+                                }
+                            },
+                            {
+                                "height": 5,
+                                "width": 8,
+                                "y": 49,
+                                "x": 0,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/NATGateway,NatGatewayId} MetricName=\"PeakPacketsPerSecond\"', 'Maximum', 60)), MAX, DESC)",
+                                                "label": "${PROP('Dim.NatGatewayId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Sum",
+                                    "period": 60,
+                                    "title": "PeakPacketsPerSecond"
+                                }
+                            },
+                            {
+                                "height": 1,
+                                "width": 24,
+                                "y": 0,
+                                "x": 0,
+                                "type": "text",
+                                "properties": {
+                                    "markdown": "## Error Metrics",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "height": 1,
+                                "width": 24,
+                                "y": 11,
+                                "x": 0,
+                                "type": "text",
+                                "properties": {
+                                    "markdown": "## Connection Metrics",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "height": 1,
+                                "width": 24,
+                                "y": 38,
+                                "x": 0,
+                                "type": "text",
+                                "properties": {
+                                    "markdown": "## Packet Metrics",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "height": 1,
+                                "width": 24,
+                                "y": 22,
+                                "x": 0,
+                                "type": "text",
+                                "properties": {
+                                    "markdown": "## Byte Metrics",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "height": 5,
+                                "width": 12,
+                                "y": 1,
+                                "x": 0,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/NATGateway,NatGatewayId} MetricName=\"ErrorPortAllocation\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.NatGatewayId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Sum",
+                                    "period": 60,
+                                    "title": "ErrorPortAllocation",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "height": 5,
+                                "width": 12,
+                                "y": 6,
+                                "x": 12,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/NATGateway,NatGatewayId} MetricName=\"PacketsDropCount\"', 'Sum', 60)), SUM, DESC)",
+                                                "label": "${PROP('Dim.NatGatewayId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Sum",
+                                    "period": 60,
+                                    "title": "PacketsDropCount"
+                                }
+                            },
+                            {
+                                "height": 5,
+                                "width": 8,
+                                "y": 23,
+                                "x": 0,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/NATGateway,NatGatewayId} MetricName=\"BytesInFromSource\"', 'Sum', 60)), SUM, DESC)",
+                                                "label": "${PROP('Dim.NatGatewayId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "pie",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Sum",
+                                    "period": 60,
+                                    "title": "BytesInFromSource"
+                                }
+                            },
+                            {
+                                "height": 5,
+                                "width": 8,
+                                "y": 28,
+                                "x": 0,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/NATGateway,NatGatewayId} MetricName=\"BytesInFromDestination\"', 'Sum', 60)), SUM, DESC)",
+                                                "label": "${PROP('Dim.NatGatewayId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "pie",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Sum",
+                                    "period": 60,
+                                    "title": "BytesInFromDestination"
+                                }
+                            },
+                            {
+                                "height": 5,
+                                "width": 8,
+                                "y": 39,
+                                "x": 0,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/NATGateway,NatGatewayId} MetricName=\"PacketsInFromSource\"', 'Sum', 60)), SUM, DESC)",
+                                                "label": "${PROP('Dim.NatGatewayId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "pie",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Sum",
+                                    "period": 60,
+                                    "title": "PacketsInFromSource"
+                                }
+                            },
+                            {
+                                "height": 5,
+                                "width": 8,
+                                "y": 44,
+                                "x": 0,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/NATGateway,NatGatewayId} MetricName=\"PacketsInFromDestination\"', 'Sum', 60)), SUM, DESC)",
+                                                "label": "${PROP('Dim.NatGatewayId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "pie",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Sum",
+                                    "period": 60,
+                                    "title": "PacketsInFromDestination"
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        },
+        "CWDashboardALBIndividual": {
+            "Type": "AWS::CloudWatch::Dashboard",
+            "Properties": {
+                "DashboardName": "NAT_Individual_Resources",
+                "DashboardBody": {
+                    "Fn::ToJsonString": {
+                        "variables": [
+                            {
+                                "type": "pattern",
+                                "pattern": "us-east-1",
+                                "inputType": "select",
+                                "id": "Region",
+                                "label": "Region",
+                                "defaultValue": {
+                                    "Ref": "DefaultRegion"
+                                },
+                                "visible": true,
+                                "values": [
+                                    {
+                                        "value": "us-east-1",
+                                        "label": "N. Virginia"
+                                    },
+                                    {
+                                        "value": "us-east-2",
+                                        "label": "Ohio"
+                                    },
+                                    {
+                                        "value": "us-west-1",
+                                        "label": "N.California"
+                                    },
+                                    {
+                                        "value": "us-west-2",
+                                        "label": "Oregon"
+                                    },
+                                    {
+                                        "value": "ap-east-1",
+                                        "label": "Hong Kong"
+                                    },
+                                    {
+                                        "value": "ap-south-1",
+                                        "label": "Mumbai"
+                                    },
+                                    {
+                                        "value": "ap-northeast-3",
+                                        "label": "Osaka"
+                                    },
+                                    {
+                                        "value": "ap-northeast-2",
+                                        "label": "Seoul"
+                                    },
+                                    {
+                                        "value": "ap-southeast-1",
+                                        "label": "Singapore"
+                                    },
+                                    {
+                                        "value": "ap-southeast-2",
+                                        "label": "Sydney"
+                                    },
+                                    {
+                                        "value": "ap-noutheast-1",
+                                        "label": "Toyko"
+                                    },
+                                    {
+                                        "value": "ca-central-1",
+                                        "label": "Canada"
+                                    },
+                                    {
+                                        "value": "eu-central-1",
+                                        "label": "Frankfurt"
+                                    },
+                                    {
+                                        "value": "eu-west-1",
+                                        "label": "Ireland"
+                                    },
+                                    {
+                                        "value": "eu-west-2",
+                                        "label": "London"
+                                    },
+                                    {
+                                        "value": "eu-west-3",
+                                        "label": "Paris"
+                                    },
+                                    {
+                                        "value": "eu-north-1",
+                                        "label": "Stockholm"
+                                    },
+                                    {
+                                        "value": "sa-east-1",
+                                        "label": "South America"
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "property",
+                                "property": "NatGatewayId",
+                                "inputType": "select",
+                                "id": "NatGatewayId",
+                                "label": "NatGatewayId",
+                                "defaultValue": {
+                                    "Ref": "DefaultNAT"
+                                },
+                                "visible": true,
+                                "search": "{AWS/NATGateway,NatGatewayId} MetricName=ErrorPortAllocation",
+                                "populateFrom": "NatGatewayId"
+                            }
+                        ],
+                        "widgets": [
+                            {
+                                "height": 5,
+                                "width": 8,
+                                "y": 12,
+                                "x": 0,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/NATGateway,NatGatewayId} NatGatewayId=\"nat-gateway\" MetricName=\"ActiveConnectionCount\"', 'Maximum', 60))",
+                                                "label": "${LABEL}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Sum",
+                                    "period": 60,
+                                    "title": "ActiveConnectionCount"
+                                }
+                            },
+                            {
+                                "height": 5,
+                                "width": 3,
+                                "y": 6,
+                                "x": 0,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/NATGateway,NatGatewayId} NatGatewayId=\"nat-gateway\" MetricName=\"PacketsDropCount\"', 'Sum', 60))",
+                                                "label": "${LABEL}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Sum",
+                                    "period": 60,
+                                    "title": "PacketsDropCount",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "height": 5,
+                                "width": 8,
+                                "y": 28,
+                                "x": 0,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/NATGateway,NatGatewayId} NatGatewayId=\"nat-gateway\" MetricName=\"BytesInFromDestination\"', 'Sum', 60))",
+                                                "label": "${LABEL}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Sum",
+                                    "period": 60,
+                                    "title": "BytesInFromDestination"
+                                }
+                            },
+                            {
+                                "height": 5,
+                                "width": 8,
+                                "y": 23,
+                                "x": 0,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/NATGateway,NatGatewayId} NatGatewayId=\"nat-gateway\" MetricName=\"BytesInFromSource\"', 'Sum', 60))",
+                                                "label": "${LABEL}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Sum",
+                                    "period": 60,
+                                    "title": "BytesInFromSource"
+                                }
+                            },
+                            {
+                                "height": 5,
+                                "width": 8,
+                                "y": 28,
+                                "x": 8,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/NATGateway,NatGatewayId} NatGatewayId=\"nat-gateway\" MetricName=\"BytesOutToDestination\"', 'Sum', 60))",
+                                                "label": "${LABEL}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Sum",
+                                    "period": 60,
+                                    "title": "BytesOutToDestination"
+                                }
+                            },
+                            {
+                                "height": 5,
+                                "width": 8,
+                                "y": 23,
+                                "x": 8,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/NATGateway,NatGatewayId} NatGatewayId=\"nat-gateway\" MetricName=\"BytesOutToSource\"', 'Sum', 60))",
+                                                "label": "${LABEL}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Sum",
+                                    "period": 60,
+                                    "title": "BytesOutToSource"
+                                }
+                            },
+                            {
+                                "height": 5,
+                                "width": 8,
+                                "y": 12,
+                                "x": 16,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/NATGateway,NatGatewayId} NatGatewayId=\"nat-gateway\" MetricName=\"ConnectionAttemptCount\"', 'Maximum', 60))",
+                                                "label": "${LABEL}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Sum",
+                                    "period": 60,
+                                    "title": "ConnectionAttemptCount"
+                                }
+                            },
+                            {
+                                "height": 5,
+                                "width": 8,
+                                "y": 12,
+                                "x": 8,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/NATGateway,NatGatewayId} NatGatewayId=\"nat-gateway\" MetricName=\"ConnectionEstablishedCount\"', 'Sum', 60))",
+                                                "label": "${LABEL}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Sum",
+                                    "period": 60,
+                                    "title": "ConnectionEstablishedCount"
+                                }
+                            },
+                            {
+                                "height": 5,
+                                "width": 3,
+                                "y": 1,
+                                "x": 0,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/NATGateway,NatGatewayId} NatGatewayId=\"nat-gateway\" MetricName=\"ErrorPortAllocation\"', 'Sum', 60))",
+                                                "label": "${LABEL}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Sum",
+                                    "period": 60,
+                                    "title": "ErrorPortAllocation",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "height": 5,
+                                "width": 8,
+                                "y": 17,
+                                "x": 0,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/NATGateway,NatGatewayId} NatGatewayId=\"nat-gateway\" MetricName=\"IdleTimeoutCount\"', 'Sum', 60))",
+                                                "label": "${LABEL}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Sum",
+                                    "period": 60,
+                                    "title": "IdleTimeoutCount"
+                                }
+                            },
+                            {
+                                "height": 5,
+                                "width": 8,
+                                "y": 39,
+                                "x": 0,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/NATGateway,NatGatewayId} NatGatewayId=\"nat-gateway\" MetricName=\"PacketsInFromDestination\"', 'Sum', 60))",
+                                                "label": "${LABEL}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Sum",
+                                    "period": 60,
+                                    "title": "PacketsInFromDestination"
+                                }
+                            },
+                            {
+                                "height": 5,
+                                "width": 8,
+                                "y": 34,
+                                "x": 0,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/NATGateway,NatGatewayId} NatGatewayId=\"nat-gateway\" MetricName=\"PacketsInFromSource\"', 'Sum', 60))",
+                                                "label": "${LABEL}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Sum",
+                                    "period": 60,
+                                    "title": "PacketsInFromSource"
+                                }
+                            },
+                            {
+                                "height": 5,
+                                "width": 8,
+                                "y": 39,
+                                "x": 8,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/NATGateway,NatGatewayId} NatGatewayId=\"nat-gateway\" MetricName=\"PacketsOutToDestination\"', 'Sum', 60))",
+                                                "label": "${LABEL}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Sum",
+                                    "period": 60,
+                                    "title": "PacketsOutToDestination"
+                                }
+                            },
+                            {
+                                "height": 5,
+                                "width": 8,
+                                "y": 34,
+                                "x": 8,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/NATGateway,NatGatewayId} NatGatewayId=\"nat-gateway\" MetricName=\"PacketsOutToSource\"', 'Sum', 60))",
+                                                "label": "${LABEL}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Sum",
+                                    "period": 60,
+                                    "title": "PacketsOutToSource"
+                                }
+                            },
+                            {
+                                "height": 5,
+                                "width": 8,
+                                "y": 23,
+                                "x": 16,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/NATGateway,NatGatewayId} NatGatewayId=\"nat-gateway\" MetricName=\"PeakBytesPerSecond\"', 'Maximum', 60))",
+                                                "label": "${LABEL}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Maximum",
+                                    "period": 60,
+                                    "title": "PeakBytesPerSecond"
+                                }
+                            },
+                            {
+                                "height": 5,
+                                "width": 7,
+                                "y": 34,
+                                "x": 16,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/NATGateway,NatGatewayId} NatGatewayId=\"nat-gateway\" MetricName=\"PeakPacketsPerSecond\"', 'Maximum', 60))",
+                                                "label": "${LABEL}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Sum",
+                                    "period": 60,
+                                    "title": "PeakPacketsPerSecond"
+                                }
+                            },
+                            {
+                                "height": 1,
+                                "width": 24,
+                                "y": 0,
+                                "x": 0,
+                                "type": "text",
+                                "properties": {
+                                    "markdown": "## Error Metrics",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "height": 1,
+                                "width": 24,
+                                "y": 11,
+                                "x": 0,
+                                "type": "text",
+                                "properties": {
+                                    "markdown": "## Connection Metrics",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "height": 1,
+                                "width": 24,
+                                "y": 33,
+                                "x": 0,
+                                "type": "text",
+                                "properties": {
+                                    "markdown": "## Packet Metrics",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "height": 1,
+                                "width": 24,
+                                "y": 22,
+                                "x": 0,
+                                "type": "text",
+                                "properties": {
+                                    "markdown": "## Byte Metrics",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "height": 5,
+                                "width": 8,
+                                "y": 1,
+                                "x": 3,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/NATGateway,NatGatewayId} NatGatewayId=\"nat-gateway\" MetricName=\"ErrorPortAllocation\"', 'Sum', 60))",
+                                                "label": "${LABEL}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Sum",
+                                    "period": 60,
+                                    "title": "ErrorPortAllocation"
+                                }
+                            },
+                            {
+                                "height": 5,
+                                "width": 8,
+                                "y": 6,
+                                "x": 3,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/NATGateway,NatGatewayId} NatGatewayId=\"nat-gateway\" MetricName=\"PacketsDropCount\"', 'Sum', 60))",
+                                                "label": "${LABEL}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Sum",
+                                    "period": 60,
+                                    "title": "PacketsDropCount"
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        }
+    }
+}

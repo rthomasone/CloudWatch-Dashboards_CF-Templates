@@ -1,0 +1,1212 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "CloudWatch Dashboards to visualize Network Firewall resources. Both dashboards leverage Dashboard Variables to filter on the desired resources. Dashboard 'Network_Firewall_All_Resources' visualizes ALL Network Firewall resources in the target region. Dashboard 'Network_Firewall_Individual_Resources' provides additional filters to isolate a specific Network Firewall.",
+    "Transform": "AWS::LanguageExtensions",
+    "Parameters": {
+        "DefaultRegion": {
+            "Description": "Select the default region hosting the load balancers to be monitored.",
+            "Type": "String",
+            "Default": "us-east-1"
+        },
+        "DefaultNetworkFirewall": {
+            "Description": "Select the default Network Firewall to be monitored. (e.g. net_firewall_name)",
+            "Type": "String",
+            "Default": ""
+        }
+    },
+    "Resources": {
+        "CWDashboardNFWAll": {
+            "Type": "AWS::CloudWatch::Dashboard",
+            "Properties": {
+                "DashboardName": "Network_Firewall_All_Resources",
+                "DashboardBody": {
+                    "Fn::ToJsonString": {
+                        "variables": [
+                            {
+                                "type": "pattern",
+                                "pattern": "us-east-1",
+                                "inputType": "select",
+                                "id": "Region",
+                                "label": "Region",
+                                "defaultValue": {
+                                    "Ref": "DefaultRegion"
+                                },
+                                "visible": true,
+                                "values": [
+                                    {
+                                        "value": "us-east-1",
+                                        "label": "N. Virginia"
+                                    },
+                                    {
+                                        "value": "us-east-2",
+                                        "label": "Ohio"
+                                    },
+                                    {
+                                        "value": "us-west-1",
+                                        "label": "N.California"
+                                    },
+                                    {
+                                        "value": "us-west-2",
+                                        "label": "Oregon"
+                                    },
+                                    {
+                                        "value": "ap-east-1",
+                                        "label": "Hong Kong"
+                                    },
+                                    {
+                                        "value": "ap-south-1",
+                                        "label": "Mumbai"
+                                    },
+                                    {
+                                        "value": "ap-northeast-3",
+                                        "label": "Osaka"
+                                    },
+                                    {
+                                        "value": "ap-northeast-2",
+                                        "label": "Seoul"
+                                    },
+                                    {
+                                        "value": "ap-southeast-1",
+                                        "label": "Singapore"
+                                    },
+                                    {
+                                        "value": "ap-southeast-2",
+                                        "label": "Sydney"
+                                    },
+                                    {
+                                        "value": "ap-noutheast-1",
+                                        "label": "Toyko"
+                                    },
+                                    {
+                                        "value": "ca-central-1",
+                                        "label": "Canada"
+                                    },
+                                    {
+                                        "value": "eu-central-1",
+                                        "label": "Frankfurt"
+                                    },
+                                    {
+                                        "value": "eu-west-1",
+                                        "label": "Ireland"
+                                    },
+                                    {
+                                        "value": "eu-west-2",
+                                        "label": "London"
+                                    },
+                                    {
+                                        "value": "eu-west-3",
+                                        "label": "Paris"
+                                    },
+                                    {
+                                        "value": "eu-north-1",
+                                        "label": "Stockholm"
+                                    },
+                                    {
+                                        "value": "sa-east-1",
+                                        "label": "South America"
+                                    }
+                                ],
+                                "value": "us-east-1",
+                                "customValues": "us-east-1, N. Virginia\nus-east-2, Ohio\nus-west-1, N.California\nca-central-1, Canada\nus-west-2, Oregon\neu-west-1, Ireland\neu-west-2, London\neu-central-1, Frankfurt"
+                            }
+                        ],
+                        "widgets": [
+                            {
+                                "height": 6,
+                                "width": 6,
+                                "y": 1,
+                                "x": 0,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/NetworkFirewall,AvailabilityZone,FirewallName,Engine} MetricName=\"DroppedPackets\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.FirewallName')} ${PROP('Dim.Engine')} ${PROP('Dim.AvailabilityZone')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "pie",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "Dropped Packets"
+                                }
+                            },
+                            {
+                                "height": 6,
+                                "width": 8,
+                                "y": 7,
+                                "x": 0,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/NetworkFirewall,AvailabilityZone,FirewallName,Engine} MetricName=\"DroppedPackets\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.FirewallName')} ${PROP('Dim.Engine')} ${PROP('Dim.AvailabilityZone')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "Dropped Packets"
+                                }
+                            },
+                            {
+                                "height": 6,
+                                "width": 8,
+                                "y": 7,
+                                "x": 16,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/NetworkFirewall,AvailabilityZone,FirewallName,Engine} MetricName=\"PassedPackets\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.FirewallName')} ${PROP('Dim.Engine')} ${PROP('Dim.AvailabilityZone')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "Passed Packets"
+                                }
+                            },
+                            {
+                                "height": 6,
+                                "width": 6,
+                                "y": 1,
+                                "x": 18,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/NetworkFirewall,AvailabilityZone,FirewallName,Engine} MetricName=\"PassedPackets\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.FirewallName')} ${PROP('Dim.Engine')} ${PROP('Dim.AvailabilityZone')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "pie",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "Passed Packets"
+                                }
+                            },
+                            {
+                                "height": 6,
+                                "width": 8,
+                                "y": 13,
+                                "x": 0,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/NetworkFirewall,AvailabilityZone,FirewallName,Engine} MetricName=\"ReceivedPackets\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.FirewallName')} ${PROP('Dim.Engine')} ${PROP('Dim.AvailabilityZone')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "Received Packets"
+                                }
+                            },
+                            {
+                                "height": 6,
+                                "width": 6,
+                                "y": 1,
+                                "x": 12,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/NetworkFirewall,AvailabilityZone,FirewallName,Engine} MetricName=\"ReceivedPackets\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.FirewallName')} ${PROP('Dim.Engine')} ${PROP('Dim.AvailabilityZone')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "pie",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "Received Packets"
+                                }
+                            },
+                            {
+                                "height": 6,
+                                "width": 6,
+                                "y": 1,
+                                "x": 6,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/NetworkFirewall,AvailabilityZone,FirewallName,Engine} MetricName=\"RejectedPackets\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.FirewallName')} ${PROP('Dim.Engine')} ${PROP('Dim.AvailabilityZone')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "pie",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "Rejected Packets"
+                                }
+                            },
+                            {
+                                "height": 6,
+                                "width": 8,
+                                "y": 7,
+                                "x": 8,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/NetworkFirewall,AvailabilityZone,FirewallName,Engine} MetricName=\"RejectedPackets\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.FirewallName')} ${PROP('Dim.Engine')} ${PROP('Dim.AvailabilityZone')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "Rejected Packets"
+                                }
+                            },
+                            {
+                                "height": 6,
+                                "width": 9,
+                                "y": 39,
+                                "x": 6,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/NetworkFirewall,AvailabilityZone,FirewallName,Engine} MetricName=\"StreamExceptionPolicyPackets\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.FirewallName')} ${PROP('Dim.Engine')} ${PROP('Dim.AvailabilityZone')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "StreamExceptionPolicyPackets"
+                                }
+                            },
+                            {
+                                "height": 6,
+                                "width": 6,
+                                "y": 39,
+                                "x": 0,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/NetworkFirewall,AvailabilityZone,FirewallName,Engine} MetricName=\"StreamExceptionPolicyPackets\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.FirewallName')} ${PROP('Dim.Engine')} ${PROP('Dim.AvailabilityZone')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "pie",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "StreamExceptionPolicyPackets"
+                                }
+                            },
+                            {
+                                "height": 1,
+                                "width": 24,
+                                "y": 38,
+                                "x": 0,
+                                "type": "text",
+                                "properties": {
+                                    "markdown": "## Policy Metrics",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "height": 1,
+                                "width": 24,
+                                "y": 0,
+                                "x": 0,
+                                "type": "text",
+                                "properties": {
+                                    "markdown": "## Packet Metrics",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "height": 1,
+                                "width": 24,
+                                "y": 19,
+                                "x": 0,
+                                "type": "text",
+                                "properties": {
+                                    "markdown": "## TLS Metrics",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "height": 6,
+                                "width": 8,
+                                "y": 20,
+                                "x": 8,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/NetworkFirewall,AvailabilityZone,FirewallName,Engine} MetricName=\"TLSDroppedPackets\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.FirewallName')} ${PROP('Dim.Engine')} ${PROP('Dim.AvailabilityZone')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "TLSDroppedPackets",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "height": 6,
+                                "width": 8,
+                                "y": 32,
+                                "x": 8,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/NetworkFirewall,AvailabilityZone,FirewallName,Engine} MetricName=\"TLSPassedPackets\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.FirewallName')} ${PROP('Dim.Engine')} ${PROP('Dim.AvailabilityZone')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "TLSPassedPackets"
+                                }
+                            },
+                            {
+                                "height": 6,
+                                "width": 8,
+                                "y": 26,
+                                "x": 0,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/NetworkFirewall,AvailabilityZone,FirewallName,Engine} MetricName=\"TLSErrors\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.FirewallName')} ${PROP('Dim.Engine')} ${PROP('Dim.AvailabilityZone')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "TLSErrors"
+                                }
+                            },
+                            {
+                                "height": 6,
+                                "width": 8,
+                                "y": 32,
+                                "x": 16,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/NetworkFirewall,AvailabilityZone,FirewallName,Engine} MetricName=\"TLSReceivedPackets\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.FirewallName')} ${PROP('Dim.Engine')} ${PROP('Dim.AvailabilityZone')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "TLSReceivedPackets"
+                                }
+                            },
+                            {
+                                "height": 6,
+                                "width": 8,
+                                "y": 20,
+                                "x": 16,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/NetworkFirewall,AvailabilityZone,FirewallName,Engine} MetricName=\"TLSRejectedPackets\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.FirewallName')} ${PROP('Dim.Engine')} ${PROP('Dim.AvailabilityZone')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "TLSRejectedPackets",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "height": 6,
+                                "width": 8,
+                                "y": 32,
+                                "x": 0,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/NetworkFirewall,AvailabilityZone,FirewallName,Engine} MetricName=\"TLSTimedOutConnections\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.FirewallName')} ${PROP('Dim.Engine')} ${PROP('Dim.AvailabilityZone')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "TLSTimedOutConnections"
+                                }
+                            },
+                            {
+                                "height": 6,
+                                "width": 8,
+                                "y": 20,
+                                "x": 0,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/NetworkFirewall,AvailabilityZone,FirewallName,Engine} MetricName=\"TLSErrors\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.FirewallName')} ${PROP('Dim.Engine')} ${PROP('Dim.AvailabilityZone')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "TLSErrors",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "height": 6,
+                                "width": 8,
+                                "y": 26,
+                                "x": 8,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/NetworkFirewall,AvailabilityZone,FirewallName,Engine} MetricName=\"TLSDroppedPackets\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.FirewallName')} ${PROP('Dim.Engine')} ${PROP('Dim.AvailabilityZone')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "TLSDroppedPackets"
+                                }
+                            },
+                            {
+                                "height": 6,
+                                "width": 8,
+                                "y": 26,
+                                "x": 16,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/NetworkFirewall,AvailabilityZone,FirewallName,Engine} MetricName=\"TLSRejectedPackets\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.FirewallName')} ${PROP('Dim.Engine')} ${PROP('Dim.AvailabilityZone')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "TLSRejectedPackets"
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        },
+        "CWDashboardNFWIndividual": {
+            "Type": "AWS::CloudWatch::Dashboard",
+            "Properties": {
+                "DashboardName": "Network_Firewall_Individual_Resources",
+                "DashboardBody": {
+                    "Fn::ToJsonString": {
+                        "variables": [
+                            {
+                                "type": "pattern",
+                                "pattern": "us-east-1",
+                                "inputType": "select",
+                                "id": "Region",
+                                "label": "Region",
+                                "defaultValue": {
+                                    "Ref": "DefaultRegion"
+                                },
+                                "visible": true,
+                                "values": [
+                                    {
+                                        "value": "us-east-1",
+                                        "label": "N. Virginia"
+                                    },
+                                    {
+                                        "value": "us-east-2",
+                                        "label": "Ohio"
+                                    },
+                                    {
+                                        "value": "us-west-1",
+                                        "label": "N.California"
+                                    },
+                                    {
+                                        "value": "us-west-2",
+                                        "label": "Oregon"
+                                    },
+                                    {
+                                        "value": "ap-east-1",
+                                        "label": "Hong Kong"
+                                    },
+                                    {
+                                        "value": "ap-south-1",
+                                        "label": "Mumbai"
+                                    },
+                                    {
+                                        "value": "ap-northeast-3",
+                                        "label": "Osaka"
+                                    },
+                                    {
+                                        "value": "ap-northeast-2",
+                                        "label": "Seoul"
+                                    },
+                                    {
+                                        "value": "ap-southeast-1",
+                                        "label": "Singapore"
+                                    },
+                                    {
+                                        "value": "ap-southeast-2",
+                                        "label": "Sydney"
+                                    },
+                                    {
+                                        "value": "ap-noutheast-1",
+                                        "label": "Toyko"
+                                    },
+                                    {
+                                        "value": "ca-central-1",
+                                        "label": "Canada"
+                                    },
+                                    {
+                                        "value": "eu-central-1",
+                                        "label": "Frankfurt"
+                                    },
+                                    {
+                                        "value": "eu-west-1",
+                                        "label": "Ireland"
+                                    },
+                                    {
+                                        "value": "eu-west-2",
+                                        "label": "London"
+                                    },
+                                    {
+                                        "value": "eu-west-3",
+                                        "label": "Paris"
+                                    },
+                                    {
+                                        "value": "eu-north-1",
+                                        "label": "Stockholm"
+                                    },
+                                    {
+                                        "value": "sa-east-1",
+                                        "label": "South America"
+                                    }
+                                ],
+                                "value": "us-east-1",
+                                "customValues": "us-east-1, N. Virginia\nus-east-2, Ohio\nus-west-1, N.California\nca-central-1, Canada\nus-west-2, Oregon\neu-west-1, Ireland\neu-west-2, London\neu-central-1, Frankfurt"
+                            },
+                            {
+                                "type": "property",
+                                "property": "FirewallName",
+                                "inputType": "select",
+                                "id": "FirewallName",
+                                "label": "FirewallName",
+                                "defaultValue": {
+                                    "Ref": "DefaultNetworkFirewall"
+                                },
+                                "visible": true,
+                                "search": "{AWS/NetworkFirewall,AvailabilityZone,Engine,FirewallName} MetricName=PassedPackets",
+                                "populateFrom": "FirewallName"
+                            }
+                        ],
+                        "widgets": [
+                            {
+                                "height": 6,
+                                "width": 8,
+                                "y": 1,
+                                "x": 0,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/NetworkFirewall,AvailabilityZone,FirewallName,Engine} MetricName=\"DroppedPackets\" FirewallName=\"firewall\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.FirewallName')} ${PROP('Dim.Engine')} ${PROP('Dim.AvailabilityZone')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "Dropped Packets"
+                                }
+                            },
+                            {
+                                "height": 6,
+                                "width": 8,
+                                "y": 1,
+                                "x": 16,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/NetworkFirewall,AvailabilityZone,FirewallName,Engine} MetricName=\"PassedPackets\" FirewallName=\"firewall\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.FirewallName')} ${PROP('Dim.Engine')} ${PROP('Dim.AvailabilityZone')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "Passed Packets"
+                                }
+                            },
+                            {
+                                "height": 6,
+                                "width": 8,
+                                "y": 7,
+                                "x": 16,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/NetworkFirewall,AvailabilityZone,FirewallName,Engine} MetricName=\"ReceivedPackets\" FirewallName=\"firewall\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.FirewallName')} ${PROP('Dim.Engine')} ${PROP('Dim.AvailabilityZone')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "Received Packets"
+                                }
+                            },
+                            {
+                                "height": 6,
+                                "width": 8,
+                                "y": 1,
+                                "x": 8,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/NetworkFirewall,AvailabilityZone,FirewallName,Engine} MetricName=\"RejectedPackets\" FirewallName=\"firewall\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.FirewallName')} ${PROP('Dim.Engine')} ${PROP('Dim.AvailabilityZone')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "Rejected Packets"
+                                }
+                            },
+                            {
+                                "height": 6,
+                                "width": 9,
+                                "y": 33,
+                                "x": 6,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/NetworkFirewall,AvailabilityZone,FirewallName,Engine} MetricName=\"StreamExceptionPolicyPackets\" FirewallName=\"firewall\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.FirewallName')} ${PROP('Dim.Engine')} ${PROP('Dim.AvailabilityZone')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "StreamExceptionPolicyPackets"
+                                }
+                            },
+                            {
+                                "height": 6,
+                                "width": 6,
+                                "y": 33,
+                                "x": 0,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/NetworkFirewall,AvailabilityZone,FirewallName,Engine} MetricName=\"StreamExceptionPolicyPackets\" FirewallName=\"firewall\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.FirewallName')} ${PROP('Dim.Engine')} ${PROP('Dim.AvailabilityZone')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "pie",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "StreamExceptionPolicyPackets"
+                                }
+                            },
+                            {
+                                "height": 1,
+                                "width": 24,
+                                "y": 32,
+                                "x": 0,
+                                "type": "text",
+                                "properties": {
+                                    "markdown": "## Policy Metrics",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "height": 1,
+                                "width": 24,
+                                "y": 0,
+                                "x": 0,
+                                "type": "text",
+                                "properties": {
+                                    "markdown": "## Packet Metrics",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "height": 1,
+                                "width": 24,
+                                "y": 13,
+                                "x": 0,
+                                "type": "text",
+                                "properties": {
+                                    "markdown": "## TLS Metrics",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "height": 6,
+                                "width": 8,
+                                "y": 14,
+                                "x": 8,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/NetworkFirewall,AvailabilityZone,FirewallName,Engine} MetricName=\"TLSDroppedPackets\" FirewallName=\"firewall\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.FirewallName')} ${PROP('Dim.Engine')} ${PROP('Dim.AvailabilityZone')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "TLSDroppedPackets",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "height": 6,
+                                "width": 8,
+                                "y": 26,
+                                "x": 8,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/NetworkFirewall,AvailabilityZone,FirewallName,Engine} MetricName=\"TLSPassedPackets\" FirewallName=\"firewall\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.FirewallName')} ${PROP('Dim.Engine')} ${PROP('Dim.AvailabilityZone')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "TLSPassedPackets"
+                                }
+                            },
+                            {
+                                "height": 6,
+                                "width": 8,
+                                "y": 20,
+                                "x": 0,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/NetworkFirewall,AvailabilityZone,FirewallName,Engine} MetricName=\"TLSErrors\" FirewallName=\"firewall\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.FirewallName')} ${PROP('Dim.Engine')} ${PROP('Dim.AvailabilityZone')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "TLSErrors"
+                                }
+                            },
+                            {
+                                "height": 6,
+                                "width": 8,
+                                "y": 26,
+                                "x": 16,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/NetworkFirewall,AvailabilityZone,FirewallName,Engine} MetricName=\"TLSReceivedPackets\" FirewallName=\"firewall\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.FirewallName')} ${PROP('Dim.Engine')} ${PROP('Dim.AvailabilityZone')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "TLSReceivedPackets"
+                                }
+                            },
+                            {
+                                "height": 6,
+                                "width": 8,
+                                "y": 14,
+                                "x": 16,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/NetworkFirewall,AvailabilityZone,FirewallName,Engine} MetricName=\"TLSRejectedPackets\" FirewallName=\"firewall\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.FirewallName')} ${PROP('Dim.Engine')} ${PROP('Dim.AvailabilityZone')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "TLSRejectedPackets",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "height": 6,
+                                "width": 8,
+                                "y": 26,
+                                "x": 0,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/NetworkFirewall,AvailabilityZone,FirewallName,Engine} MetricName=\"TLSTimedOutConnections\" FirewallName=\"firewall\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.FirewallName')} ${PROP('Dim.Engine')} ${PROP('Dim.AvailabilityZone')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "TLSTimedOutConnections"
+                                }
+                            },
+                            {
+                                "height": 6,
+                                "width": 8,
+                                "y": 14,
+                                "x": 0,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/NetworkFirewall,AvailabilityZone,FirewallName,Engine} MetricName=\"TLSErrors\" FirewallName=\"firewall\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.FirewallName')} ${PROP('Dim.Engine')} ${PROP('Dim.AvailabilityZone')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "TLSErrors",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "height": 6,
+                                "width": 8,
+                                "y": 20,
+                                "x": 8,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/NetworkFirewall,AvailabilityZone,FirewallName,Engine} MetricName=\"TLSDroppedPackets\" FirewallName=\"firewall\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.FirewallName')} ${PROP('Dim.Engine')} ${PROP('Dim.AvailabilityZone')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "TLSDroppedPackets"
+                                }
+                            },
+                            {
+                                "height": 6,
+                                "width": 8,
+                                "y": 20,
+                                "x": 16,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/NetworkFirewall,AvailabilityZone,FirewallName,Engine} MetricName=\"TLSRejectedPackets\" FirewallName=\"firewall\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.FirewallName')} ${PROP('Dim.Engine')} ${PROP('Dim.AvailabilityZone')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "TLSRejectedPackets"
+                                }
+                            },
+                            {
+                                "height": 6,
+                                "width": 8,
+                                "y": 7,
+                                "x": 0,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/NetworkFirewall,AvailabilityZone,FirewallName,Engine} MetricName=\"DroppedPackets\" FirewallName=\"firewall\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.FirewallName')} ${PROP('Dim.Engine')} ${PROP('Dim.AvailabilityZone')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "Dropped Packets"
+                                }
+                            },
+                            {
+                                "height": 6,
+                                "width": 8,
+                                "y": 7,
+                                "x": 8,
+                                "type": "metric",
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/NetworkFirewall,AvailabilityZone,FirewallName,Engine} MetricName=\"RejectedPackets\" FirewallName=\"firewall\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.FirewallName')} ${PROP('Dim.Engine')} ${PROP('Dim.AvailabilityZone')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "Rejected Packets"
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        }
+    }
+}

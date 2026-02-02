@@ -1,0 +1,1500 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "CloudWatch Dashboards to visualize Lambda resources. Both dashboards leverage Dashboard Variables to filter on the desired resources. Dashboard 'Lambda_All_Resources' visualizes ALL Lambda resources in the target region. Dashboard 'Lambda_Individual_Resources' provides additional filters to isolate a specific function.",
+    "Transform": "AWS::LanguageExtensions",
+    "Parameters": {
+        "DefaultRegion": {
+            "Description": "Select the default region hosting the load balancers to be monitored.",
+            "Type": "String",
+            "Default": "us-east-1"
+        },
+        "DefaultFunctionName": {
+            "Description": "Select the default function to be monitored. (e.g. SpringClean-ABCDEFGH-SpringCleanLambda-0123456789ABC)",
+            "Type": "String",
+            "Default": ""
+        }
+    },
+    "Resources": {
+        "CWDashboardLambdaAll": {
+            "Type": "AWS::CloudWatch::Dashboard",
+            "Properties": {
+                "DashboardName": "Lambda_All_Resources",
+                "DashboardBody": {
+                    "Fn::ToJsonString": {
+                        "variables": [
+                            {
+                                "type": "property",
+                                "property": "region",
+                                "inputType": "select",
+                                "id": "Region",
+                                "label": "Region",
+                                "defaultValue": {
+                                    "Ref": "DefaultRegion"
+                                },
+                                "visible": true,
+                                "values": [
+                                    {
+                                        "value": "us-east-1",
+                                        "label": "N. Virginia"
+                                    },
+                                    {
+                                        "value": "us-east-2",
+                                        "label": "Ohio"
+                                    },
+                                    {
+                                        "value": "us-west-1",
+                                        "label": "N.California"
+                                    },
+                                    {
+                                        "value": "us-west-2",
+                                        "label": "Oregon"
+                                    },
+                                    {
+                                        "value": "ap-east-1",
+                                        "label": "Hong Kong"
+                                    },
+                                    {
+                                        "value": "ap-south-1",
+                                        "label": "Mumbai"
+                                    },
+                                    {
+                                        "value": "ap-northeast-3",
+                                        "label": "Osaka"
+                                    },
+                                    {
+                                        "value": "ap-northeast-2",
+                                        "label": "Seoul"
+                                    },
+                                    {
+                                        "value": "ap-southeast-1",
+                                        "label": "Singapore"
+                                    },
+                                    {
+                                        "value": "ap-southeast-2",
+                                        "label": "Sydney"
+                                    },
+                                    {
+                                        "value": "ap-noutheast-1",
+                                        "label": "Toyko"
+                                    },
+                                    {
+                                        "value": "ca-central-1",
+                                        "label": "Canada"
+                                    },
+                                    {
+                                        "value": "eu-central-1",
+                                        "label": "Frankfurt"
+                                    },
+                                    {
+                                        "value": "eu-west-1",
+                                        "label": "Ireland"
+                                    },
+                                    {
+                                        "value": "eu-west-2",
+                                        "label": "London"
+                                    },
+                                    {
+                                        "value": "eu-west-3",
+                                        "label": "Paris"
+                                    },
+                                    {
+                                        "value": "eu-north-1",
+                                        "label": "Stockholm"
+                                    },
+                                    {
+                                        "value": "sa-east-1",
+                                        "label": "South America"
+                                    }
+                                ]
+                            }
+                        ],
+                        "widgets": [
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 1,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/Lambda,FunctionName} MetricName=\"Invocations\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.FunctionName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "Invocations",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 0,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "# Invocation Metrics",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 19,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/Lambda,FunctionName} MetricName=\"DeadLetterErrors\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.FunctionName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "DeadLetterErrors"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 16,
+                                "y": 1,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/Lambda,FunctionName} MetricName=\"Errors\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.FunctionName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "Errors",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 8,
+                                "y": 19,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/Lambda,FunctionName} MetricName=\"DestinationDeliveryFailures\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.FunctionName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "DestinationDeliveryFailures"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 8,
+                                "y": 1,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/Lambda,FunctionName} MetricName=\"Throttles\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.FunctionName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "Throttles",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 16,
+                                "y": 19,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/Lambda,FunctionName} MetricName=\"OversizedRecordCount\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.FunctionName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "OversizedRecordCount"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 13,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/Lambda,FunctionName} MetricName=\"ProvisionedConcurrencyInvocations\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.FunctionName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "ProvisionedConcurrencyInvocations"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 8,
+                                "y": 13,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/Lambda,FunctionName} MetricName=\"ProvisionedConcurrencySpilloverInvocations\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.FunctionName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "ProvisionedConcurrencySpilloverInvocations"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 16,
+                                "y": 13,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/Lambda,FunctionName} MetricName=\"RecursiveInvocationsDropped\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.FunctionName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "RecursiveInvocationsDropped"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 8,
+                                "y": 7,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/Lambda,FunctionName} MetricName=\"Throttles\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.FunctionName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "Throttles"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 16,
+                                "y": 7,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/Lambda,FunctionName} MetricName=\"Errors\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.FunctionName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "Errors"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 8,
+                                "y": 32,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/Lambda,FunctionName} MetricName=\"Duration\"', 'Average', 60)),AVG, DESC)",
+                                                "label": "${PROP('Dim.FunctionName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "Duration (ms) Average"
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 25,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "# Performance Metrics",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 57,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "# Asynchronous Invocation Metrics",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 44,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "# Concurrency Metrics",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 7,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/Lambda,FunctionName} MetricName=\"Invocations\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.FunctionName')}",
+                                                "id": "e1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "Invocations"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 32,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/Lambda,FunctionName} MetricName=\"Duration\"', 'Maximum', 60)),MAX, DESC)",
+                                                "label": "${PROP('Dim.FunctionName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "Duration (ms) Maximum"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 38,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/Lambda,FunctionName} MetricName=\"PostRuntimeExtensionsDuration\"', 'Average', 60)),AVG, DESC)",
+                                                "label": "${PROP('Dim.FunctionName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "PostRuntimeExtensionsDuration (Average)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 8,
+                                "y": 38,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/Lambda,FunctionName} MetricName=\"IteratorAge\"', 'Average', 60)),AVG, DESC)",
+                                                "label": "${PROP('Dim.FunctionName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "IteratorAge (Average)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 16,
+                                "y": 38,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/Lambda,FunctionName} MetricName=\"OffsetLag\"', 'Average', 60)),AVG, DESC)",
+                                                "label": "${PROP('Dim.FunctionName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "OffsetLag (Average)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 16,
+                                "y": 32,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/Lambda,FunctionName} MetricName=\"Duration\"', 'p90', 60))",
+                                                "label": "${PROP('Dim.FunctionName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "Duration (ms) p90"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 45,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/Lambda,FunctionName} MetricName=\"ConcurrentExecutions\"', 'Maximum', 60)),MAX, DESC)",
+                                                "label": "${PROP('Dim.FunctionName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "ConcurrentExecutions (Maximum)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 8,
+                                "y": 45,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/Lambda,FunctionName} MetricName=\"ProvisionedConcurrentExecutions\"', 'Maximum', 60)),MAX, DESC)",
+                                                "label": "${PROP('Dim.FunctionName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "ProvisionedConcurrentExecutions (Maximum)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 16,
+                                "y": 45,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/Lambda,FunctionName} MetricName=\"ProvisionedConcurrencyUtilization\"', 'Maximum', 60)),MAX, DESC)",
+                                                "label": "${PROP('Dim.FunctionName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "ProvisionedConcurrencyUtilization (Maximum)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 51,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/Lambda,FunctionName} MetricName=\"ClaimedAccountConcurrency\"', 'Maximum', 60)),MAX, DESC)",
+                                                "label": "${PROP('Dim.FunctionName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "ClaimedAccountConcurrency (Maximum)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 58,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/Lambda,FunctionName} MetricName=\"AsyncEventsReceived\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.FunctionName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "AsyncEventsReceived"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 8,
+                                "y": 58,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/Lambda,FunctionName} MetricName=\"AsyncEventsDropped\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.FunctionName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "AsyncEventsDropped"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 8,
+                                "y": 51,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/Lambda,FunctionName} MetricName=\"UnreservedConcurrentExecutions\"', 'Maximum', 60)),MAX, DESC)",
+                                                "label": "${PROP('Dim.FunctionName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "UnreservedConcurrentExecutions (Maximum)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 16,
+                                "y": 58,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/Lambda,FunctionName} MetricName=\"AsyncEventAge\"', 'Maximum', 60)),MAX, DESC)",
+                                                "label": "${PROP('Dim.FunctionName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "AsyncEventAge (Maximum)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 26,
+                                "width": 24,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/Lambda,FunctionName} MetricName=\"Duration\"', 'p90', 60))",
+                                                "label": "${PROP('Dim.FunctionName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "Duration (ms) p90",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        },
+        "CWDashboardLambdaIndividual": {
+            "Type": "AWS::CloudWatch::Dashboard",
+            "Properties": {
+                "DashboardName": "Lambda_Individual_Resources",
+                "DashboardBody": {
+                    "Fn::ToJsonString": {
+                        "variables": [
+                            {
+                                "type": "property",
+                                "property": "region",
+                                "inputType": "select",
+                                "id": "Region",
+                                "label": "Region",
+                                "defaultValue":{
+                                    "Ref": "DefaultRegion"
+                                },
+                                "visible": true,
+                                "values": [
+                                    {
+                                        "value": "us-east-1",
+                                        "label": "N. Virginia"
+                                    },
+                                    {
+                                        "value": "us-east-2",
+                                        "label": "Ohio"
+                                    },
+                                    {
+                                        "value": "us-west-1",
+                                        "label": "N.California"
+                                    },
+                                    {
+                                        "value": "us-west-2",
+                                        "label": "Oregon"
+                                    },
+                                    {
+                                        "value": "ap-east-1",
+                                        "label": "Hong Kong"
+                                    },
+                                    {
+                                        "value": "ap-south-1",
+                                        "label": "Mumbai"
+                                    },
+                                    {
+                                        "value": "ap-northeast-3",
+                                        "label": "Osaka"
+                                    },
+                                    {
+                                        "value": "ap-northeast-2",
+                                        "label": "Seoul"
+                                    },
+                                    {
+                                        "value": "ap-southeast-1",
+                                        "label": "Singapore"
+                                    },
+                                    {
+                                        "value": "ap-southeast-2",
+                                        "label": "Sydney"
+                                    },
+                                    {
+                                        "value": "ap-noutheast-1",
+                                        "label": "Toyko"
+                                    },
+                                    {
+                                        "value": "ca-central-1",
+                                        "label": "Canada"
+                                    },
+                                    {
+                                        "value": "eu-central-1",
+                                        "label": "Frankfurt"
+                                    },
+                                    {
+                                        "value": "eu-west-1",
+                                        "label": "Ireland"
+                                    },
+                                    {
+                                        "value": "eu-west-2",
+                                        "label": "London"
+                                    },
+                                    {
+                                        "value": "eu-west-3",
+                                        "label": "Paris"
+                                    },
+                                    {
+                                        "value": "eu-north-1",
+                                        "label": "Stockholm"
+                                    },
+                                    {
+                                        "value": "sa-east-1",
+                                        "label": "South America"
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "property",
+                                "property": "FunctionName",
+                                "inputType": "select",
+                                "id": "FunctionName",
+                                "label": "FunctionName",
+                                "defaultValue": {
+                                    "Ref": "DefaultFunctionName"
+                                },
+                                "visible": true,
+                                "inputPopulationType": "search",
+                                "search": "{AWS/Lambda,FunctionName}",
+                                "populateFrom": "FunctionName"
+                            }
+                        ],
+                        "widgets": [
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 0,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "# Invocation Metrics",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 1,
+                                "width": 12,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/Lambda,FunctionName} MetricName=\"Invocations\" FunctionName=\"function\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('MetricName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ],
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/Lambda,FunctionName} MetricName=\"Throttles\" FunctionName=\"function\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('MetricName')}",
+                                                "id": "e2",
+                                                "region": "us-east-1"
+                                            }
+                                        ],
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/Lambda,FunctionName} MetricName=\"Errors\" FunctionName=\"function\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('MetricName')}",
+                                                "id": "e3",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "Invocation Metrics",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 7,
+                                "width": 12,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/Lambda,FunctionName} MetricName=\"DeadLetterErrors\" FunctionName=\"function\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "DeadLetterErrors",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ],
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/Lambda,FunctionName} MetricName=\"DestinationDeliveryFailures\" FunctionName=\"function\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "DestinationDeliveryFailures",
+                                                "id": "e2",
+                                                "region": "us-east-1"
+                                            }
+                                        ],
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/Lambda,FunctionName} MetricName=\"OversizedRecordCount\" FunctionName=\"function\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "OversizedRecordCount",
+                                                "id": "e3",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "Errors & Failures"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 7,
+                                "width": 12,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/Lambda,FunctionName} MetricName=\"ProvisionedConcurrencyInvocations\" FunctionName=\"function\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "ProvisionedConcurrencyInvocations",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ],
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/Lambda,FunctionName} MetricName=\"ProvisionedConcurrencySpilloverInvocations\" FunctionName=\"function\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "ProvisionedConcurrencySpilloverInvocations",
+                                                "id": "e2",
+                                                "region": "us-east-1"
+                                            }
+                                        ],
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/Lambda,FunctionName} MetricName=\"RecursiveInvocationsDropped\" FunctionName=\"function\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "RecursiveInvocationsDropped",
+                                                "id": "e3",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "Invocations Metrics 2"
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 13,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "# Performance Metrics",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 33,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "# Asynchronous Invocation Metrics",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 26,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "# Concurrency Metrics",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 1,
+                                "width": 12,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/Lambda,FunctionName} MetricName=\"Invocations\" FunctionName=\"function\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('MetricName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ],
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/Lambda,FunctionName} MetricName=\"Throttles\" FunctionName=\"function\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('MetricName')}",
+                                                "id": "e2",
+                                                "region": "us-east-1"
+                                            }
+                                        ],
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/Lambda,FunctionName} MetricName=\"Errors\" FunctionName=\"function\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('MetricName')}",
+                                                "id": "e3",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "Invocations Metrics 1"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 14,
+                                "width": 12,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/Lambda,FunctionName} MetricName=\"Duration\" FunctionName=\"function\"', 'Maximum', 60)),MAX, DESC)",
+                                                "label": "${PROP('MetricName')} Maximum",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ],
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/Lambda,FunctionName} MetricName=\"Duration\" FunctionName=\"function\"', 'Average', 60)),AVG, DESC)",
+                                                "label": "${PROP('MetricName')} Average",
+                                                "id": "e2",
+                                                "region": "us-east-1"
+                                            }
+                                        ],
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/Lambda,FunctionName} MetricName=\"Duration\" FunctionName=\"function\"', 'p90', 60))",
+                                                "label": "${PROP('MetricName')} p90",
+                                                "id": "e3",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "Duration (ms)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 20,
+                                "width": 12,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/Lambda,FunctionName} MetricName=\"PostRuntimeExtensionsDuration\" FunctionName=\"function\"', 'Average', 60)),AVG, DESC)",
+                                                "label": "PostRuntimeExtensionsDuration",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ],
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/Lambda,FunctionName} MetricName=\"IteratorAge\" FunctionName=\"function\"', 'Average', 60)),AVG, DESC)",
+                                                "label": "IteratorAge",
+                                                "id": "e2",
+                                                "region": "us-east-1"
+                                            }
+                                        ],
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/Lambda,FunctionName} MetricName=\"OffsetLag\" FunctionName=\"function\"', 'Average', 60)),AVG, DESC)",
+                                                "label": "OffsetLag",
+                                                "id": "e3",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "IteratorAge, OffsetLag & PostRuntimeExtensionsDuration"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 27,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/Lambda,FunctionName} MetricName=\"ConcurrentExecutions\" FunctionName=\"function\"', 'Maximum', 60)),MAX, DESC)",
+                                                "label": "${PROP('MetricName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ],
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/Lambda,FunctionName} MetricName=\"ProvisionedConcurrentExecutions\" FunctionName=\"function\"', 'Maximum', 60)),MAX, DESC)",
+                                                "label": "ProvisionedConcurrentExecutions",
+                                                "id": "e2",
+                                                "region": "us-east-1"
+                                            }
+                                        ],
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/Lambda,FunctionName} MetricName=\"UnreservedConcurrentExecutions\" FunctionName=\"function\"', 'Maximum', 60)),MAX, DESC)",
+                                                "label": "UnreservedConcurrentExecutions",
+                                                "id": "e3",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "ConcurrentExecutions (Maximum)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 8,
+                                "y": 27,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/Lambda,FunctionName} MetricName=\"ProvisionedConcurrencyUtilization\" FunctionName=\"function\"', 'Maximum', 60)),MAX, DESC)",
+                                                "label": "${PROP('Dim.FunctionName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "ProvisionedConcurrencyUtilization (Maximum)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 16,
+                                "y": 27,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/Lambda,FunctionName} MetricName=\"ClaimedAccountConcurrency\" FunctionName=\"function\"', 'Maximum', 60)),MAX, DESC)",
+                                                "label": "${PROP('Dim.FunctionName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "ClaimedAccountConcurrency (Maximum)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 40,
+                                "width": 12,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/Lambda,FunctionName} MetricName=\"AsyncEventsReceived\" FunctionName=\"function\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('MetricName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ],
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/Lambda,FunctionName} MetricName=\"AsyncEventsDropped\" FunctionName=\"function\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('MetricName')}",
+                                                "id": "e2",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "AsyncEventsReceived"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 34,
+                                "width": 12,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/Lambda,FunctionName} MetricName=\"AsyncEventAge\" FunctionName=\"function\"', 'Maximum', 60)),MAX, DESC)",
+                                                "label": "${PROP('MetricName')} Maximum",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ],
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/Lambda,FunctionName} MetricName=\"AsyncEventAge\" FunctionName=\"function\"', 'Average', 60)),AVG, DESC)",
+                                                "label": "${PROP('MetricName')} Average",
+                                                "id": "e2",
+                                                "region": "us-east-1"
+                                            }
+                                        ],
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/Lambda,FunctionName} MetricName=\"AsyncEventAge\" FunctionName=\"function\"', 'p90', 60))",
+                                                "label": "${PROP('MetricName')} p90",
+                                                "id": "e3",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "AsyncEventAge"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 14,
+                                "width": 12,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/Lambda,FunctionName} MetricName=\"Duration\" FunctionName=\"function\"', 'Maximum', 60)),MAX, DESC)",
+                                                "label": "${PROP('MetricName')} Maximum",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ],
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/Lambda,FunctionName} MetricName=\"Duration\" FunctionName=\"function\"', 'Average', 60)),AVG, DESC)",
+                                                "label": "${PROP('MetricName')} Average",
+                                                "id": "e2",
+                                                "region": "us-east-1"
+                                            }
+                                        ],
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/Lambda,FunctionName} MetricName=\"Duration\" FunctionName=\"function\"', 'p90', 60))",
+                                                "label": "${PROP('MetricName')} p90",
+                                                "id": "e3",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "Duration (ms)",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 34,
+                                "width": 12,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/Lambda,FunctionName} MetricName=\"AsyncEventAge\" FunctionName=\"function\"', 'Maximum', 60)),MAX, DESC)",
+                                                "label": "${PROP('MetricName')} Maximum",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ],
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/Lambda,FunctionName} MetricName=\"AsyncEventAge\" FunctionName=\"function\"', 'Average', 60)),AVG, DESC)",
+                                                "label": "${PROP('MetricName')} Average",
+                                                "id": "e2",
+                                                "region": "us-east-1"
+                                            }
+                                        ],
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/Lambda,FunctionName} MetricName=\"AsyncEventAge\" FunctionName=\"function\"', 'p90', 60))",
+                                                "label": "${PROP('MetricName')} p90",
+                                                "id": "e3",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "AsyncEventAge",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        }
+    }
+}

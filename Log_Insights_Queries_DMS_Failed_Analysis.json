@@ -1,0 +1,182 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "CloudWatch Training: Demonstrate capabilites of CloudWatch Log Insights on NGiNX access logs",
+    "Parameters": {
+        "LogGroupToQuery": {
+            "Type": "String",
+            "Description": "Select CloudWatch Log Group containing NGiNX access logs in JSON format.",
+            "ConstraintDescription": "Provided queries assume access logs contain automatically discovered fields",
+            "Default": "dms-tasks-source"
+        }
+    },
+    "Resources": {
+        "QueryTokenizeFields": {
+            "Type": "AWS::Logs::QueryDefinition",
+            "Properties": {
+                "LogGroupNames": [
+                    {
+                        "Ref": "LogGroupToQuery"
+                    }
+                ],
+                "Name": "DMS-Log-Tokenize",
+                "QueryString": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            "#Tokenize Log Events\n",
+                            "parse @message '* [* ]*: *' as date_time, category, logging_level, event\n",
+                            "| limit 5"
+                        ]
+                    ]
+                }
+            }
+        },
+        "QueryFilterErrors": {
+            "Type": "AWS::Logs::QueryDefinition",
+            "Properties": {
+                "LogGroupNames": [
+                    {
+                        "Ref": "LogGroupToQuery"
+                    }
+                ],
+                "Name": "DMS-Log-Filter-on-Error-Events",
+                "QueryString": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            "#Filter on Errors Events (parse)\n",
+                            "parse @message '* [* ]*: *' as date_time, category, logging_level, event\n",
+                            "| filter logging_level = 'E'"
+                        ]
+                    ]
+                }
+            }
+        },
+        "QueryFilterInformational": {
+            "Type": "AWS::Logs::QueryDefinition",
+            "Properties": {
+                "LogGroupNames": [
+                    {
+                        "Ref": "LogGroupToQuery"
+                    }
+                ],
+                "Name": "DMS-Log-Filter-on-Informational-Events",
+                "QueryString": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            "#Filter on Informational Events (parse)\n",
+                            "parse @message '* [* ]*: *' as date_time, category, logging_level, event\n",
+                            "| filter logging_level = 'I'"
+                        ]
+                    ]
+                }
+            }
+        },
+        "QueryFilterWarnings": {
+            "Type": "AWS::Logs::QueryDefinition",
+            "Properties": {
+                "LogGroupNames": [
+                    {
+                        "Ref": "LogGroupToQuery"
+                    }
+                ],
+                "Name": "DMS-Log-Filter-on-Warning-Events",
+                "QueryString": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            "#Filter on Warnings Events (parse)\n",
+                            "parse @message '* [* ]*: *' as date_time, category, logging_level, event\n",
+                            "| filter logging_level = 'W'"
+                        ]
+                    ]
+                }
+            }
+        },
+        "QueryFilteronRunning": {
+            "Type": "AWS::Logs::QueryDefinition",
+            "Properties": {
+                "LogGroupNames": [
+                    {
+                        "Ref": "LogGroupToQuery"
+                    }
+                ],
+                "Name": "DMS-Log-Filter-on-Running",
+                "QueryString": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            "#Filter on events containing RUNNING (parse)\n",
+                            "parse @message '* [* ]*: *' as date_time, category, logging_level, event\n",
+                            "| filter event like 'RUNNING'"
+                        ]
+                    ]
+                }
+            }
+        },
+        "QueryFilteronStartLoadingTable": {
+            "Type": "AWS::Logs::QueryDefinition",
+            "Properties": {
+                "LogGroupNames": [
+                    {
+                        "Ref": "LogGroupToQuery"
+                    }
+                ],
+                "Name": "DMS-Log-Filter-on-Start-Loading-Table",
+                "QueryString": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            "#Filter on events containing 'Start loading table' (parse)\n",
+                            "parse @message '* [* ]*: *' as date_time, category, logging_level, event\n",
+                            "| filter event like 'Start loading table'"
+                        ]
+                    ]
+                }
+            }
+        },
+        "QueryFilteronUnloadFinished": {
+            "Type": "AWS::Logs::QueryDefinition",
+            "Properties": {
+                "LogGroupNames": [
+                    {
+                        "Ref": "LogGroupToQuery"
+                    }
+                ],
+                "Name": "DMS-Log-Filter-on-Unload-finished",
+                "QueryString": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            "#Filter on events containing 'Start loading table' (parse)\n",
+                            "parse @message '* [* ]*: *' as date_time, category, logging_level, event\n",
+                            "| filter event like 'Unload finished'"
+                        ]
+                    ]
+                }
+            }
+        },
+        "QueryFilteronMultipleConditions": {
+            "Type": "AWS::Logs::QueryDefinition",
+            "Properties": {
+                "LogGroupNames": [
+                    {
+                        "Ref": "LogGroupToQuery"
+                    }
+                ],
+                "Name": "DMS-Log-Filter-on-Multiple-Conditions",
+                "QueryString": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            "#Filter on Multiple Terms\n",
+                            "parse @message '* [* ]*: *' as date_time, category, logging_level, event\n",
+                            "| filter logging_level in ['W', 'E'] or event like 'RUNNING' or event like 'Start loading table' or event like 'Unload finished' or event like 'wal'"
+                        ]
+                    ]
+                }
+            }
+        }
+    }
+}

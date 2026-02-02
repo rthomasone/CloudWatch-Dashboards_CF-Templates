@@ -1,0 +1,322 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "This template provides Contributor Insights queries to assist with the analysis of Transit Gateway Flow Logs.",
+    "Transform": "AWS::LanguageExtensions",
+    "Parameters": {
+        "LogGroupARN": {
+            "Description": "Provide the CloudWatch Log Group ARN containing Transit Gateway Flow Logs.",
+            "Type": "String",
+            "Default": "arn:aws:logs:us-east-1:123456789012:log-group:TGW-Flow-Logs"
+        }
+    },
+    "Resources": {
+        "TGWBytesTransferredByAttachmentID": {
+            "Type": "AWS::CloudWatch::InsightRule",
+            "Properties": {
+                "RuleName": "TGW_Bytes_Transferred_by_Attachment_ID_2",
+                "RuleState": "ENABLED",
+                "ApplyOnTransformedLogs": false,
+                "RuleBody": {
+                    "Fn::ToJsonString": {
+                        "AggregateOn": "Sum",
+                        "Contribution": {
+                            "Filters": [],
+                            "Keys": [
+                                "tgwattachmentid",
+                                "tgwpairattachmentid"
+                            ],
+                            "ValueOf": "bytes"
+                        },
+                        "LogFormat": "CLF",
+                        "Schema": {
+                            "Name": "CloudWatchLogRule",
+                            "Version": 1
+                        },
+                        "LogGroupARNs": [
+                            {
+                                "Ref": "LogGroupARN"
+                            }
+                        ],
+                        "Fields": {
+                            "5": "tgwattachmentid",
+                            "16": "tgwpairattachmentid",
+                            "23": "bytes"
+                        }
+                    }
+                }
+            }
+        },
+        "TGWBytesTransferredBySourceDestinationIP": {
+            "Type": "AWS::CloudWatch::InsightRule",
+            "Properties": {
+                "RuleName": "TGW_Bytes_Transferred_by_Source_and_Destination_IP_Address_2",
+                "RuleState": "ENABLED",
+                "ApplyOnTransformedLogs": false,
+                "RuleBody": {
+                    "Fn::ToJsonString": {
+                        "AggregateOn": "Sum",
+                        "Contribution": {
+                            "Filters": [],
+                            "Keys": [
+                                "srcaddr",
+                                "dstaddr"
+                            ],
+                            "ValueOf": "bytes"
+                        },
+                        "LogFormat": "CLF",
+                        "Schema": {
+                            "Name": "CloudWatchLogRule",
+                            "Version": 1
+                        },
+                        "LogGroupARNs": [
+                            {
+                                "Ref": "LogGroupARN"
+                            }
+                        ],
+                        "Fields": {
+                            "17": "srcaddr",
+                            "18": "dstaddr",
+                            "23": "bytes"
+                        }
+                    }
+                }
+            }
+        },
+        "TGWPacketLossNoRouteTopFlows": {
+            "Type": "AWS::CloudWatch::InsightRule",
+            "Properties": {
+                "RuleName": "TGW_PacketLossNoRoute_Top_Flows_2",
+                "RuleState": "ENABLED",
+                "ApplyOnTransformedLogs": false,
+                "RuleBody": {
+                    "Fn::ToJsonString": {
+                        "AggregateOn": "Count",
+                        "Contribution": {
+                            "Filters": [
+                                {
+                                    "Match": "PacketsLostNoRoute",
+                                    "EqualTo": 1
+                                }
+                            ],
+                            "Keys": [
+                                "Source_Account_ID",
+                                "TGW_Attachment_ID",
+                                "Source_IP",
+                                "Destination_IP"
+                            ]
+                        },
+                        "LogFormat": "CLF",
+                        "Schema": {
+                            "Name": "CloudWatchLogRule",
+                            "Version": 1
+                        },
+                        "LogGroupARNs": [
+                            {
+                                "Ref": "LogGroupARN"
+                            }
+                        ],
+                        "Fields": {
+                            "5": "TGW_Attachment_ID",
+                            "6": "Source_Account_ID",
+                            "17": "Source_IP",
+                            "18": "Destination_IP",
+                            "28": "PacketsLostNoRoute"
+                        }
+                    }
+                }
+            }
+        },
+        "TGWTopInboundFlowbyIP": {
+            "Type": "AWS::CloudWatch::InsightRule",
+            "Properties": {
+                "RuleName": "TGW_Top_Inbound_Flows_by_IP_2",
+                "RuleState": "ENABLED",
+                "ApplyOnTransformedLogs": false,
+                "RuleBody": {
+                    "Fn::ToJsonString": {
+                        "AggregateOn": "Sum",
+                        "Contribution": {
+                            "Filters": [
+                                {
+                                    "Match": "flowdirection",
+                                    "In": [
+                                        "ingress"
+                                    ]
+                                }
+                            ],
+                            "Keys": [
+                                "tgwattachmentid",
+                                "srcaddr",
+                                "dstaddr",
+                                "dstport"
+                            ],
+                            "ValueOf": "bytes"
+                        },
+                        "LogFormat": "CLF",
+                        "Schema": {
+                            "Name": "CloudWatchLogRule",
+                            "Version": 1
+                        },
+                        "LogGroupARNs": [
+                            {
+                                "Ref": "LogGroupARN"
+                            }
+                        ],
+                        "Fields": {
+                            "5": "tgwattachmentid",
+                            "17": "srcaddr",
+                            "18": "dstaddr",
+                            "20": "dstport",
+                            "23": "bytes",
+                            "34": "flowdirection"
+                        }
+                    }
+                }
+            }
+        },
+        "TGWTopInboundHTTPClients": {
+            "Type": "AWS::CloudWatch::InsightRule",
+            "Properties": {
+                "RuleName": "TGW_Top_Inbound_HTTP_Clients_2",
+                "RuleState": "ENABLED",
+                "ApplyOnTransformedLogs": false,
+                "RuleBody": {
+                    "Fn::ToJsonString": {
+                        "AggregateOn": "Sum",
+                        "Contribution": {
+                            "Filters": [
+                                {
+                                    "Match": "flowdirection",
+                                    "In": [
+                                        "ingress"
+                                    ]
+                                },
+                                {
+                                    "Match": "srcport",
+                                    "EqualTo": 80
+                                }
+                            ],
+                            "Keys": [
+                                "srcaddr",
+                                "dstaddr",
+                                "srcport"
+                            ],
+                            "ValueOf": "bytes"
+                        },
+                        "LogFormat": "CLF",
+                        "Schema": {
+                            "Name": "CloudWatchLogRule",
+                            "Version": 1
+                        },
+                        "LogGroupARNs": [
+                            {
+                                "Ref": "LogGroupARN"
+                            }
+                        ],
+                        "Fields": {
+                            "17": "srcaddr",
+                            "18": "dstaddr",
+                            "20": "srcport",
+                            "23": "bytes",
+                            "34": "flowdirection"
+                        }
+                    }
+                }
+            }
+        },
+        "TGWTopInboundSourcePorts": {
+            "Type": "AWS::CloudWatch::InsightRule",
+            "Properties": {
+                "RuleName": "TGW_Top_Inbound_Source_Ports_2",
+                "RuleState": "ENABLED",
+                "ApplyOnTransformedLogs": false,
+                "RuleBody": {
+                    "Fn::ToJsonString": {
+                        "AggregateOn": "Sum",
+                        "Contribution": {
+                            "Filters": [
+                                {
+                                    "Match": "flowdirection",
+                                    "In": [
+                                        "ingress"
+                                    ]
+                                },
+                                {
+                                    "Match": "srcport",
+                                    "EqualTo": 80
+                                }
+                            ],
+                            "Keys": [
+                                "srcport"
+                            ],
+                            "ValueOf": "bytes"
+                        },
+                        "LogFormat": "CLF",
+                        "Schema": {
+                            "Name": "CloudWatchLogRule",
+                            "Version": 1
+                        },
+                        "LogGroupARNs": [
+                            {
+                                "Ref": "LogGroupARN"
+                            }
+                        ],
+                        "Fields": {
+                            "20": "srcport",
+                            "23": "bytes",
+                            "34": "flowdirection"
+                        }
+                    }
+                }
+            }
+        },
+        "TGWOutboundFlowsByIP": {
+            "Type": "AWS::CloudWatch::InsightRule",
+            "Properties": {
+                "RuleName": "TGW_Top_Outbound_Flows_by_IP_2",
+                "RuleState": "ENABLED",
+                "ApplyOnTransformedLogs": false,
+                "RuleBody": {
+                    "Fn::ToJsonString": {
+                        "AggregateOn": "Sum",
+                        "Contribution": {
+                            "Filters": [
+                                {
+                                    "Match": "flowdirection",
+                                    "In": [
+                                        "egress"
+                                    ]
+                                }
+                            ],
+                            "Keys": [
+                                "tgwattachmentid",
+                                "srcaddr",
+                                "dstaddr",
+                                "srcport"
+                            ],
+                            "ValueOf": "bytes"
+                        },
+                        "LogFormat": "CLF",
+                        "Schema": {
+                            "Name": "CloudWatchLogRule",
+                            "Version": 1
+                        },
+                        "LogGroupARNs": [
+                            {
+                                "Ref": "LogGroupARN"
+                            }
+                        ],
+                        "Fields": {
+                            "5": "tgwattachmentid",
+                            "17": "srcaddr",
+                            "18": "dstaddr",
+                            "19": "srcport",
+                            "23": "bytes",
+                            "34": "flowdirection"
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,208 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "Athena Named Queries to analyze ALB Access Logs. These queries will assist with troubleshooting ALB related issues.",
+    "Resources": {
+        "Query1": {
+            "Type": "AWS::Athena::NamedQuery",
+            "Properties": {
+                "Database": "default",
+                "Description": "Filter on Target HTTP 401 Unauthorized",
+                "Name": "ALB // HTTP 401 Unauthorized",
+                "QueryString": "--Filter on Target 401 Unauthorized\nSELECT time, client_ip, target_ip, elb_status_code, target_status_code, request_url\nFROM \"default\".\"migration-albogs\"\nWHERE parse_datetime(time,'yyyy-MM-dd''T''HH:mm:ss.SSSSSS''Z') \n     BETWEEN parse_datetime('2025-05-13-20:00:00','yyyy-MM-dd-HH:mm:ss') \n     AND parse_datetime('2025-05-13-21:00:00','yyyy-MM-dd-HH:mm:ss')\n     AND target_status_code = '401'\n     AND request_url like '%xyz%'\nORDER BY time desc\nLIMIT 10;",
+                "WorkGroup": "primary"
+            }
+        },
+        "Query2": {
+            "Type": "AWS::Athena::NamedQuery",
+            "Properties": {
+                "Database": "default",
+                "Description": "Filter on Target HTTP 401 Unauthorized & Aggregrate on Target Group & Target IP",
+                "Name": "ALB // HTTP 401 Unauthorized & Aggregrate",
+                "QueryString": "--Filter on Target 401 Unauthorized\n--Aggregrate on Target Group & Target IP\nSELECT target_group_arn, target_ip, request_url, count(request_url) as RequestCount\nFROM \"default\".\"migration-albogs\"\nWHERE parse_datetime(time,'yyyy-MM-dd''T''HH:mm:ss.SSSSSS''Z') \n     BETWEEN parse_datetime('2025-05-13-20:00:00','yyyy-MM-dd-HH:mm:ss') \n     AND parse_datetime('2025-05-13-21:00:00','yyyy-MM-dd-HH:mm:ss')\n     AND target_status_code = '401'\n     --AND request_url like '%xyz%'\nGROUP BY target_group_arn, target_ip, request_url\nORDER BY RequestCount desc\nLIMIT 10;",
+                "WorkGroup": "primary"
+            }
+        },
+        "Query3": {
+            "Type": "AWS::Athena::NamedQuery",
+            "Properties": {
+                "Database": "default",
+                "Description": "Filter on ALB HTTP 403 Forbidden",
+                "Name": "ALB // HTTP 403 Forbidden",
+                "QueryString": "--Filter on ALB HTTP 403 Forbidden\nSELECT client_ip, target_status_code, actions_executed, request_url\nFROM \"default\".\"migration-albogs\"\nWHERE parse_datetime(time,'yyyy-MM-dd''T''HH:mm:ss.SSSSSS''Z') \n     BETWEEN parse_datetime('2025-05-13-21:00:00','yyyy-MM-dd-HH:mm:ss') \n     AND parse_datetime('2025-05-13-22:00:00','yyyy-MM-dd-HH:mm:ss')\n     AND elb_status_code = 403\nORDER BY time desc\nLIMIT 10;",
+                "WorkGroup": "primary"
+            }
+        },
+        "Query4": {
+            "Type": "AWS::Athena::NamedQuery",
+            "Properties": {
+                "Database": "default",
+                "Description": "Filter on ALB HTTP 403 Forbidden & Aggregate on Client IP, Target Response, Action Executed",
+                "Name": "ALB // HTTP 403 Forbidden & Aggregate",
+                "QueryString": "--Filter on ALB HTTP 403 Forbidden\n--Aggregrate on Client IP, Request URL, Target Status Code, Actions Executed\nSELECT client_ip, request_url, target_status_code, actions_executed, count(request_url) as RequestCount\nFROM \"default\".\"migration-albogs\"\nWHERE parse_datetime(time,'yyyy-MM-dd''T''HH:mm:ss.SSSSSS''Z') \n     BETWEEN parse_datetime('2025-05-13-21:00:00','yyyy-MM-dd-HH:mm:ss') \n     AND parse_datetime('2025-05-13-22:00:00','yyyy-MM-dd-HH:mm:ss')\n     AND elb_status_code = 403\nGROUP BY client_ip, request_url, target_status_code, actions_executed\nORDER BY RequestCount desc\nLIMIT 10",
+                "WorkGroup": "primary"
+            }
+        },
+        "Query5": {
+            "Type": "AWS::Athena::NamedQuery",
+            "Properties": {
+                "Database": "default",
+                "Description": "Filter on Target Code 404 Not Found",
+                "Name": "ALB // HTTP 404 Not Found",
+                "QueryString": "--Filter on Target HTTP 404 Not Found\nSELECT time, client_ip, target_ip, elb_status_code, target_status_code, request_url\nFROM \"default\".\"migration-albogs\"\nWHERE parse_datetime(time,'yyyy-MM-dd''T''HH:mm:ss.SSSSSS''Z') \n     BETWEEN parse_datetime('2025-05-13-20:00:00','yyyy-MM-dd-HH:mm:ss') \n     AND parse_datetime('2025-05-13-21:00:00','yyyy-MM-dd-HH:mm:ss')\n     AND target_status_code = '404'\n     AND request_url like '%xyz%'\nORDER BY time desc\nLIMIT 10;",
+                "WorkGroup": "primary"
+            }
+        },
+        "Query6": {
+            "Type": "AWS::Athena::NamedQuery",
+            "Properties": {
+                "Database": "default",
+                "Description": " Filter on ALB HTTP 460 & Aggregate on Client IP",
+                "Name": "ALB // HTTP 460 & Aggregate",
+                "QueryString": "--Filter on ALB HTTP 460\n--Aggregrate on Client IP\nSELECT client_ip, count(request_url) as RequestCount\nFROM \"default\".\"migration-albogs\"\nWHERE parse_datetime(time,'yyyy-MM-dd''T''HH:mm:ss.SSSSSS''Z') \n     BETWEEN parse_datetime('2025-05-13-20:00:00','yyyy-MM-dd-HH:mm:ss') \n     AND parse_datetime('2025-05-13-21:00:00','yyyy-MM-dd-HH:mm:ss')\n     AND elb_status_code = 460\nGROUP BY client_ip\nORDER BY RequestCount desc;",
+                "WorkGroup": "primary"
+            }
+        },
+        "Query7": {
+            "Type": "AWS::Athena::NamedQuery",
+            "Properties": {
+                "Database": "default",
+                "Description": "Filter on Target HTTP 500 & Aggregate on Request URL",
+                "Name": "ALB // HTTP 500 Internal Server Error on Target & Aggregate",
+                "QueryString": "--Filter on Target HTTP 500\n--Aggregrate on Request URL\nSELECT request_url, count(request_url) as RequestCount\nFROM \"default\".\"migration-albogs\"\nWHERE parse_datetime(time,'yyyy-MM-dd''T''HH:mm:ss.SSSSSS''Z') \n     BETWEEN parse_datetime('2025-05-13-20:00:00','yyyy-MM-dd-HH:mm:ss') \n     AND parse_datetime('2025-05-13-21:00:00','yyyy-MM-dd-HH:mm:ss')\n     AND target_status_code like '500'\nGROUP BY request_url\nORDER BY RequestCount desc\nLIMIT 10;",
+                "WorkGroup": "primary"
+            }
+        },
+        "Query8": {
+            "Type": "AWS::Athena::NamedQuery",
+            "Properties": {
+                "Database": "default",
+                "Description": "Filter on ALB HTTP 502 Bad Gateway",
+                "Name": "ALB // HTTP 502 Bad Gateway",
+                "QueryString": "--Filter on ALB HTTP 502 Bad Gateway\nSELECT *\nFROM \"default\".\"migration-albogs\"\nWHERE parse_datetime(time,'yyyy-MM-dd''T''HH:mm:ss.SSSSSS''Z') \n     BETWEEN parse_datetime('2025-05-13-22:00:00','yyyy-MM-dd-HH:mm:ss') \n     AND parse_datetime('2025-05-13-23:00:00','yyyy-MM-dd-HH:mm:ss')\n     AND elb_status_code = 502\nORDER BY time desc;",
+                "WorkGroup": "primary"
+            }
+        },
+        "Query9": {
+            "Type": "AWS::Athena::NamedQuery",
+            "Properties": {
+                "Database": "default",
+                "Description": "Filter on ALB HTTP 502 Bad Gateway & Aggregate on Target IP",
+                "Name": "ALB // HTTP 502 Bad Gateway & Aggregate",
+                "QueryString": "--Filter on ALB HTTP 502 Bad Gateway\n--Aggregrate on Target IP\nSELECT target_ip, count(request_url) as RequestCount\nFROM \"default\".\"migration-albogs\"\nWHERE parse_datetime(time,'yyyy-MM-dd''T''HH:mm:ss.SSSSSS''Z') \n     BETWEEN parse_datetime('2025-05-13-22:00:00','yyyy-MM-dd-HH:mm:ss') \n     AND parse_datetime('2025-05-13-23:00:00','yyyy-MM-dd-HH:mm:ss')\n     AND elb_status_code = 502\nGROUP BY target_ip\nORDER BY RequestCount desc\nLIMIT 10;",
+                "WorkGroup": "primary"
+            }
+        },
+        "Query10": {
+            "Type": "AWS::Athena::NamedQuery",
+            "Properties": {
+                "Database": "default",
+                "Description": "Filter on ALB HTTP 503 Service Unavailable",
+                "Name": "ALB // HTTP 503 Service Unavailable",
+                "QueryString": "--Filter on ALB HTTP 503 Service Unavailable\nSELECT *\nFROM \"default\".\"migration-albogs\"\nWHERE parse_datetime(time,'yyyy-MM-dd''T''HH:mm:ss.SSSSSS''Z') \n     BETWEEN parse_datetime('2025-05-13-22:00:00','yyyy-MM-dd-HH:mm:ss') \n     AND parse_datetime('2025-05-13-23:00:00','yyyy-MM-dd-HH:mm:ss')\n     AND elb_status_code = 503\nORDER BY time desc;",
+                "WorkGroup": "primary"
+            }
+        },
+        "Query11": {
+            "Type": "AWS::Athena::NamedQuery",
+            "Properties": {
+                "Database": "default",
+                "Description": "Filter on ALB HTTP 503 Service Unavailable & Aggregate on Request URL & Target Group",
+                "Name": "ALB // HTTP 503 Service Unavailable & Aggregate",
+                "QueryString": "--Filter on ALB HTTP 503 Service Unavailable\n--Aggregrate on Request URL & Target Group\nSELECT request_url, target_group_arn, target_ip, count(request_url) as RequestCount\nFROM \"default\".\"migration-albogs\"\nWHERE parse_datetime(time,'yyyy-MM-dd''T''HH:mm:ss.SSSSSS''Z') \n     BETWEEN parse_datetime('2025-05-13-22:00:00','yyyy-MM-dd-HH:mm:ss') \n     AND parse_datetime('2025-05-13-23:00:00','yyyy-MM-dd-HH:mm:ss')\n     AND elb_status_code = 503\nGROUP BY request_url, target_group_arn, target_ip\nORDER BY RequestCount desc\nLIMIT 10;",
+                "WorkGroup": "primary"
+            }
+        },
+        "Query12": {
+            "Type": "AWS::Athena::NamedQuery",
+            "Properties": {
+                "Database": "default",
+                "Description": "Filter on ALB HTTP 504 Gateway Timeout",
+                "Name": "ALB // HTTP 504 Gateway Timeout",
+                "QueryString": "--Filter on ALB HTTP 504 Gateway Timeout\nSELECT *\nFROM \"default\".\"migration-albogs\"\nWHERE parse_datetime(time,'yyyy-MM-dd''T''HH:mm:ss.SSSSSS''Z') \n     BETWEEN parse_datetime('2025-05-13-22:00:00','yyyy-MM-dd-HH:mm:ss') \n     AND parse_datetime('2025-05-13-23:00:00','yyyy-MM-dd-HH:mm:ss')\n     AND elb_status_code = 504\nORDER BY time desc;",
+                "WorkGroup": "primary"
+            }
+        },
+       
+        
+        "Query13": {
+            "Type": "AWS::Athena::NamedQuery",
+            "Properties": {
+                "Database": "default",
+                "Description": "Filter for Target Response Time > 1s",
+                "Name": "ALB // Latency // More Than 1 second",
+                "QueryString": "--Filter for Target Response Time > 1s\nSELECT *\nFROM \"default\".\"migration-albogs\"\nWHERE parse_datetime(time,'yyyy-MM-dd''T''HH:mm:ss.SSSSSS''Z') \n     BETWEEN parse_datetime('2025-05-13-20:00:00','yyyy-MM-dd-HH:mm:ss') \n     AND parse_datetime('2025-05-13-21:00:00','yyyy-MM-dd-HH:mm:ss')\n     AND target_processing_time > 1\nORDER BY time desc\nLIMIT 10",
+                "WorkGroup": "primary"
+            }
+        },
+        "Query14": {
+            "Type": "AWS::Athena::NamedQuery",
+            "Properties": {
+                "Database": "default",
+                "Description": "Filter for Target Response Time > 1s & Aggregate on Request URL (COUNT)",
+                "Name": "ALB // Latency // More Than 1 second & Aggregate on Request URL (COUNT)",
+                "QueryString": "--Filter for Target Response Time > 1s\n--Aggregate on Request URL (COUNT)\nSELECT request_url, count(target_processing_time) as RequestCount\nFROM \"default\".\"migration-albogs\"\nWHERE parse_datetime(time,'yyyy-MM-dd''T''HH:mm:ss.SSSSSS''Z') \n     BETWEEN parse_datetime('2025-05-13-20:00:00','yyyy-MM-dd-HH:mm:ss') \n     AND parse_datetime('2025-05-13-21:00:00','yyyy-MM-dd-HH:mm:ss')\n     AND target_processing_time > 1\nGROUP BY request_url\nORDER BY RequestCount desc\nLIMIT 10",
+                "WorkGroup": "primary"
+            }
+        },
+        "Query15": {
+            "Type": "AWS::Athena::NamedQuery",
+            "Properties": {
+                "Database": "default",
+                "Description": "Filter for Target Response Time > 1s & Aggregate on Request URL (MAX)",
+                "Name": "ALB // Latency // More Than 1 second & Aggregate on Request URL (MAX)",
+                "QueryString": "--Filter for Target Response Time > 1s\n--Aggregate on Request URL (MAX)\nSELECT request_url, target_group_arn, target_ip, max(target_processing_time) as Max_Target_Processing_Time\nFROM \"default\".\"migration-albogs\"\nWHERE parse_datetime(time,'yyyy-MM-dd''T''HH:mm:ss.SSSSSS''Z') \n     BETWEEN parse_datetime('2025-05-13-20:00:00','yyyy-MM-dd-HH:mm:ss') \n     AND parse_datetime('2025-05-13-21:00:00','yyyy-MM-dd-HH:mm:ss')\n     AND target_processing_time > 1\nGROUP BY request_url, target_group_arn, target_ip\nORDER BY Max_Target_Processing_Time desc\nLIMIT 10",
+                "WorkGroup": "primary"
+            }
+        },
+        "Query16": {
+            "Type": "AWS::Athena::NamedQuery",
+            "Properties": {
+                "Database": "default",
+                "Description": "Filter for Target Response Time > 1s & Aggregate on Target IP (COUNT)",
+                "Name": "ALB // Latency // More Than 1 second & Aggregate on Target IP (COUNT)",
+                "QueryString": "--Filter for Target Response Time > 1s\n--Aggregate on Request URL (COUNT)\nSELECT target_ip, count(target_processing_time) as RequestCount\nFROM \"default\".\"migration-albogs\"\nWHERE parse_datetime(time,'yyyy-MM-dd''T''HH:mm:ss.SSSSSS''Z') \n     BETWEEN parse_datetime('2025-05-13-20:00:00','yyyy-MM-dd-HH:mm:ss') \n     AND parse_datetime('2025-05-13-21:00:00','yyyy-MM-dd-HH:mm:ss')\n     AND target_processing_time > 1\nGROUP BY target_ip\nORDER BY RequestCount desc\nLIMIT 10",
+                "WorkGroup": "primary"
+            }
+        },
+        "Query17": {
+            "Type": "AWS::Athena::NamedQuery",
+            "Properties": {
+                "Database": "default",
+                "Description": "Filter for Target Response Time > 1s & Aggregate on Target IP (MAX)",
+                "Name": "ALB // Latency // More Than 1 second & Aggregate on Target IP (MAX)",
+                "QueryString": "--Filter for Target Response Time > 1s\n--Aggregate on Request URL (MAX)\nSELECT request_url, target_group_arn, target_ip, max(target_processing_time) as Max_Target_Processing_Time\nFROM \"default\".\"migration-albogs\"\nWHERE parse_datetime(time,'yyyy-MM-dd''T''HH:mm:ss.SSSSSS''Z') \n     BETWEEN parse_datetime('2025-05-13-20:00:00','yyyy-MM-dd-HH:mm:ss') \n     AND parse_datetime('2025-05-13-21:00:00','yyyy-MM-dd-HH:mm:ss')\n     AND target_processing_time > 1\nGROUP BY request_url, target_group_arn, target_ip\nORDER BY Max_Target_Processing_Time desc\nLIMIT 10",
+                "WorkGroup": "primary"
+            }
+        },
+        "Query18": {
+            "Type": "AWS::Athena::NamedQuery",
+            "Properties": {
+                "Database": "default",
+                "Description": "Aggregate ALB & Target Response Codes within a given time range",
+                "Name": "ALB // Summarize ALB & Target Response Codes",
+                "QueryString": "--Aggregate on ALB & Target Response Codes\nSELECT elb_status_code, target_status_code, count(request_url) as RequestCount\nFROM \"default\".\"migration-albogs\"\nWHERE parse_datetime(time,'yyyy-MM-dd''T''HH:mm:ss.SSSSSS''Z') \n     BETWEEN parse_datetime('2025-05-13-20:00:00','yyyy-MM-dd-HH:mm:ss') \n     AND parse_datetime('2025-05-13-21:00:00','yyyy-MM-dd-HH:mm:ss')\nGROUP BY elb_status_code, target_status_code\nORDER BY RequestCount desc\nLIMIT 10;",
+                "WorkGroup": "primary"
+            }
+        },
+        "Query19": {
+            "Type": "AWS::Athena::NamedQuery",
+            "Properties": {
+                "Database": "default",
+                "Description": "Filter on a Target Group & Aggregate on Target IP",
+                "Name": "ALB // Traffic Imbalance within a Target Group",
+                "QueryString": "--Filter for Target Group ARN\n--Aggregate on Target IP\nSELECT target_ip, count(target_processing_time) as RequestCount\nFROM \"default\".\"migration-albogs\"\nWHERE parse_datetime(time,'yyyy-MM-dd''T''HH:mm:ss.SSSSSS''Z') \n     BETWEEN parse_datetime('2025-05-13-20:00:00','yyyy-MM-dd-HH:mm:ss') \n     AND parse_datetime('2025-05-13-21:00:00','yyyy-MM-dd-HH:mm:ss')\n     AND target_group_arn like '%CWT-Web-Servers%'\nGROUP BY target_ip\nORDER BY RequestCount desc\nLIMIT 10",
+                "WorkGroup": "primary"
+            }
+        },
+        "Query20": {
+            "Type": "AWS::Athena::NamedQuery",
+            "Properties": {
+                "Database": "default",
+                "Description": "Filter on Websocket Traffic",
+                "Name": "ALB // Websocket Traffic",
+                "QueryString": "SELECT request_url, count(request_url) as RequestCount\nFROM \"default\".\"migration-albogs\"\nWHERE parse_datetime(time,'yyyy-MM-dd''T''HH:mm:ss.SSSSSS''Z') \n     BETWEEN parse_datetime('2025-05-13-20:00:00','yyyy-MM-dd-HH:mm:ss') \n     AND parse_datetime('2025-05-13-21:00:00','yyyy-MM-dd-HH:mm:ss')\n     AND type = 'wss'\nGROUP BY request_url\nORDER BY RequestCount desc",
+                "WorkGroup": "primary"
+            }
+        }
+    }
+}
