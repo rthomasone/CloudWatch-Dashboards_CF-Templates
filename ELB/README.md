@@ -29,7 +29,7 @@ Currently, it's not possible to represent this percentage using [Search Expressi
     "metrics": [
         [ { "expression": "(m1/m3)*100", "label": "Backend HTTP 4XX (%)", "id": "e1" } ],
         [ { "expression": "(m2/m3)*100", "label": "Backend HTTP 5XX (%)", "id": "e2" } ],
-        [ "AWS/ELB", "HTTPCode_Backend_4XX", "LoadBalancerName", "ac7cae108a59a40d7b0964f8e1146f3c", { "id": "m1", "visible": false } ],
+        [ "AWS/ELB", "HTTPCode_Backend_4XX", "LoadBalancerName", "replace_with_clb_name", { "id": "m1", "visible": false } ],
         [ ".", "HTTPCode_Backend_5XX", ".", ".", { "id": "m2", "visible": false } ],
         [ ".", "RequestCount", ".", ".", { "id": "m3", "visible": false } ]
     ],
@@ -38,6 +38,6 @@ Currently, it's not possible to represent this percentage using [Search Expressi
     "region": "us-east-1",
     "stat": "Sum",
     "period": 60,
-    "title": "ac7cae108a59a40d7b0964f8e1146f3c: Backend HTTP 4xx/5xx (%)"
+    "title": "replace_with_clb_name: Backend HTTP 4xx/5xx (%)"
 }
 ```
