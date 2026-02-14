@@ -1,0 +1,1736 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "CloudWatch Dashboards to visualize Classic Load Balancer (CLB) resources. Both dashboards leverage Dashboard Variables to filter on the desired resources. Dashboard 'CLB_All_Resources' visualizes ALL CLB resources in the target region. Dashboard 'CLB_Individual_Resources' provides additional filters to isolate a specific CLB.",
+    "Transform": "AWS::LanguageExtensions",
+    "Parameters": {
+        "DefaultRegion": {
+            "Description": "Select the default region hosting the load balancers to be monitored.",
+            "Type": "String",
+            "Default": "us-east-1"
+        },
+        "DefaultCLB": {
+            "Description": "Select the default load balancer to be monitored. (e.g. 0123456789abcdef0123456789abcdef)",
+            "Type": "String",
+            "Default": ""
+        }
+    },
+    "Resources": {
+        "CWDashboardCLBAll": {
+            "Type": "AWS::CloudWatch::Dashboard",
+            "Properties": {
+                "DashboardName": "CLB_All_Resources",
+                "DashboardBody": {
+                    "Fn::ToJsonString": {
+                        "variables": [
+                            {
+                                "type": "pattern",
+                                "pattern": "us-east-1",
+                                "inputType": "select",
+                                "id": "Region",
+                                "label": "Region",
+                                "defaultValue": {
+                                    "Ref": "DefaultRegion"
+                                },
+                                "visible": true,
+                                "values": [
+                                    {
+                                        "value": "us-east-1",
+                                        "label": "N. Virginia"
+                                    },
+                                    {
+                                        "value": "us-east-2",
+                                        "label": "Ohio"
+                                    },
+                                    {
+                                        "value": "us-west-1",
+                                        "label": "N.California"
+                                    },
+                                    {
+                                        "value": "us-west-2",
+                                        "label": "Oregon"
+                                    },
+                                    {
+                                        "value": "ap-east-1",
+                                        "label": "Hong Kong"
+                                    },
+                                    {
+                                        "value": "ap-south-1",
+                                        "label": "Mumbai"
+                                    },
+                                    {
+                                        "value": "ap-northeast-3",
+                                        "label": "Osaka"
+                                    },
+                                    {
+                                        "value": "ap-northeast-2",
+                                        "label": "Seoul"
+                                    },
+                                    {
+                                        "value": "ap-southeast-1",
+                                        "label": "Singapore"
+                                    },
+                                    {
+                                        "value": "ap-southeast-2",
+                                        "label": "Sydney"
+                                    },
+                                    {
+                                        "value": "ap-noutheast-1",
+                                        "label": "Toyko"
+                                    },
+                                    {
+                                        "value": "ca-central-1",
+                                        "label": "Canada"
+                                    },
+                                    {
+                                        "value": "eu-central-1",
+                                        "label": "Frankfurt"
+                                    },
+                                    {
+                                        "value": "eu-west-1",
+                                        "label": "Ireland"
+                                    },
+                                    {
+                                        "value": "eu-west-2",
+                                        "label": "London"
+                                    },
+                                    {
+                                        "value": "eu-west-3",
+                                        "label": "Paris"
+                                    },
+                                    {
+                                        "value": "eu-north-1",
+                                        "label": "Stockholm"
+                                    },
+                                    {
+                                        "value": "sa-east-1",
+                                        "label": "South America"
+                                    }
+                                ],
+                                "value": "us-east-1",
+                                "customValues": "us-east-1, N. Virginia\nus-east-2, Ohio\nus-west-1, N.California\nca-central-1, Canada\nus-west-2, Oregon\neu-west-1, Ireland\neu-west-2, London\neu-central-1, Frankfurt"
+                            }
+                        ],
+                        "widgets": [
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 8,
+                                "width": 8,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/ELB,LoadBalancerName} MetricName=\"RequestCount\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.LoadBalancerName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "period": 60,
+                                    "stat": "Sum",
+                                    "title": "RequestCount by CLB",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false,
+                                    "labels": {
+                                        "visible": true
+                                    },
+                                    "legend": {
+                                        "position": "hidden"
+                                    }
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 16,
+                                "y": 8,
+                                "width": 8,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/ELB,LoadBalancerName} MetricName=\"HTTPCode_ELB_5XX\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.LoadBalancerName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "period": 60,
+                                    "stat": "Sum",
+                                    "title": "HTTP 5XX Responses by CLB",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false,
+                                    "labels": {
+                                        "visible": true
+                                    },
+                                    "legend": {
+                                        "position": "hidden"
+                                    }
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 0,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "## Load Balancer Performance",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 8,
+                                "y": 8,
+                                "width": 8,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/ELB,LoadBalancerName} MetricName=\"HTTPCode_ELB_4XX\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.LoadBalancerName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "period": 60,
+                                    "stat": "Sum",
+                                    "title": "HTTP 4XX Responses by CLB",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false,
+                                    "labels": {
+                                        "visible": true
+                                    },
+                                    "legend": {
+                                        "position": "hidden"
+                                    }
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 6,
+                                "y": 30,
+                                "width": 6,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/ELB,LoadBalancerName} MetricName=\"HealthyHostCount\"', 'Minimum', 60)),MIN, DESC)",
+                                                "label": "${PROP('Dim.LoadBalancerName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1",
+                                                "period": 60
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "title": "Healthy Backends",
+                                    "period": 60,
+                                    "stat": "Minimum",
+                                    "legend": {
+                                        "position": "hidden"
+                                    }
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 18,
+                                "y": 30,
+                                "width": 6,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/ELB,LoadBalancerName} MetricName=\"BackendConnectionErrors\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.LoadBalancerName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "period": 60,
+                                    "stat": "Sum",
+                                    "title": "BackendConnectionErrors",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false,
+                                    "labels": {
+                                        "visible": true
+                                    },
+                                    "legend": {
+                                        "position": "hidden"
+                                    }
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 15,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "## Backend Performance",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 30,
+                                "width": 6,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/ELB,LoadBalancerName} MetricName=\"Latency\"', 'Maximum', 60)),MAX, DESC)",
+                                                "label": "${PROP('Dim.LoadBalancerName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1",
+                                                "period": 60
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "title": "Latency added by Backend (Maximum)",
+                                    "period": 60,
+                                    "stat": "Average",
+                                    "legend": {
+                                        "position": "hidden"
+                                    }
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 23,
+                                "width": 6,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/ELB,LoadBalancerName} MetricName=\"HTTPCode_Backend_2XX\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.LoadBalancerName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "period": 60,
+                                    "stat": "Sum",
+                                    "title": "HTTPCode_Backend_2XX by CLB",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false,
+                                    "labels": {
+                                        "visible": true
+                                    },
+                                    "legend": {
+                                        "position": "hidden"
+                                    }
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 6,
+                                "y": 23,
+                                "width": 6,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/ELB,LoadBalancerName} MetricName=\"HTTPCode_Backend_3XX\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.LoadBalancerName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "period": 60,
+                                    "stat": "Sum",
+                                    "title": "HTTPCode_Backend_3XX by CLB",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false,
+                                    "labels": {
+                                        "visible": true
+                                    },
+                                    "legend": {
+                                        "position": "hidden"
+                                    }
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 23,
+                                "width": 6,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/ELB,LoadBalancerName} MetricName=\"HTTPCode_Backend_4XX\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.LoadBalancerName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "period": 60,
+                                    "stat": "Sum",
+                                    "title": "HTTPCode_Backend_4XX by CLB",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false,
+                                    "labels": {
+                                        "visible": true
+                                    },
+                                    "legend": {
+                                        "position": "hidden"
+                                    }
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 18,
+                                "y": 23,
+                                "width": 6,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ELB,LoadBalancerName} MetricName=\"HTTPCode_Backend_5XX\"', 'Sum', 60))",
+                                                "label": "${PROP('Dim.LoadBalancerName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "period": 60,
+                                    "stat": "Sum",
+                                    "title": "HTTPCode_Backend_5XX by CLB",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false,
+                                    "labels": {
+                                        "visible": true
+                                    },
+                                    "legend": {
+                                        "position": "hidden"
+                                    }
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 30,
+                                "width": 6,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/ELB,LoadBalancerName} MetricName=\"UnHealthyHostCount\"', 'Maximum', 60)),MAX, DESC)",
+                                                "label": "${PROP('Dim.LoadBalancerName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1",
+                                                "period": 60
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "title": "UnHealthy Backends",
+                                    "period": 60,
+                                    "stat": "Maximum",
+                                    "legend": {
+                                        "position": "hidden"
+                                    }
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 1,
+                                "width": 12,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/ELB,LoadBalancerName} MetricName=\"RequestCount\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.LoadBalancerName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "pie",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "period": 60,
+                                    "stat": "Sum",
+                                    "title": "RequestCount by CLB",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false,
+                                    "labels": {
+                                        "visible": true
+                                    },
+                                    "legend": {
+                                        "position": "hidden"
+                                    }
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 1,
+                                "width": 12,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/ELB,LoadBalancerName} MetricName=\"HTTPCode_ELB_5XX\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.LoadBalancerName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "period": 60,
+                                    "stat": "Sum",
+                                    "title": "HTTP 5XX Responses by CLB",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false,
+                                    "labels": {
+                                        "visible": true
+                                    },
+                                    "legend": {
+                                        "position": "hidden"
+                                    }
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 16,
+                                "width": 6,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/ELB,LoadBalancerName} MetricName=\"UnHealthyHostCount\"', 'Maximum', 60)),MAX, DESC)",
+                                                "label": "${PROP('Dim.LoadBalancerName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1",
+                                                "period": 60
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "title": "UnHealthy Backends",
+                                    "period": 60,
+                                    "stat": "Maximum",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 6,
+                                "y": 37,
+                                "width": 6,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/ELB,LoadBalancerName} MetricName=\"SpilloverCount\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.LoadBalancerName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "period": 60,
+                                    "stat": "Sum",
+                                    "title": "SpilloverCount by CLB",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false,
+                                    "labels": {
+                                        "visible": true
+                                    },
+                                    "legend": {
+                                        "position": "hidden"
+                                    }
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 37,
+                                "width": 6,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/ELB,LoadBalancerName} MetricName=\"SurgeQueueLength\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.LoadBalancerName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "period": 60,
+                                    "stat": "Sum",
+                                    "title": "SurgeQueueLength by CLB",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false,
+                                    "labels": {
+                                        "visible": true
+                                    },
+                                    "legend": {
+                                        "position": "hidden"
+                                    }
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 6,
+                                "y": 16,
+                                "width": 6,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/ELB,LoadBalancerName} MetricName=\"Latency\"', 'Maximum', 60)),MAX, DESC)",
+                                                "label": "${PROP('Dim.LoadBalancerName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1",
+                                                "period": 60
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "title": "Latency added by Backend (Maximum)",
+                                    "period": 60,
+                                    "stat": "Average",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 16,
+                                "width": 6,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/ELB,LoadBalancerName} MetricName=\"BackendConnectionErrors\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.LoadBalancerName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "period": 60,
+                                    "stat": "Sum",
+                                    "title": "BackendConnectionErrors",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false,
+                                    "labels": {
+                                        "visible": true
+                                    },
+                                    "legend": {
+                                        "position": "hidden"
+                                    }
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 18,
+                                "y": 16,
+                                "width": 6,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/ELB,LoadBalancerName} MetricName=\"SurgeQueueLength\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.LoadBalancerName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "period": 60,
+                                    "stat": "Sum",
+                                    "title": "SurgeQueueLength by CLB",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false,
+                                    "labels": {
+                                        "visible": true
+                                    },
+                                    "legend": {
+                                        "position": "hidden"
+                                    }
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 44,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "## Connections",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 53,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "## Capacity",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 54,
+                                "width": 12,
+                                "height": 8,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/ELB,LoadBalancerName} MetricName=\"EstimatedALBConsumedLCUs\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.LoadBalancerName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "period": 60,
+                                    "stat": "Sum",
+                                    "title": "EstimatedALBConsumedLCUs",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false,
+                                    "labels": {
+                                        "visible": true
+                                    },
+                                    "legend": {
+                                        "position": "bottom"
+                                    }
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 54,
+                                "width": 12,
+                                "height": 8,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/ELB,LoadBalancerName} MetricName=\"EstimatedProcessedBytes\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.LoadBalancerName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "period": 60,
+                                    "stat": "Sum",
+                                    "title": "EstimatedProcessedBytes",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false,
+                                    "labels": {
+                                        "visible": true
+                                    },
+                                    "legend": {
+                                        "position": "bottom"
+                                    }
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 45,
+                                "width": 12,
+                                "height": 8,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/ELB,LoadBalancerName} MetricName=\"EstimatedALBActiveConnectionCount\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.LoadBalancerName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "period": 60,
+                                    "stat": "Sum",
+                                    "title": "EstimatedALBActiveConnectionCount",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false,
+                                    "labels": {
+                                        "visible": true
+                                    },
+                                    "legend": {
+                                        "position": "hidden"
+                                    }
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 45,
+                                "width": 12,
+                                "height": 8,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/ELB,LoadBalancerName} MetricName=\"EstimatedALBNewConnectionCount\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.LoadBalancerName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "period": 60,
+                                    "stat": "Sum",
+                                    "title": "EstimatedALBNewConnectionCount",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false,
+                                    "labels": {
+                                        "visible": true
+                                    },
+                                    "legend": {
+                                        "position": "hidden"
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        },
+        "CWDashboardALBIndividual": {
+            "Type": "AWS::CloudWatch::Dashboard",
+            "Properties": {
+                "DashboardName": "CLB_Individual_Resources",
+                "DashboardBody": {
+                    "Fn::ToJsonString": {
+                        "variables": [
+                            {
+                                "type": "pattern",
+                                "pattern": "us-east-1",
+                                "inputType": "select",
+                                "id": "Region",
+                                "label": "Region",
+                                "defaultValue": {
+                                    "Ref": "DefaultRegion"
+                                },
+                                "visible": true,
+                                "values": [
+                                    {
+                                        "value": "us-east-1",
+                                        "label": "N. Virginia"
+                                    },
+                                    {
+                                        "value": "us-east-2",
+                                        "label": "Ohio"
+                                    },
+                                    {
+                                        "value": "us-west-1",
+                                        "label": "N.California"
+                                    },
+                                    {
+                                        "value": "us-west-2",
+                                        "label": "Oregon"
+                                    },
+                                    {
+                                        "value": "ap-east-1",
+                                        "label": "Hong Kong"
+                                    },
+                                    {
+                                        "value": "ap-south-1",
+                                        "label": "Mumbai"
+                                    },
+                                    {
+                                        "value": "ap-northeast-3",
+                                        "label": "Osaka"
+                                    },
+                                    {
+                                        "value": "ap-northeast-2",
+                                        "label": "Seoul"
+                                    },
+                                    {
+                                        "value": "ap-southeast-1",
+                                        "label": "Singapore"
+                                    },
+                                    {
+                                        "value": "ap-southeast-2",
+                                        "label": "Sydney"
+                                    },
+                                    {
+                                        "value": "ap-noutheast-1",
+                                        "label": "Toyko"
+                                    },
+                                    {
+                                        "value": "ca-central-1",
+                                        "label": "Canada"
+                                    },
+                                    {
+                                        "value": "eu-central-1",
+                                        "label": "Frankfurt"
+                                    },
+                                    {
+                                        "value": "eu-west-1",
+                                        "label": "Ireland"
+                                    },
+                                    {
+                                        "value": "eu-west-2",
+                                        "label": "London"
+                                    },
+                                    {
+                                        "value": "eu-west-3",
+                                        "label": "Paris"
+                                    },
+                                    {
+                                        "value": "eu-north-1",
+                                        "label": "Stockholm"
+                                    },
+                                    {
+                                        "value": "sa-east-1",
+                                        "label": "South America"
+                                    }
+                                ],
+                                "value": "us-east-1",
+                                "customValues": "us-east-1, N. Virginia\nus-east-2, Ohio\nus-west-1, N.California\nca-central-1, Canada\nus-west-2, Oregon\neu-west-1, Ireland\neu-west-2, London\neu-central-1, Frankfurt"
+                            },
+                            {
+                                "type": "property",
+                                "property": "LoadBalancerName",
+                                "inputType": "select",
+                                "id": "LoadBalancerName",
+                                "label": "LoadBalancerName",
+                                "defaultValue": {
+                                    "Ref": "DefaultCLB"
+                                },
+                                "visible": true,
+                                "inputPopulationType": "search",
+                                "search": "{AWS/ELB,LoadBalancerName}",
+                                "populateFrom": "LoadBalancerName"
+                            }
+                        ],
+                        "widgets": [
+                            {
+                                "type": "metric",
+                                "x": 4,
+                                "y": 1,
+                                "width": 20,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/ELB,LoadBalancerName} MetricName=\"RequestCount\" LoadBalancerName=\"appname\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.LoadBalancerName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "period": 60,
+                                    "stat": "Sum",
+                                    "title": "RequestCount",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false,
+                                    "labels": {
+                                        "visible": true
+                                    },
+                                    "legend": {
+                                        "position": "bottom"
+                                    }
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 0,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "## Load Balancer Performance",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 4,
+                                "y": 8,
+                                "width": 20,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/ELB,LoadBalancerName} MetricName=\"HTTPCode_ELB_4XX\" LoadBalancerName=\"appname\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('MetricName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ],
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/ELB,LoadBalancerName} MetricName=\"HTTPCode_ELB_5XX\" LoadBalancerName=\"appname\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('MetricName')}",
+                                                "id": "e2",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "period": 60,
+                                    "stat": "Sum",
+                                    "title": "HTTP 4XX/5XX emitted by CLB",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false,
+                                    "labels": {
+                                        "visible": true
+                                    },
+                                    "legend": {
+                                        "position": "bottom"
+                                    }
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 18,
+                                "y": 26,
+                                "width": 6,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/ELB,LoadBalancerName} MetricName=\"BackendConnectionErrors\" LoadBalancerName=\"appname\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.LoadBalancerName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "period": 60,
+                                    "stat": "Sum",
+                                    "title": "BackendConnectionErrors",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false,
+                                    "labels": {
+                                        "visible": true
+                                    },
+                                    "legend": {
+                                        "position": "bottom"
+                                    }
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 15,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "## Backend Performance",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 26,
+                                "width": 6,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/ELB,LoadBalancerName} MetricName=\"Latency\" LoadBalancerName=\"appname\"', 'p90', 60)),MAX, DESC)",
+                                                "label": "${PROP('Dim.LoadBalancerName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1",
+                                                "period": 60
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "title": "Latency added by Backend (p90)",
+                                    "period": 60,
+                                    "stat": "Average"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 6,
+                                "y": 19,
+                                "width": 18,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/ELB,LoadBalancerName} MetricName=\"HTTPCode_Backend_2XX\" LoadBalancerName=\"appname\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('MetricName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ],
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/ELB,LoadBalancerName} MetricName=\"HTTPCode_Backend_3XX\" LoadBalancerName=\"appname\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('MetricName')}",
+                                                "id": "e2",
+                                                "region": "us-east-1"
+                                            }
+                                        ],
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/ELB,LoadBalancerName} MetricName=\"HTTPCode_Backend_4XX\" LoadBalancerName=\"appname\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('MetricName')}",
+                                                "id": "e3",
+                                                "region": "us-east-1"
+                                            }
+                                        ],
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/ELB,LoadBalancerName} MetricName=\"HTTPCode_Backend_5XX\" LoadBalancerName=\"appname\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('MetricName')}",
+                                                "id": "e4",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "period": 60,
+                                    "stat": "Sum",
+                                    "title": "Backend HTTP Response",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false,
+                                    "labels": {
+                                        "visible": true
+                                    },
+                                    "legend": {
+                                        "position": "bottom"
+                                    }
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 26,
+                                "width": 12,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/ELB,LoadBalancerName} MetricName=\"HealthyHostCount\" LoadBalancerName=\"appname\"', 'Minimum', 60)),MIN, DESC)",
+                                                "label": "${PROP('MetricName')}",
+                                                "id": "e2",
+                                                "region": "us-east-1",
+                                                "period": 60
+                                            }
+                                        ],
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/ELB,LoadBalancerName} MetricName=\"UnHealthyHostCount\" LoadBalancerName=\"appname\"', 'Maximum', 60)),MAX, DESC)",
+                                                "label": "${PROP('MetricName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1",
+                                                "period": 60
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "title": "Backends Health",
+                                    "period": 60,
+                                    "stat": "Maximum"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 1,
+                                "width": 4,
+                                "height": 4,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/ELB,LoadBalancerName} MetricName=\"RequestCount\" LoadBalancerName=\"appname\" LoadBalancerName=\"appname\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.LoadBalancerName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "period": 60,
+                                    "stat": "Sum",
+                                    "title": "RequestCount",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false,
+                                    "labels": {
+                                        "visible": true
+                                    },
+                                    "legend": {
+                                        "position": "hidden"
+                                    }
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 10,
+                                "width": 4,
+                                "height": 5,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/ELB,LoadBalancerName} MetricName=\"HTTPCode_ELB_5XX\" LoadBalancerName=\"appname\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.LoadBalancerName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "period": 60,
+                                    "stat": "Sum",
+                                    "title": "HTTP 5XX Responses by CLB",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false,
+                                    "labels": {
+                                        "visible": true
+                                    },
+                                    "legend": {
+                                        "position": "hidden"
+                                    }
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 16,
+                                "width": 6,
+                                "height": 3,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/ELB,LoadBalancerName} MetricName=\"UnHealthyHostCount\" LoadBalancerName=\"appname\"', 'Maximum', 60)),MAX, DESC)",
+                                                "label": "${PROP('Dim.LoadBalancerName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1",
+                                                "period": 60
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "title": "UnHealthy Backends",
+                                    "period": 60,
+                                    "stat": "Maximum",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 6,
+                                "y": 33,
+                                "width": 6,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/ELB,LoadBalancerName} MetricName=\"SpilloverCount\" LoadBalancerName=\"appname\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.LoadBalancerName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "period": 60,
+                                    "stat": "Sum",
+                                    "title": "SpilloverCount by CLB",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false,
+                                    "labels": {
+                                        "visible": true
+                                    },
+                                    "legend": {
+                                        "position": "bottom"
+                                    }
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 33,
+                                "width": 6,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/ELB,LoadBalancerName} MetricName=\"SurgeQueueLength\" LoadBalancerName=\"appname\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.LoadBalancerName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "period": 60,
+                                    "stat": "Sum",
+                                    "title": "SurgeQueueLength by CLB",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false,
+                                    "labels": {
+                                        "visible": true
+                                    },
+                                    "legend": {
+                                        "position": "bottom"
+                                    }
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 6,
+                                "y": 16,
+                                "width": 6,
+                                "height": 3,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/ELB,LoadBalancerName} MetricName=\"Latency\" LoadBalancerName=\"appname\"', 'p90', 60)),MAX, DESC)",
+                                                "label": "${PROP('Dim.LoadBalancerName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1",
+                                                "period": 60
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "title": "Latency added by Backend (p90)",
+                                    "period": 60,
+                                    "stat": "Average",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 16,
+                                "width": 6,
+                                "height": 3,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/ELB,LoadBalancerName} MetricName=\"BackendConnectionErrors\" LoadBalancerName=\"appname\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.LoadBalancerName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "period": 60,
+                                    "stat": "Sum",
+                                    "title": "BackendConnectionErrors",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false,
+                                    "labels": {
+                                        "visible": true
+                                    },
+                                    "legend": {
+                                        "position": "hidden"
+                                    }
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 18,
+                                "y": 16,
+                                "width": 6,
+                                "height": 3,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/ELB,LoadBalancerName} MetricName=\"SurgeQueueLength\" LoadBalancerName=\"appname\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.LoadBalancerName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "period": 60,
+                                    "stat": "Sum",
+                                    "title": "SurgeQueueLength by CLB",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false,
+                                    "labels": {
+                                        "visible": true
+                                    },
+                                    "legend": {
+                                        "position": "hidden"
+                                    }
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 40,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "## Connections",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 50,
+                                "width": 12,
+                                "height": 8,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/ELB,LoadBalancerName} MetricName=\"EstimatedALBConsumedLCUs\" LoadBalancerName=\"appname\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.LoadBalancerName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "period": 60,
+                                    "stat": "Sum",
+                                    "title": "Estimated ALB Consumed LCUs",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false,
+                                    "labels": {
+                                        "visible": true
+                                    },
+                                    "legend": {
+                                        "position": "bottom"
+                                    }
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 50,
+                                "width": 12,
+                                "height": 8,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/ELB,LoadBalancerName} MetricName=\"EstimatedProcessedBytes\" LoadBalancerName=\"appname\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.LoadBalancerName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "period": 60,
+                                    "stat": "Sum",
+                                    "title": "Estimated Processed Bytes",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false,
+                                    "labels": {
+                                        "visible": true
+                                    },
+                                    "legend": {
+                                        "position": "bottom"
+                                    }
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 41,
+                                "width": 24,
+                                "height": 8,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/ELB,LoadBalancerName} MetricName=\"EstimatedALBActiveConnectionCount\" LoadBalancerName=\"appname\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('MetricName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ],
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/ELB,LoadBalancerName} MetricName=\"EstimatedALBNewConnectionCount\" LoadBalancerName=\"appname\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('MetricName')}",
+                                                "id": "e2",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "period": 60,
+                                    "stat": "Sum",
+                                    "title": "Estimated ALB Connection Count",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false,
+                                    "labels": {
+                                        "visible": true
+                                    },
+                                    "legend": {
+                                        "position": "bottom"
+                                    }
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 5,
+                                "width": 4,
+                                "height": 5,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/ELB,LoadBalancerName} MetricName=\"HTTPCode_ELB_4XX\" LoadBalancerName=\"appname\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('Dim.LoadBalancerName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "period": 60,
+                                    "stat": "Sum",
+                                    "title": "HTTP 4XX Responses by CLB",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false,
+                                    "labels": {
+                                        "visible": true
+                                    },
+                                    "legend": {
+                                        "position": "hidden"
+                                    }
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 49,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "## Capacity",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 19,
+                                "width": 6,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/ELB,LoadBalancerName} MetricName=\"HTTPCode_Backend_2XX\" LoadBalancerName=\"appname\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('MetricName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ],
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/ELB,LoadBalancerName} MetricName=\"HTTPCode_Backend_3XX\" LoadBalancerName=\"appname\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('MetricName')}",
+                                                "id": "e2",
+                                                "region": "us-east-1"
+                                            }
+                                        ],
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/ELB,LoadBalancerName} MetricName=\"HTTPCode_Backend_4XX\" LoadBalancerName=\"appname\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('MetricName')}",
+                                                "id": "e3",
+                                                "region": "us-east-1"
+                                            }
+                                        ],
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/ELB,LoadBalancerName} MetricName=\"HTTPCode_Backend_5XX\" LoadBalancerName=\"appname\"', 'Sum', 60)),SUM, DESC)",
+                                                "label": "${PROP('MetricName')}",
+                                                "id": "e4",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "pie",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "period": 60,
+                                    "stat": "Sum",
+                                    "title": "Backend HTTP Response",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false,
+                                    "labels": {
+                                        "visible": false
+                                    },
+                                    "legend": {
+                                        "position": "bottom"
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        }
+    }
+}
