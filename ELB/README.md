@@ -20,7 +20,7 @@ To visualize this metric, you can create a custom widget using the source below:
 
 Make sure to replace `replace_with_clb_name` with the actual name of your Classic Load Balancer.
 
-## Visual HTTP 4XX and HTTP 5XX as a percentage of the RequestCount
+## Visualize HTTP 4XX & HTTP 5XX as a percentage of the RequestCount
 
 Currently, it's not possible to represent this percentage using [Search Expressions](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/using-search-expressions.html)
 
