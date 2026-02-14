@@ -1,0 +1,313 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "CloudWatch Dashboard to visualize Network Synthetic Monitor resources.",
+    "Transform": "AWS::LanguageExtensions",
+    "Parameters": {
+        "DefaultRegion": {
+            "Description": "Select the default region hosting the load balancers to be monitored.",
+            "Type": "String",
+            "Default": "us-east-1"
+        }
+    },
+    "Resources": {
+        "CWDashboardALBAll": {
+            "Type": "AWS::CloudWatch::Dashboard",
+            "Properties": {
+                "DashboardName": "Network_Synthetic_Monitor",
+                "DashboardBody": {
+                    "Fn::ToJsonString": {
+                        "variables": [
+                            {
+                                "type": "pattern",
+                                "pattern": "us-east-1",
+                                "inputType": "select",
+                                "id": "Region",
+                                "label": "Region",
+                                "defaultValue": {
+                                    "Ref": "DefaultRegion"
+                                },
+                                "visible": true,
+                                "values": [
+                                    {
+                                        "value": "us-east-1",
+                                        "label": "N. Virginia"
+                                    },
+                                    {
+                                        "value": "us-east-2",
+                                        "label": "Ohio"
+                                    },
+                                    {
+                                        "value": "us-west-1",
+                                        "label": "N.California"
+                                    },
+                                    {
+                                        "value": "us-west-2",
+                                        "label": "Oregon"
+                                    },
+                                    {
+                                        "value": "ap-east-1",
+                                        "label": "Hong Kong"
+                                    },
+                                    {
+                                        "value": "ap-south-1",
+                                        "label": "Mumbai"
+                                    },
+                                    {
+                                        "value": "ap-northeast-3",
+                                        "label": "Osaka"
+                                    },
+                                    {
+                                        "value": "ap-northeast-2",
+                                        "label": "Seoul"
+                                    },
+                                    {
+                                        "value": "ap-southeast-1",
+                                        "label": "Singapore"
+                                    },
+                                    {
+                                        "value": "ap-southeast-2",
+                                        "label": "Sydney"
+                                    },
+                                    {
+                                        "value": "ap-noutheast-1",
+                                        "label": "Toyko"
+                                    },
+                                    {
+                                        "value": "ca-central-1",
+                                        "label": "Canada"
+                                    },
+                                    {
+                                        "value": "eu-central-1",
+                                        "label": "Frankfurt"
+                                    },
+                                    {
+                                        "value": "eu-west-1",
+                                        "label": "Ireland"
+                                    },
+                                    {
+                                        "value": "eu-west-2",
+                                        "label": "London"
+                                    },
+                                    {
+                                        "value": "eu-west-3",
+                                        "label": "Paris"
+                                    },
+                                    {
+                                        "value": "eu-north-1",
+                                        "label": "Stockholm"
+                                    },
+                                    {
+                                        "value": "sa-east-1",
+                                        "label": "South America"
+                                    }
+                                ],
+                                "value": "us-east-1",
+                                "customValues": "us-east-1, N. Virginia\nus-east-2, Ohio\nus-west-1, N.California\nca-central-1, Canada\nus-west-2, Oregon\neu-west-1, Ireland\neu-west-2, London\neu-central-1, Frankfurt"
+                            }
+                        ],
+                        "widgets": [
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 7,
+                                "width": 12,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/NetworkMonitor,Probe,Monitor} MetricName=\"PacketLoss\"', 'Maximum', 60)),MAX, DESC)",
+                                                "label": "${PROP('Dim.Probe')} ${PROP('Dim.Monitor')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "period": 60,
+                                    "stat": "Sum",
+                                    "title": "PacketLoss %",
+                                    "setPeriodToTimeRange": false,
+                                    "sparkline": true,
+                                    "labels": {
+                                        "visible": true
+                                    },
+                                    "legend": {
+                                        "position": "hidden"
+                                    }
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 7,
+                                "width": 12,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/NetworkMonitor,Probe,Monitor} MetricName=\"PacketLoss\"', 'Maximum', 60)),MAX, DESC)",
+                                                "label": "${PROP('Dim.Probe')} ${PROP('Dim.Monitor')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "period": 60,
+                                    "stat": "Sum",
+                                    "title": "PacketLoss %",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false,
+                                    "labels": {
+                                        "visible": true
+                                    },
+                                    "legend": {
+                                        "position": "bottom"
+                                    }
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 14,
+                                "width": 12,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/NetworkMonitor,Probe,Monitor} MetricName=\"RTT\"', 'Maximum', 60)),MAX, DESC)",
+                                                "label": "${PROP('Dim.Probe')} ${PROP('Dim.Monitor')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "period": 60,
+                                    "stat": "Sum",
+                                    "title": "Round Trip TIme (Max)",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false,
+                                    "labels": {
+                                        "visible": true
+                                    },
+                                    "legend": {
+                                        "position": "bottom"
+                                    }
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 14,
+                                "width": 12,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/NetworkMonitor,Probe,Monitor} MetricName=\"RTT\"', 'Maximum', 60)),MAX, DESC)",
+                                                "label": "${PROP('Dim.Probe')} ${PROP('Dim.Monitor')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "period": 60,
+                                    "stat": "Sum",
+                                    "title": "Round Trip TIme (Max)",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false,
+                                    "labels": {
+                                        "visible": true
+                                    },
+                                    "legend": {
+                                        "position": "hidden"
+                                    }
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 0,
+                                "width": 12,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/NetworkMonitor,Probe,Monitor} MetricName=\"HealthIndicator\"', 'Minimum', 60)),MIN, DESC)",
+                                                "label": "${PROP('Dim.Probe')} ${PROP('Dim.Monitor')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "period": 60,
+                                    "stat": "Sum",
+                                    "title": "HealthIndicator (Min)",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false,
+                                    "labels": {
+                                        "visible": true
+                                    },
+                                    "legend": {
+                                        "position": "bottom"
+                                    }
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 0,
+                                "width": 12,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/NetworkMonitor,Probe,Monitor} MetricName=\"HealthIndicator\"', 'Minimum', 60)),MIN, DESC)",
+                                                "label": "${PROP('Dim.Probe')} ${PROP('Dim.Monitor')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "period": 60,
+                                    "stat": "Sum",
+                                    "title": "HealthIndicator (Min)",
+                                    "setPeriodToTimeRange": false,
+                                    "sparkline": true,
+                                    "labels": {
+                                        "visible": true
+                                    },
+                                    "legend": {
+                                        "position": "bottom"
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        }
+    }
+}

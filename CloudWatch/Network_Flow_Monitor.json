@@ -13,7 +13,7 @@
         "CWDashboardALBAll": {
             "Type": "AWS::CloudWatch::Dashboard",
             "Properties": {
-                "DashboardName": "ALB_All_Resources",
+                "DashboardName": "Network_Flow_Monitor",
                 "DashboardBody": {
                     "Fn::ToJsonString": {
                         "variables": [
