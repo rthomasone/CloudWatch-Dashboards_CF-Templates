@@ -23,7 +23,7 @@
         "CWDashboardEBSAll": {
             "Type": "AWS::CloudWatch::Dashboard",
             "Properties": {
-                "DashboardName": "EBS_All_Resources_Test",
+                "DashboardName": "EBS_All_Resources_Account_ID",
                 "DashboardBody": {
                     "Fn::ToJsonString": {
                         "variables": [
@@ -750,7 +750,7 @@
         "CWDashboardEBSIndividual": {
             "Type": "AWS::CloudWatch::Dashboard",
             "Properties": {
-                "DashboardName": "EBS_Individual_Resources_Test",
+                "DashboardName": "EBS_Individual_Resources_Account_ID",
                 "DashboardBody": {
                     "Fn::ToJsonString": {
                         "variables": [
