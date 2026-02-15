@@ -1,6 +1,6 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
-    "Description": "CloudWatch Dashboards to visualize Application Load Balancer (ALB) resources. Both dashboards leverage Dashboard Variables to filter on the desired resources. Dashboard 'ALB_All_Resources' visualizes ALL ALB resources in the target region. Dashboard 'ALB_Individual_Resources' provides additional filters to isolate a specific ALB and the corresponding Web Application Firewall (WAF).",
+    "Description": "CloudWatch Dashboards to visualize EventBridge Pipes resources. Both dashboards leverage Dashboard Variables to filter on the desired resources. Dashboard 'ALB_All_Resources' visualizes ALL ALB resources in the target region. Dashboard 'ALB_Individual_Resources' provides additional filters to isolate a specific ALB and the corresponding Web Application Firewall (WAF).",
     "Transform": "AWS::LanguageExtensions",
     "Parameters": {
         "DefaultRegion": {

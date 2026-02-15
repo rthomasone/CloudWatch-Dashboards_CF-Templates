@@ -1,10 +1,10 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
-    "Description": "CloudWatch Dashboards to visualize EventBridge resources on default and custom event buses. This template contains four (4) dashboards and leverages Dashboard Variables to filter resources. For example, dashboard 'EventBridge_All_Resource_Custom_Bus' visualizes ALL EventBridge rules in the target region for a specific custom event bus. On the other hand, Dashboard 'EventBridge_Individual_Resource_Custom_Bus' provides additional filters to isolate a specific rule for that custom event bus.",
+    "Description": "CloudWatch Dashboards to visualize EventBridge rules on default and custom event buses. This template contains four (4) dashboards and leverages Dashboard Variables to filter rules. For example, dashboard 'EventBridge_All_Resource_Custom_Bus' visualizes ALL EventBridge rules in the target region for a specific custom event bus. On the other hand, Dashboard 'EventBridge_Individual_Resource_Custom_Bus' provides additional filters to isolate a specific rule for that custom event bus.",
     "Transform": "AWS::LanguageExtensions",
     "Parameters": {
         "DefaultRegion": {
-            "Description": "Select the default region hosting the load balancers to be monitored.",
+            "Description": "Select the default region hosting the EventBridge rules to be monitored.",
             "Type": "String",
             "Default": "us-east-1"
         },
