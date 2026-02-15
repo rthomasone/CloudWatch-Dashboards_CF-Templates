@@ -1,0 +1,1117 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "CloudWatch Dashboards to visualize CloudFront distributions. Both dashboards leverage Dashboard Variables to filter on the desired resources. Dashboard 'CloudFront_All_Resources' visualizes ALL CloudFront distributions in the target region. Dashboard 'CloudFront_Individual_Resources' provides additional filters to isolate a specific CloudFront distribution.",
+    "Transform": "AWS::LanguageExtensions",
+    "Parameters": {
+        "DefaultRegion": {
+            "Description": "Select the default region hosting the CloudFront distributions to be monitored.",
+            "Type": "String",
+            "Default": "us-east-1"
+        },
+        "DefaultDistributionId": {
+            "Description": "Select the default CloudFront distribution ID to be monitored (e.g. E1234567890ABC).)",
+            "Type": "String",
+            "Default": ""
+        },
+        "DefaultFunctionName": {
+            "Description": "Select the default Lambda@Edge function name to be monitored.",
+            "Type": "String",
+            "Default": ""
+        }
+    },
+    "Resources": {
+        "CWDashboardCloudFrontAll": {
+            "Type": "AWS::CloudWatch::Dashboard",
+            "Properties": {
+                "DashboardName": "CloudFront_All_Resources",
+                "DashboardBody": {
+                    "Fn::ToJsonString": {
+                        "variables": [
+                            {
+                                "type": "property",
+                                "property": "region",
+                                "inputType": "select",
+                                "id": "Region",
+                                "label": "Region",
+                                "defaultValue": {
+                                    "Ref": "DefaultRegion"
+                                },
+                                "visible": true,
+                                "values": [
+                                    {
+                                        "value": "us-east-1",
+                                        "label": "N. Virginia"
+                                    },
+                                    {
+                                        "value": "us-east-2",
+                                        "label": "Ohio"
+                                    },
+                                    {
+                                        "value": "us-west-1",
+                                        "label": "N.California"
+                                    },
+                                    {
+                                        "value": "us-west-2",
+                                        "label": "Oregon"
+                                    },
+                                    {
+                                        "value": "ap-east-1",
+                                        "label": "Hong Kong"
+                                    },
+                                    {
+                                        "value": "ap-south-1",
+                                        "label": "Mumbai"
+                                    },
+                                    {
+                                        "value": "ap-northeast-3",
+                                        "label": "Osaka"
+                                    },
+                                    {
+                                        "value": "ap-northeast-2",
+                                        "label": "Seoul"
+                                    },
+                                    {
+                                        "value": "ap-southeast-1",
+                                        "label": "Singapore"
+                                    },
+                                    {
+                                        "value": "ap-southeast-2",
+                                        "label": "Sydney"
+                                    },
+                                    {
+                                        "value": "ap-noutheast-1",
+                                        "label": "Toyko"
+                                    },
+                                    {
+                                        "value": "ca-central-1",
+                                        "label": "Canada"
+                                    },
+                                    {
+                                        "value": "eu-central-1",
+                                        "label": "Frankfurt"
+                                    },
+                                    {
+                                        "value": "eu-west-1",
+                                        "label": "Ireland"
+                                    },
+                                    {
+                                        "value": "eu-west-2",
+                                        "label": "London"
+                                    },
+                                    {
+                                        "value": "eu-west-3",
+                                        "label": "Paris"
+                                    },
+                                    {
+                                        "value": "eu-north-1",
+                                        "label": "Stockholm"
+                                    },
+                                    {
+                                        "value": "sa-east-1",
+                                        "label": "South America"
+                                    }
+                                ]
+                            }
+                        ],
+                        "widgets": [
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 22,
+                                "width": 12,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/CloudFront,DistributionId,Region} MetricName=\"BytesDownloaded\"', 'Sum', 60)), SUM, DESC)",
+                                                "label": "${PROP('Dim.DistributionId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "period": 60,
+                                    "stat": "Sum",
+                                    "title": "BytesDownloaded"
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 0,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "# Request Metrics",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 1,
+                                "width": 8,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/CloudFront,DistributionId,Region} MetricName=\"TotalErrorRate\"', 'Average', 60)), AVG, DESC)",
+                                                "label": "${PROP('Dim.DistributionId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "period": 60,
+                                    "stat": "Sum",
+                                    "title": "TotalErrorRate"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 8,
+                                "y": 1,
+                                "width": 8,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/CloudFront,DistributionId,Region} MetricName=\"5xxErrorRate\"', 'Average', 60)), AVG, DESC)",
+                                                "label": "${PROP('Dim.DistributionId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "period": 60,
+                                    "stat": "Sum",
+                                    "title": "5xxErrorRate"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 16,
+                                "y": 1,
+                                "width": 8,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/CloudFront,DistributionId,Region} MetricName=\"4xxErrorRate\"', 'Average', 60)), AVG, DESC)",
+                                                "label": "${PROP('Dim.DistributionId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "period": 60,
+                                    "stat": "Sum",
+                                    "title": "4xxErrorRate"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 8,
+                                "width": 8,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/CloudFront,DistributionId,Region} MetricName=\"TotalErrorRate\"', 'Average', 60)), AVG, DESC)",
+                                                "label": "${PROP('Dim.DistributionId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "period": 60,
+                                    "stat": "Sum",
+                                    "title": "TotalErrorRate"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 8,
+                                "y": 8,
+                                "width": 8,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/CloudFront,DistributionId,Region} MetricName=\"5xxErrorRate\"', 'Average', 60)), AVG, DESC)",
+                                                "label": "${PROP('Dim.DistributionId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "period": 60,
+                                    "stat": "Sum",
+                                    "title": "5xxErrorRate"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 16,
+                                "y": 8,
+                                "width": 8,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/CloudFront,DistributionId,Region} MetricName=\"4xxErrorRate\"', 'Average', 60)), AVG, DESC)",
+                                                "label": "${PROP('Dim.DistributionId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "period": 60,
+                                    "stat": "Sum",
+                                    "title": "4xxErrorRate"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 22,
+                                "width": 12,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/CloudFront,DistributionId,Region} MetricName=\"BytesUploaded\"', 'Sum', 60)), SUM, DESC)",
+                                                "label": "${PROP('Dim.DistributionId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "period": 60,
+                                    "stat": "Sum",
+                                    "title": "BytesUploaded"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 15,
+                                "width": 24,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/CloudFront,DistributionId,Region} MetricName=\"Requests\"', 'Sum', 60)), SUM, DESC)",
+                                                "label": "${PROP('Dim.DistributionId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "period": 60,
+                                    "stat": "Sum",
+                                    "title": "Requests"
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 29,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "# Function Metrics",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 44,
+                                "width": 12,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/CloudFront,FunctionName,DistributionId,Region} MetricName=\"FunctionInvocations\"', 'Sum', 60)), SUM, DESC)",
+                                                "label": "${PROP('Dim.DistributionId')} ${PROP('Dim.FunctionName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "period": 60,
+                                    "stat": "Sum",
+                                    "title": "FunctionInvocations"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 44,
+                                "width": 12,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/CloudFront,FunctionName,DistributionId,Region} MetricName=\"FunctionComputeUtilization\"', 'Maximum', 60)), MAX, DESC)",
+                                                "label": "${PROP('Dim.DistributionId')} ${PROP('Dim.FunctionName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "period": 60,
+                                    "stat": "Sum",
+                                    "title": "FunctionComputeUtilization"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 30,
+                                "width": 8,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/CloudFront,FunctionName,Region} MetricName=\"FunctionThrottles\"', 'Sum', 60)), SUM, DESC)",
+                                                "label": "${PROP('Dim.FunctionName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "period": 60,
+                                    "stat": "Sum",
+                                    "title": "FunctionThrottles",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 16,
+                                "y": 30,
+                                "width": 8,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/CloudFront,FunctionName,Region} MetricName=\"FunctionValidationErrors\"', 'Sum', 60)), SUM, DESC)",
+                                                "label": "${PROP('Dim.FunctionName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "period": 60,
+                                    "stat": "Sum",
+                                    "title": "FunctionValidationErrors",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 8,
+                                "y": 30,
+                                "width": 8,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/CloudFront,FunctionName,Region} MetricName=\"FunctionExecutionErrors\"', 'Sum', 60)), SUM, DESC)",
+                                                "label": "${PROP('Dim.FunctionName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "period": 60,
+                                    "stat": "Sum",
+                                    "title": "FunctionExecutionErrors",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 37,
+                                "width": 8,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/CloudFront,FunctionName,Region} MetricName=\"FunctionThrottles\"', 'Sum', 60)), SUM, DESC)",
+                                                "label": "${PROP('Dim.FunctionName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "period": 60,
+                                    "stat": "Sum",
+                                    "title": "FunctionThrottles"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 8,
+                                "y": 37,
+                                "width": 8,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/CloudFront,FunctionName,Region} MetricName=\"FunctionExecutionErrors\"', 'Sum', 60)), SUM, DESC)",
+                                                "label": "${PROP('Dim.FunctionName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "period": 60,
+                                    "stat": "Sum",
+                                    "title": "FunctionExecutionErrors"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 16,
+                                "y": 37,
+                                "width": 8,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/CloudFront,FunctionName,Region} MetricName=\"FunctionValidationErrors\"', 'Sum', 60)), SUM, DESC)",
+                                                "label": "${PROP('Dim.FunctionName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "period": 60,
+                                    "stat": "Sum",
+                                    "title": "FunctionValidationErrors"
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        },
+        "CWDashboardCloudFrontIndividual": {
+            "Type": "AWS::CloudWatch::Dashboard",
+            "Properties": {
+                "DashboardName": "CloudFront_Individual_Resources",
+                "DashboardBody": {
+                    "Fn::ToJsonString": {
+                        "variables": [
+                            {
+                                "type": "property",
+                                "property": "region",
+                                "inputType": "select",
+                                "id": "Region",
+                                "label": "Region",
+                                "defaultValue": {
+                                    "Ref": "DefaultRegion"
+                                },
+                                "visible": true,
+                                "values": [
+                                    {
+                                        "value": "us-east-1",
+                                        "label": "N. Virginia"
+                                    },
+                                    {
+                                        "value": "us-east-2",
+                                        "label": "Ohio"
+                                    },
+                                    {
+                                        "value": "us-west-1",
+                                        "label": "N.California"
+                                    },
+                                    {
+                                        "value": "us-west-2",
+                                        "label": "Oregon"
+                                    },
+                                    {
+                                        "value": "ap-east-1",
+                                        "label": "Hong Kong"
+                                    },
+                                    {
+                                        "value": "ap-south-1",
+                                        "label": "Mumbai"
+                                    },
+                                    {
+                                        "value": "ap-northeast-3",
+                                        "label": "Osaka"
+                                    },
+                                    {
+                                        "value": "ap-northeast-2",
+                                        "label": "Seoul"
+                                    },
+                                    {
+                                        "value": "ap-southeast-1",
+                                        "label": "Singapore"
+                                    },
+                                    {
+                                        "value": "ap-southeast-2",
+                                        "label": "Sydney"
+                                    },
+                                    {
+                                        "value": "ap-noutheast-1",
+                                        "label": "Toyko"
+                                    },
+                                    {
+                                        "value": "ca-central-1",
+                                        "label": "Canada"
+                                    },
+                                    {
+                                        "value": "eu-central-1",
+                                        "label": "Frankfurt"
+                                    },
+                                    {
+                                        "value": "eu-west-1",
+                                        "label": "Ireland"
+                                    },
+                                    {
+                                        "value": "eu-west-2",
+                                        "label": "London"
+                                    },
+                                    {
+                                        "value": "eu-west-3",
+                                        "label": "Paris"
+                                    },
+                                    {
+                                        "value": "eu-north-1",
+                                        "label": "Stockholm"
+                                    },
+                                    {
+                                        "value": "sa-east-1",
+                                        "label": "South America"
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "property",
+                                "property": "DistributionId",
+                                "inputType": "select",
+                                "id": "DistributionId",
+                                "label": "DistributionId",
+                                "defaultValue": {
+                                    "Ref": "DefaultDistributionId"
+                                },
+                                "visible": true,
+                                "inputPopulationType": "search",
+                                "search": "{AWS/CloudFront,DistributionId,Region} MetricName=Requests",
+                                "populateFrom": "DistributionId"
+                            },
+                            {
+                                "type": "property",
+                                "property": "FunctionName",
+                                "inputType": "select",
+                                "id": "FunctionName",
+                                "label": "FunctionName",
+                                "defaultValue": {
+                                    "Ref": "DefaultFunctionName"
+                                },
+                                "visible": true,
+                                "inputPopulationType": "search",
+                                "search": "{AWS/CloudFront,DistributionId,FunctionName,Region} MetricName=FunctionInvocations",
+                                "populateFrom": "FunctionName"
+                            }
+                        ],
+                        "widgets": [
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 15,
+                                "width": 6,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/CloudFront,DistributionId,Region} MetricName=\"BytesDownloaded\" DistributionId=\"distro\"', 'Sum', 60)), SUM, DESC)",
+                                                "label": "${PROP('MetricName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ],
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/CloudFront,DistributionId,Region} MetricName=\"BytesUploaded\" DistributionId=\"distro\"', 'Sum', 60)), SUM, DESC)",
+                                                "label": "${PROP('MetricName')}",
+                                                "id": "e2",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "period": 60,
+                                    "stat": "Sum",
+                                    "title": "Data Transferred",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 0,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "# Distribution Metrics",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 6,
+                                "y": 1,
+                                "width": 18,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/CloudFront,DistributionId,Region} MetricName=\"TotalErrorRate\" DistributionId=\"distro\"', 'Average', 60)), AVG, DESC)",
+                                                "label": "${PROP('MetricName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ],
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/CloudFront,DistributionId,Region} MetricName=\"5xxErrorRate\" DistributionId=\"distro\"', 'Average', 60)), AVG, DESC)",
+                                                "label": "${PROP('MetricName')}",
+                                                "id": "e2",
+                                                "region": "us-east-1"
+                                            }
+                                        ],
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/CloudFront,DistributionId,Region} MetricName=\"4xxErrorRate\" DistributionId=\"distro\"', 'Average', 60)), AVG, DESC)",
+                                                "label": "${PROP('MetricName')}",
+                                                "id": "e3",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "period": 60,
+                                    "stat": "Sum",
+                                    "title": "Distribution Error Rate (%)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 8,
+                                "width": 24,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/CloudFront,DistributionId,Region} MetricName=\"Requests\" DistributionId=\"distro\"', 'Sum', 60)), SUM, DESC)",
+                                                "label": "${PROP('Dim.DistributionId')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "period": 60,
+                                    "stat": "Sum",
+                                    "title": "Requests"
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 22,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "# Function Metrics",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 23,
+                                "width": 12,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/CloudFront,FunctionName,DistributionId,Region} MetricName=\"FunctionInvocations\" DistributionId=\"distro\" FunctionName=\"lambda\"', 'Sum', 60)), SUM, DESC)",
+                                                "label": "${PROP('Dim.DistributionId')} ${PROP('Dim.FunctionName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "period": 60,
+                                    "stat": "Sum",
+                                    "title": "FunctionInvocations"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 23,
+                                "width": 12,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/CloudFront,FunctionName,DistributionId,Region} MetricName=\"FunctionComputeUtilization\" DistributionId=\"distro\" FunctionName=\"lambda\"', 'Maximum', 60)), MAX, DESC)",
+                                                "label": "${PROP('Dim.DistributionId')} ${PROP('Dim.FunctionName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "period": 60,
+                                    "stat": "Sum",
+                                    "title": "FunctionComputeUtilization"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 31,
+                                "width": 8,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/CloudFront,FunctionName,Region} MetricName=\"FunctionThrottles\"', 'Sum', 60)), SUM, DESC)",
+                                                "label": "${PROP('Dim.FunctionName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "period": 60,
+                                    "stat": "Sum",
+                                    "title": "FunctionThrottles",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 16,
+                                "y": 31,
+                                "width": 8,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/CloudFront,FunctionName,Region} MetricName=\"FunctionValidationErrors\"', 'Sum', 60)), SUM, DESC)",
+                                                "label": "${PROP('Dim.FunctionName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "period": 60,
+                                    "stat": "Sum",
+                                    "title": "FunctionValidationErrors",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 8,
+                                "y": 31,
+                                "width": 8,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/CloudFront,FunctionName,Region} MetricName=\"FunctionExecutionErrors\"', 'Sum', 60)), SUM, DESC)",
+                                                "label": "${PROP('Dim.FunctionName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "period": 60,
+                                    "stat": "Sum",
+                                    "title": "FunctionExecutionErrors",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 38,
+                                "width": 8,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/CloudFront,FunctionName,Region} MetricName=\"FunctionThrottles\"', 'Sum', 60)), SUM, DESC)",
+                                                "label": "${PROP('Dim.FunctionName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "period": 60,
+                                    "stat": "Sum",
+                                    "title": "FunctionThrottles"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 8,
+                                "y": 38,
+                                "width": 8,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/CloudFront,FunctionName,Region} MetricName=\"FunctionExecutionErrors\"', 'Sum', 60)), SUM, DESC)",
+                                                "label": "${PROP('Dim.FunctionName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "period": 60,
+                                    "stat": "Sum",
+                                    "title": "FunctionExecutionErrors"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 16,
+                                "y": 38,
+                                "width": 8,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/CloudFront,FunctionName,Region} MetricName=\"FunctionValidationErrors\"', 'Sum', 60)), SUM, DESC)",
+                                                "label": "${PROP('Dim.FunctionName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "period": 60,
+                                    "stat": "Sum",
+                                    "title": "FunctionValidationErrors"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 1,
+                                "width": 6,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/CloudFront,DistributionId,Region} MetricName=\"TotalErrorRate\" DistributionId=\"distro\"', 'Average', 60)), AVG, DESC)",
+                                                "label": "${PROP('MetricName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ],
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/CloudFront,DistributionId,Region} MetricName=\"5xxErrorRate\" DistributionId=\"distro\"', 'Average', 60)), AVG, DESC)",
+                                                "label": "${PROP('MetricName')}",
+                                                "id": "e2",
+                                                "region": "us-east-1"
+                                            }
+                                        ],
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/CloudFront,DistributionId,Region} MetricName=\"4xxErrorRate\" DistributionId=\"distro\"', 'Average', 60)), AVG, DESC)",
+                                                "label": "${PROP('MetricName')}",
+                                                "id": "e3",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "period": 60,
+                                    "stat": "Sum",
+                                    "title": "Distribution Error Rate ( Latest %)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 6,
+                                "y": 15,
+                                "width": 18,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/CloudFront,DistributionId,Region} MetricName=\"BytesDownloaded\" DistributionId=\"distro\"', 'Sum', 60)), SUM, DESC)",
+                                                "label": "${PROP('MetricName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ],
+                                        [
+                                            {
+                                                "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/CloudFront,DistributionId,Region} MetricName=\"BytesUploaded\" DistributionId=\"distro\"', 'Sum', 60)), SUM, DESC)",
+                                                "label": "${PROP('MetricName')}",
+                                                "id": "e2",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "period": 60,
+                                    "stat": "Sum",
+                                    "title": "Data Transferred"
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 30,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "# Distribution & Function Metrics",
+                                    "background": "transparent"
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        }
+    }
+}
