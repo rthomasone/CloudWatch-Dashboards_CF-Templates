@@ -1,6 +1,6 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
-    "Description": "CloudWatch Dashboards to visualize EventBridge resources. Both dashboards leverage Dashboard Variables to filter on the desired resources. Dashboard 'EventBridge_All_Resources' visualizes ALL EventBridge rules in the target region. Dashboard 'EventBridge_Individual_Resources' provides additional filters to isolate a specific rule.",
+    "Description": "CloudWatch Dashboards to visualize EventBridge resources on default and custom event buses. This template contains four (4) dashboards and leverages Dashboard Variables to filter resources. For example, dashboard 'EventBridge_All_Resource_Custom_Bus' visualizes ALL EventBridge rules in the target region for a specific custom event bus. On the other hand, Dashboard 'EventBridge_Individual_Resource_Custom_Bus' provides additional filters to isolate a specific rule for that custom event bus.",
     "Transform": "AWS::LanguageExtensions",
     "Parameters": {
         "DefaultRegion": {
@@ -9,16 +9,26 @@
             "Default": "us-east-1"
         },
         "DefaultRuleName": {
-            "Description": "Optional. Select the default EventBridge Rule to be monitored.",
+            "Description": "Optional. Select the default EventBridge Rule on the Default Event Bus to be monitored.",
+            "Type": "String",
+            "Default": ""
+        },
+        "DefaultCustomEventBus": {
+            "Description": "Optional. Select the default EventBridge Custom Event Bus to be monitored.",
+            "Type": "String",
+            "Default": ""
+        },
+        "DefaultCustomEventBusRuleName": {
+            "Description": "Optional. Select the default EventBridge Rule on the Custom Event Bus to be monitored.",
             "Type": "String",
             "Default": ""
         }
     },
     "Resources": {
-        "CWDashboardEBAll": {
+        "CWDashboardEBDefaultAll": {
             "Type": "AWS::CloudWatch::Dashboard",
             "Properties": {
-                "DashboardName": "EventBridge_All_Resource",
+                "DashboardName": "EventBridge_All_Resource_Default_Bus",
                 "DashboardBody": {
                     "Fn::ToJsonString": {
                         "variables": [
@@ -28,7 +38,9 @@
                                 "inputType": "select",
                                 "id": "Region",
                                 "label": "Region",
-                                "defaultValue": "us-east-1",
+                                "defaultValue": {
+                                    "Ref": "DefaultRegion"
+                                },
                                 "visible": true,
                                 "values": [
                                     {
@@ -249,7 +261,7 @@
                                 "type": "metric",
                                 "x": 0,
                                 "y": 78,
-                                "width": 8,
+                                "width": 12,
                                 "height": 6,
                                 "properties": {
                                     "metrics": [
@@ -278,9 +290,9 @@
                             },
                             {
                                 "type": "metric",
-                                "x": 8,
+                                "x": 12,
                                 "y": 78,
-                                "width": 8,
+                                "width": 12,
                                 "height": 6,
                                 "properties": {
                                     "metrics": [
@@ -372,7 +384,7 @@
                                 "type": "metric",
                                 "x": 0,
                                 "y": 85,
-                                "width": 6,
+                                "width": 8,
                                 "height": 6,
                                 "properties": {
                                     "metrics": [
@@ -402,9 +414,9 @@
                             },
                             {
                                 "type": "metric",
-                                "x": 6,
+                                "x": 8,
                                 "y": 85,
-                                "width": 6,
+                                "width": 8,
                                 "height": 6,
                                 "properties": {
                                     "metrics": [
@@ -434,9 +446,9 @@
                             },
                             {
                                 "type": "metric",
-                                "x": 12,
+                                "x": 16,
                                 "y": 85,
-                                "width": 6,
+                                "width": 8,
                                 "height": 6,
                                 "properties": {
                                     "metrics": [
@@ -1037,10 +1049,10 @@
                 }
             }
         },
-        "CWDashboardEBIndividual": {
+        "CWDashboardEBDefaultIndividual": {
             "Type": "AWS::CloudWatch::Dashboard",
             "Properties": {
-                "DashboardName": "EventBridge_Individual_Resource",
+                "DashboardName": "EventBridge_Individual_Resource_Default_Bus",
                 "DashboardBody": {
                     "Fn::ToJsonString": {
                         "variables": [
@@ -1725,6 +1737,1829 @@
                                         [
                                             {
                                                 "expression": "SEARCH('{AWS/Events,RuleName} MetricName=\"DeadLetterInvocations\" RuleName=\"rule1\"', 'Sum', 60)",
+                                                "label": "${PROP('Dim.RuleName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "DeadLetterInvocations",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        },
+        "CWDashboardEBCustomAll": {
+            "Type": "AWS::CloudWatch::Dashboard",
+            "Properties": {
+                "DashboardName": "EventBridge_All_Resource_Custom_Bus",
+                "DashboardBody": {
+                    "Fn::ToJsonString": {
+                        "variables": [
+                            {
+                                "type": "pattern",
+                                "pattern": "us-east-1",
+                                "inputType": "select",
+                                "id": "Region",
+                                "label": "Region",
+                                "defaultValue": {
+                                    "Ref": "DefaultRegion"
+                                },
+                                "visible": true,
+                                "values": [
+                                    {
+                                        "value": "us-east-1",
+                                        "label": "N. Virginia"
+                                    },
+                                    {
+                                        "value": "us-east-2",
+                                        "label": "Ohio"
+                                    },
+                                    {
+                                        "value": "us-west-1",
+                                        "label": "N.California"
+                                    },
+                                    {
+                                        "value": "us-west-2",
+                                        "label": "Oregon"
+                                    },
+                                    {
+                                        "value": "ap-east-1",
+                                        "label": "Hong Kong"
+                                    },
+                                    {
+                                        "value": "ap-south-1",
+                                        "label": "Mumbai"
+                                    },
+                                    {
+                                        "value": "ap-northeast-3",
+                                        "label": "Osaka"
+                                    },
+                                    {
+                                        "value": "ap-northeast-2",
+                                        "label": "Seoul"
+                                    },
+                                    {
+                                        "value": "ap-southeast-1",
+                                        "label": "Singapore"
+                                    },
+                                    {
+                                        "value": "ap-southeast-2",
+                                        "label": "Sydney"
+                                    },
+                                    {
+                                        "value": "ap-noutheast-1",
+                                        "label": "Toyko"
+                                    },
+                                    {
+                                        "value": "ca-central-1",
+                                        "label": "Canada"
+                                    },
+                                    {
+                                        "value": "eu-central-1",
+                                        "label": "Frankfurt"
+                                    },
+                                    {
+                                        "value": "eu-west-1",
+                                        "label": "Ireland"
+                                    },
+                                    {
+                                        "value": "eu-west-2",
+                                        "label": "London"
+                                    },
+                                    {
+                                        "value": "eu-west-3",
+                                        "label": "Paris"
+                                    },
+                                    {
+                                        "value": "eu-north-1",
+                                        "label": "Stockholm"
+                                    },
+                                    {
+                                        "value": "sa-east-1",
+                                        "label": "South America"
+                                    }
+                                ],
+                                "value": "us-east-1",
+                                "customValues": "us-east-1, N. Virginia\nus-east-2, Ohio\nus-west-1, N.California\nca-central-1, Canada\nus-west-2, Oregon\neu-west-1, Ireland\neu-west-2, London\neu-central-1, Frankfurt"
+                            },
+                            {
+                                "type": "property",
+                                "property": "EventBusName",
+                                "inputType": "select",
+                                "id": "EventBusName",
+                                "label": "EventBusName",
+                                "defaultValue": {
+                                    "Ref": "DefaultCustomEventBus"
+                                },
+                                "visible": true,
+                                "inputPopulationType": "search",
+                                "search": "{AWS/Events,EventBusName,RuleName} MetricName=TriggeredRules",
+                                "populateFrom": "EventBusName"
+                            }
+                        ],
+                        "widgets": [
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 0,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "# Error Metrics",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 17,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "# Rule Metrics",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 63,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "# Latency Metrics (Account-Level)",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 90,
+                                "width": 12,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SEARCH('{AWS/Events,EventBusName,RuleName} EventBusName=\"custombus\" MetricName=\"Events\" RuleName=\"rule1\"', 'Sum', 60)",
+                                                "label": "${PROP('Dim.RuleName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "Partner Events",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 55,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "# Dead Letter Queue Metrics",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 34,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "# Target Invocation Metrics",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 18,
+                                "width": 6,
+                                "height": 8,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/Events,EventBusName,RuleName} EventBusName=\"custombus\" MetricName=\"TriggeredRules\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.RuleName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "pie",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "TriggeredRules",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 35,
+                                "width": 6,
+                                "height": 8,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/Events,EventBusName,RuleName} EventBusName=\"custombus\" MetricName=\"Invocations\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.RuleName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "pie",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "Invocations",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 77,
+                                "width": 12,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            "AWS/Events",
+                                            "PutEventsApproximateCallCount",
+                                            {
+                                                "region": "us-east-1"
+                                            }
+                                        ],
+                                        [
+                                            ".",
+                                            "PutEventsApproximateSuccessCount",
+                                            {
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "period": 60,
+                                    "region": "us-east-1",
+                                    "stacked": false,
+                                    "title": "PutEvents call volume",
+                                    "view": "timeSeries",
+                                    "stat": "Sum"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 77,
+                                "width": 12,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            "AWS/Events",
+                                            "PutEventsApproximateFailedCount",
+                                            {
+                                                "stat": "Sum",
+                                                "region": "us-east-1"
+                                            }
+                                        ],
+                                        [
+                                            ".",
+                                            "PutEventsApproximateThrottledCount",
+                                            {
+                                                "stat": "Sum",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "period": 300,
+                                    "region": "us-east-1",
+                                    "stacked": false,
+                                    "title": "Failed PutEvents requests",
+                                    "view": "timeSeries"
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 76,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "# Custom Events",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 64,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            "AWS/Events",
+                                            "IngestionToInvocationStartLatency",
+                                            {
+                                                "stat": "p99",
+                                                "region": "us-east-1"
+                                            }
+                                        ],
+                                        [
+                                            "...",
+                                            {
+                                                "stat": "p90",
+                                                "region": "us-east-1"
+                                            }
+                                        ],
+                                        [
+                                            "...",
+                                            {
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "period": 60,
+                                    "region": "us-east-1",
+                                    "stacked": false,
+                                    "title": "IngestionToInvocationStartLatency",
+                                    "view": "timeSeries",
+                                    "stat": "p50",
+                                    "legend": {
+                                        "position": "hidden"
+                                    }
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 83,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "# Partner Events",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 84,
+                                "width": 12,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            "AWS/Events",
+                                            "PutPartnerEventsApproximateCallCount",
+                                            {
+                                                "stat": "Sum",
+                                                "region": "us-east-1"
+                                            }
+                                        ],
+                                        [
+                                            ".",
+                                            "PutPartnerEventsApproximateSuccessCount",
+                                            {
+                                                "stat": "Sum",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "period": 300,
+                                    "region": "us-east-1",
+                                    "stacked": false,
+                                    "title": "PutPartnerEvents call volume",
+                                    "view": "timeSeries"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 90,
+                                "width": 12,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            "AWS/Events",
+                                            "PutPartnerEventsApproximateFailedCount",
+                                            {
+                                                "stat": "Sum",
+                                                "region": "us-east-1"
+                                            }
+                                        ],
+                                        [
+                                            ".",
+                                            "PutPartnerEventsApproximateThrottledCount",
+                                            {
+                                                "stat": "Sum",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "period": 300,
+                                    "region": "us-east-1",
+                                    "stacked": false,
+                                    "title": "Failed PutPartnerEvents requests",
+                                    "view": "timeSeries"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 84,
+                                "width": 12,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            "AWS/Events",
+                                            "PutPartnerEventsLatency",
+                                            {
+                                                "stat": "p99",
+                                                "region": "us-east-1"
+                                            }
+                                        ],
+                                        [
+                                            "...",
+                                            {
+                                                "stat": "p90",
+                                                "region": "us-east-1"
+                                            }
+                                        ],
+                                        [
+                                            "...",
+                                            {
+                                                "stat": "p50",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "period": 300,
+                                    "region": "us-east-1",
+                                    "stacked": false,
+                                    "title": "PutPartnerEvents latency",
+                                    "view": "timeSeries"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 6,
+                                "y": 18,
+                                "width": 18,
+                                "height": 8,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/Events,EventBusName,RuleName} EventBusName=\"custombus\" MetricName=\"TriggeredRules\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.RuleName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "TriggeredRules",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 26,
+                                "width": 6,
+                                "height": 8,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/Events,EventBusName,RuleName} EventBusName=\"custombus\" MetricName=\"MatchedEvents\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.RuleName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "pie",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "MatchedEvents",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 6,
+                                "y": 26,
+                                "width": 18,
+                                "height": 8,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/Events,EventBusName,RuleName} EventBusName=\"custombus\" MetricName=\"MatchedEvents\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.RuleName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "MatchedEvents",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 6,
+                                "y": 35,
+                                "width": 18,
+                                "height": 8,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/Events,EventBusName,RuleName} EventBusName=\"custombus\" MetricName=\"Invocations\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.RuleName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "Invocations",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 16,
+                                "y": 43,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/Events,EventBusName,RuleName} EventBusName=\"custombus\" MetricName=\"RetryInvocationAttempts\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.RuleName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "RetryInvocationAttempts",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 43,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/Events,EventBusName,RuleName} EventBusName=\"custombus\" MetricName=\"InvocationAttempts\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.RuleName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "InvocationAttempts",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 8,
+                                "y": 43,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/Events,EventBusName,RuleName} EventBusName=\"custombus\" MetricName=\"SuccessfulInvocationAttempts\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.RuleName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "SuccessfulInvocationAttempts",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 56,
+                                "width": 6,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/Events,EventBusName,RuleName} EventBusName=\"custombus\" MetricName=\"DeadLetterInvocations\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.RuleName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "pie",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "DeadLetterInvocations",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 6,
+                                "y": 56,
+                                "width": 18,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/Events,EventBusName,RuleName} EventBusName=\"custombus\" MetricName=\"DeadLetterInvocations\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.RuleName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "DeadLetterInvocations",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 49,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/Events,EventBusName,RuleName} EventBusName=\"custombus\" MetricName=\"InvocationsSentToDlq\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.RuleName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "InvocationsSentToDlq",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 8,
+                                "y": 49,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/Events,EventBusName,RuleName} EventBusName=\"custombus\" MetricName=\"InvocationsFailedToBeSentToDlq\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.RuleName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "InvocationsFailedToBeSentToDlq",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 16,
+                                "y": 70,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/Events,EventBusName,RuleName} EventBusName=\"custombus\" MetricName=\"IngestionToInvocationSuccessLatency\"', 'p90', 60))",
+                                                "label": "${PROP('Dim.RuleName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "IngestionToInvocationSuccessLatency (p90))",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 8,
+                                "y": 64,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            "AWS/Events",
+                                            "IngestionToInvocationCompleteLatency",
+                                            {
+                                                "stat": "p99",
+                                                "region": "us-east-1"
+                                            }
+                                        ],
+                                        [
+                                            "...",
+                                            {
+                                                "stat": "p90",
+                                                "region": "us-east-1"
+                                            }
+                                        ],
+                                        [
+                                            "...",
+                                            {
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "period": 60,
+                                    "region": "us-east-1",
+                                    "stacked": false,
+                                    "title": "IngestionToInvocationCompleteLatency",
+                                    "view": "timeSeries",
+                                    "stat": "p50",
+                                    "legend": {
+                                        "position": "hidden"
+                                    }
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 16,
+                                "y": 64,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            "AWS/Events",
+                                            "IngestionToInvocationSuccessLatency",
+                                            {
+                                                "stat": "p99",
+                                                "region": "us-east-1"
+                                            }
+                                        ],
+                                        [
+                                            "...",
+                                            {
+                                                "stat": "p90",
+                                                "region": "us-east-1"
+                                            }
+                                        ],
+                                        [
+                                            "...",
+                                            {
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "period": 60,
+                                    "region": "us-east-1",
+                                    "stacked": false,
+                                    "title": "IngestionToInvocationSuccessLatency",
+                                    "view": "timeSeries",
+                                    "stat": "p50",
+                                    "legend": {
+                                        "position": "hidden"
+                                    }
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 8,
+                                "y": 70,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/Events,EventBusName,RuleName} EventBusName=\"custombus\" MetricName=\"IngestionToInvocationCompleteLatency\"', 'p90', 60))",
+                                                "label": "${PROP('Dim.RuleName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "IngestionToInvocationCompleteLatency (p90)",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 70,
+                                "width": 8,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/Events,EventBusName,RuleName} EventBusName=\"custombus\" MetricName=\"IngestionToInvocationStartLatency\"', 'p90', 60))",
+                                                "label": "${PROP('Dim.RuleName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "IngestionToInvocationStartLatency  (p90))",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 1,
+                                "width": 6,
+                                "height": 8,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/Events,EventBusName,RuleName} EventBusName=\"custombus\" MetricName=\"FailedInvocations\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.RuleName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "pie",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "FailedInvocations",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 6,
+                                "y": 1,
+                                "width": 18,
+                                "height": 8,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/Events,EventBusName,RuleName} EventBusName=\"custombus\" MetricName=\"FailedInvocations\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.RuleName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "FailedInvocations",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 9,
+                                "width": 6,
+                                "height": 8,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/Events,EventBusName,RuleName} EventBusName=\"custombus\" MetricName=\"ThrottledRules\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.RuleName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "pie",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "ThrottledRules",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 6,
+                                "y": 9,
+                                "width": 18,
+                                "height": 8,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/Events,EventBusName,RuleName} EventBusName=\"custombus\" MetricName=\"ThrottledRules\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.RuleName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "ThrottledRules",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 97,
+                                "width": 24,
+                                "height": 8,
+                                "properties": {
+                                    "view": "timeSeries",
+                                    "metrics": [
+                                        [
+                                            "AWS/Usage",
+                                            "CallCount",
+                                            "Class",
+                                            "None",
+                                            "Resource",
+                                            "Invocations",
+                                            "Service",
+                                            "EventBridge",
+                                            "Type",
+                                            "API",
+                                            {
+                                                "id": "usage_data",
+                                                "visible": false,
+                                                "color": "#1f77b4"
+                                            }
+                                        ],
+                                        [
+                                            {
+                                                "expression": "(usage_data/SERVICE_QUOTA(usage_data))*100",
+                                                "label": "% Utilization",
+                                                "id": "pct_utilization",
+                                                "color": "#1f77b4"
+                                            }
+                                        ]
+                                    ],
+                                    "region": "us-east-1",
+                                    "title": "Invocations throttle limit in transactions per second - (Utilization %)",
+                                    "stat": "Sum",
+                                    "period": 1
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 96,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "# Quotas",
+                                    "background": "transparent"
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        },
+        "CWDashboardEBCustomIndividual": {
+            "Type": "AWS::CloudWatch::Dashboard",
+            "Properties": {
+                "DashboardName": "EventBridge_Individual_Resource_Custom_Bus",
+                "DashboardBody": {
+                    "Fn::ToJsonString": {
+                        "variables": [
+                            {
+                                "type": "pattern",
+                                "pattern": "us-east-1",
+                                "inputType": "select",
+                                "id": "Region",
+                                "label": "Region",
+                                "defaultValue": {
+                                    "Ref": "DefaultRegion"
+                                },
+                                "visible": true,
+                                "values": [
+                                    {
+                                        "value": "us-east-1",
+                                        "label": "N. Virginia"
+                                    },
+                                    {
+                                        "value": "us-east-2",
+                                        "label": "Ohio"
+                                    },
+                                    {
+                                        "value": "us-west-1",
+                                        "label": "N.California"
+                                    },
+                                    {
+                                        "value": "us-west-2",
+                                        "label": "Oregon"
+                                    },
+                                    {
+                                        "value": "ap-east-1",
+                                        "label": "Hong Kong"
+                                    },
+                                    {
+                                        "value": "ap-south-1",
+                                        "label": "Mumbai"
+                                    },
+                                    {
+                                        "value": "ap-northeast-3",
+                                        "label": "Osaka"
+                                    },
+                                    {
+                                        "value": "ap-northeast-2",
+                                        "label": "Seoul"
+                                    },
+                                    {
+                                        "value": "ap-southeast-1",
+                                        "label": "Singapore"
+                                    },
+                                    {
+                                        "value": "ap-southeast-2",
+                                        "label": "Sydney"
+                                    },
+                                    {
+                                        "value": "ap-noutheast-1",
+                                        "label": "Toyko"
+                                    },
+                                    {
+                                        "value": "ca-central-1",
+                                        "label": "Canada"
+                                    },
+                                    {
+                                        "value": "eu-central-1",
+                                        "label": "Frankfurt"
+                                    },
+                                    {
+                                        "value": "eu-west-1",
+                                        "label": "Ireland"
+                                    },
+                                    {
+                                        "value": "eu-west-2",
+                                        "label": "London"
+                                    },
+                                    {
+                                        "value": "eu-west-3",
+                                        "label": "Paris"
+                                    },
+                                    {
+                                        "value": "eu-north-1",
+                                        "label": "Stockholm"
+                                    },
+                                    {
+                                        "value": "sa-east-1",
+                                        "label": "South America"
+                                    }
+                                ],
+                                "value": "us-east-1",
+                                "customValues": "us-east-1, N. Virginia\nus-east-2, Ohio\nus-west-1, N.California\nca-central-1, Canada\nus-west-2, Oregon\neu-west-1, Ireland\neu-west-2, London\neu-central-1, Frankfurt"
+                            },
+                            {
+                                "type": "property",
+                                "property": "EventBusName",
+                                "inputType": "select",
+                                "id": "EventBusName",
+                                "label": "EventBusName",
+                                "defaultValue": {
+                                    "Ref": "DefaultCustomEventBus"
+                                },
+                                "visible": true,
+                                "inputPopulationType": "search",
+                                "search": "{AWS/Events,EventBusName,RuleName} MetricName=TriggeredRules",
+                                "populateFrom": "EventBusName"
+                            },
+                            {
+                                "type": "property",
+                                "property": "RuleName",
+                                "inputType": "select",
+                                "id": "RuleName",
+                                "label": "RuleName",
+                                "defaultValue": {
+                                    "Ref": "DefaultCustomEventBusRuleName"
+                                },
+                                "visible": true,
+                                "inputPopulationType": "search",
+                                "search": "{AWS/Events,EventBusName,RuleName} MetricName=TriggeredRules",
+                                "populateFrom": "RuleName"
+                            }
+                        ],
+                        "widgets": [
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 0,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "# Error Metrics",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 15,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "# Traffic Volume Metrics",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 5,
+                                "y": 16,
+                                "width": 19,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SEARCH('{AWS/Events,EventBusName,RuleName} EventBusName=\"custombus\" MetricName=\"TriggeredRules\" RuleName=\"rule1\"', 'Sum', 60)",
+                                                "label": "${PROP('Dim.RuleName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "TriggeredRules",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 23,
+                                "width": 12,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SEARCH('{AWS/Events,EventBusName,RuleName} EventBusName=\"custombus\" MetricName=\"MatchedEvents\" RuleName=\"rule1\"', 'Sum', 60)",
+                                                "label": "${PROP('Dim.RuleName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "MatchedEvents",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 5,
+                                "y": 31,
+                                "width": 18,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SEARCH('{AWS/Events,EventBusName,RuleName} EventBusName=\"custombus\" MetricName=\"Invocations\" RuleName=\"rule1\"', 'Sum', 60)",
+                                                "label": "${PROP('Dim.RuleName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "Invocations",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 8,
+                                "y": 38,
+                                "width": 8,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SEARCH('{AWS/Events,EventBusName,RuleName} EventBusName=\"custombus\" MetricName=\"InvocationAttempts\" RuleName=\"rule1\"', 'Sum', 60)",
+                                                "label": "${PROP('Dim.RuleName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "InvocationAttempts",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 16,
+                                "y": 38,
+                                "width": 8,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SEARCH('{AWS/Events,EventBusName,RuleName} EventBusName=\"custombus\" MetricName=\"SuccessfulInvocationAttempts\" RuleName=\"rule1\"', 'Sum', 60)",
+                                                "label": "${PROP('Dim.RuleName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "SuccessfulInvocationAttempts",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 61,
+                                "width": 8,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SEARCH('{AWS/Events,EventBusName,RuleName} EventBusName=\"custombus\" MetricName=\"IngestionToInvocationSuccessLatency\" RuleName=\"rule1\"', 'Average', 60)",
+                                                "label": "${PROP('Dim.RuleName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "IngestionToInvocationSuccessLatency",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 60,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "# Latency Metrics",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 8,
+                                "y": 61,
+                                "width": 8,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SEARCH('{AWS/Events,EventBusName,RuleName} EventBusName=\"custombus\" MetricName=\"IngestionToInvocationStartLatency\" RuleName=\"rule1\"', 'Average', 60)",
+                                                "label": "${PROP('Dim.RuleName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "IngestionToInvocationStartLatency",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 16,
+                                "y": 61,
+                                "width": 8,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SEARCH('{AWS/Events,EventBusName,RuleName} EventBusName=\"custombus\" MetricName=\"IngestionToInvocationCompleteLatency\" RuleName=\"rule1\"', 'Average', 60)",
+                                                "label": "${PROP('Dim.RuleName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "IngestionToInvocationCompleteLatency",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 5,
+                                "y": 46,
+                                "width": 19,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SEARCH('{AWS/Events,EventBusName,RuleName} EventBusName=\"custombus\" MetricName=\"DeadLetterInvocations\" RuleName=\"rule1\"', 'Sum', 60)",
+                                                "label": "${PROP('Dim.RuleName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "DeadLetterInvocations",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 23,
+                                "width": 12,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SEARCH('{AWS/Events,EventBusName,RuleName} EventBusName=\"custombus\" MetricName=\"Events\" RuleName=\"rule1\"', 'Sum', 60)",
+                                                "label": "${PROP('Dim.RuleName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "Partner Events",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 53,
+                                "width": 12,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SEARCH('{AWS/Events,EventBusName,RuleName} EventBusName=\"custombus\" MetricName=\"InvocationsSentToDlq\" RuleName=\"rule1\"', 'Sum', 60)",
+                                                "label": "${PROP('Dim.RuleName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "InvocationsSentToDlq",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 53,
+                                "width": 12,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SEARCH('{AWS/Events,EventBusName,RuleName} EventBusName=\"custombus\" MetricName=\"InvocationsFailedToBeSentToDlq\" RuleName=\"rule1\"', 'Sum', 60)",
+                                                "label": "${PROP('Dim.RuleName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "InvocationsFailedToBeSentToDlq",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 5,
+                                "y": 1,
+                                "width": 19,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SEARCH('{AWS/Events,EventBusName,RuleName} EventBusName=\"custombus\" MetricName=\"FailedInvocations\" RuleName=\"rule1\"', 'Sum', 60)",
+                                                "label": "${PROP('Dim.RuleName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "FailedInvocations",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 5,
+                                "y": 8,
+                                "width": 19,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SEARCH('{AWS/Events,EventBusName,RuleName} EventBusName=\"custombus\" MetricName=\"ThrottledRules\" RuleName=\"rule1\"', 'Sum', 60)",
+                                                "label": "${PROP('Dim.RuleName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "ThrottledRules",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 45,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "# Dead Letter Queue Metrics",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 30,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "# Target Invocation Metrics",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 1,
+                                "width": 5,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SEARCH('{AWS/Events,EventBusName,RuleName} EventBusName=\"custombus\" MetricName=\"FailedInvocations\" RuleName=\"rule1\"', 'Sum', 60)",
+                                                "label": "${PROP('Dim.RuleName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "FailedInvocations",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 8,
+                                "width": 5,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SEARCH('{AWS/Events,EventBusName,RuleName} EventBusName=\"custombus\" MetricName=\"ThrottledRules\" RuleName=\"rule1\"', 'Sum', 60)",
+                                                "label": "${PROP('Dim.RuleName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "ThrottledRules",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 38,
+                                "width": 8,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SEARCH('{AWS/Events,EventBusName,RuleName} EventBusName=\"custombus\" MetricName=\"RetryInvocationAttempts\" RuleName=\"rule1\"', 'Sum', 60)",
+                                                "label": "${PROP('Dim.RuleName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "RetryInvocationAttempts",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 16,
+                                "width": 5,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SEARCH('{AWS/Events,EventBusName,RuleName} EventBusName=\"custombus\" MetricName=\"TriggeredRules\" RuleName=\"rule1\"', 'Sum', 60)",
+                                                "label": "${PROP('Dim.RuleName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "TriggeredRules",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 31,
+                                "width": 5,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SEARCH('{AWS/Events,EventBusName,RuleName} EventBusName=\"custombus\" MetricName=\"Invocations\" RuleName=\"rule1\"', 'Sum', 60)",
+                                                "label": "${PROP('Dim.RuleName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "Invocations",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 46,
+                                "width": 5,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "SEARCH('{AWS/Events,EventBusName,RuleName} EventBusName=\"custombus\" MetricName=\"DeadLetterInvocations\" RuleName=\"rule1\"', 'Sum', 60)",
                                                 "label": "${PROP('Dim.RuleName')}",
                                                 "id": "e1",
                                                 "region": "us-east-1"
