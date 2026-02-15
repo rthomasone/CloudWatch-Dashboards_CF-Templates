@@ -4,32 +4,27 @@
     "Transform": "AWS::LanguageExtensions",
     "Parameters": {
         "DefaultRegion": {
-            "Description": "Select the default region hosting the load balancers to be monitored.",
+            "Description": "Select the default region hosting the EventBridge Pipes to be monitored.",
             "Type": "String",
             "Default": "us-east-1"
         },
-        "DefaultALB": {
-            "Description": "Select the default load balancer to be monitored. (e.g. app/ALB-ABC/0123456789abcdef)",
-            "Type": "String",
-            "Default": ""
-        },
-        "DefaultWebACL": {
-            "Description": "If WAF is associated with the default load balancer, select the corresponding WebACL. (e.g. sample-waf-name)",
+        "DefaultPipe": {
+            "Description": "Optional. Select the default EventBridge Pipe to be monitored.",
             "Type": "String",
             "Default": ""
         }
     },
     "Resources": {
-        "CWDashboardALBAll": {
+        "CWDashboardEBPipesAll": {
             "Type": "AWS::CloudWatch::Dashboard",
             "Properties": {
-                "DashboardName": "ALB_All_Resources",
+                "DashboardName": "EventBridge_Pipes_All_Resources",
                 "DashboardBody": {
                     "Fn::ToJsonString": {
                         "variables": [
                             {
-                                "type": "pattern",
-                                "pattern": "us-east-1",
+                                "type": "property",
+                                "property": "region",
                                 "inputType": "select",
                                 "id": "Region",
                                 "label": "Region",
@@ -110,62 +105,10 @@
                                         "value": "sa-east-1",
                                         "label": "South America"
                                     }
-                                ],
-                                "value": "us-east-1",
-                                "customValues": "us-east-1, N. Virginia\nus-east-2, Ohio\nus-west-1, N.California\nca-central-1, Canada\nus-west-2, Oregon\neu-west-1, Ireland\neu-west-2, London\neu-central-1, Frankfurt"
+                                ]
                             }
                         ],
                         "widgets": [
-                            {
-                                "type": "metric",
-                                "x": 0,
-                                "y": 8,
-                                "width": 6,
-                                "height": 7,
-                                "properties": {
-                                    "metrics": [
-                                        [
-                                            {
-                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"RequestCount\"', 'Sum', 60))",
-                                                "label": "${PROP('Dim.LoadBalancer')}",
-                                                "id": "e1",
-                                                "region": "us-east-1"
-                                            }
-                                        ]
-                                    ],
-                                    "view": "timeSeries",
-                                    "stacked": false,
-                                    "region": "us-east-1",
-                                    "period": 60,
-                                    "stat": "Sum",
-                                    "title": "RequestCount"
-                                }
-                            },
-                            {
-                                "type": "metric",
-                                "x": 18,
-                                "y": 8,
-                                "width": 6,
-                                "height": 7,
-                                "properties": {
-                                    "metrics": [
-                                        [
-                                            {
-                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"HTTPCode_ELB_5XX_Count\"', 'Sum', 60))",
-                                                "label": "${PROP('Dim.LoadBalancer')}",
-                                                "id": "e1",
-                                                "region": "us-east-1"
-                                            }
-                                        ]
-                                    ],
-                                    "view": "timeSeries",
-                                    "stacked": false,
-                                    "region": "us-east-1",
-                                    "title": "HTTP 5XX emitted by ALB",
-                                    "period": 60,
-                                    "stat": "Sum"
-                                }
-                            },
                             {
                                 "type": "text",
                                 "x": 0,
@@ -173,531 +116,426 @@
                                 "width": 24,
                                 "height": 1,
                                 "properties": {
-                                    "markdown": "## ALB Request Metrics",
+                                    "markdown": "# Account-Level Metrics",
                                     "background": "transparent"
-                                }
-                            },
-                            {
-                                "type": "metric",
-                                "x": 12,
-                                "y": 8,
-                                "width": 6,
-                                "height": 7,
-                                "properties": {
-                                    "metrics": [
-                                        [
-                                            {
-                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"HTTPCode_ELB_4XX_Count\"', 'Sum', 60))",
-                                                "label": "${PROP('Dim.LoadBalancer')}",
-                                                "id": "e1",
-                                                "region": "us-east-1"
-                                            }
-                                        ]
-                                    ],
-                                    "view": "timeSeries",
-                                    "stacked": false,
-                                    "region": "us-east-1",
-                                    "title": "HTTP 4XX emitted by ALB",
-                                    "period": 60,
-                                    "stat": "Sum"
-                                }
-                            },
-                            {
-                                "type": "metric",
-                                "x": 12,
-                                "y": 37,
-                                "width": 6,
-                                "height": 7,
-                                "properties": {
-                                    "metrics": [
-                                        [
-                                            {
-                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,TargetGroup,LoadBalancer} MetricName=\"HealthyHostCount\"', 'Minimum', 60))",
-                                                "label": "${PROP('Dim.LoadBalancer')} ${PROP('Dim.TargetGroup')}",
-                                                "id": "e1",
-                                                "region": "us-east-1"
-                                            }
-                                        ]
-                                    ],
-                                    "view": "timeSeries",
-                                    "stacked": false,
-                                    "region": "us-east-1",
-                                    "period": 300,
-                                    "stat": "Average",
-                                    "title": "Healthy Targets"
-                                }
-                            },
-                            {
-                                "type": "metric",
-                                "x": 6,
-                                "y": 37,
-                                "width": 6,
-                                "height": 7,
-                                "properties": {
-                                    "metrics": [
-                                        [
-                                            {
-                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,TargetGroup,LoadBalancer} MetricName=\"RequestCount\"', 'Sum', 60))",
-                                                "label": "${PROP('Dim.LoadBalancer')} ${PROP('Dim.TargetGroup')}",
-                                                "id": "e1",
-                                                "region": "us-east-1"
-                                            }
-                                        ]
-                                    ],
-                                    "view": "timeSeries",
-                                    "stacked": false,
-                                    "region": "us-east-1",
-                                    "period": 300,
-                                    "stat": "Average",
-                                    "title": "Request Count Per Target"
-                                }
-                            },
-                            {
-                                "type": "metric",
-                                "x": 6,
-                                "y": 51,
-                                "width": 6,
-                                "height": 7,
-                                "properties": {
-                                    "metrics": [
-                                        [
-                                            {
-                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,TargetGroup,LoadBalancer} MetricName=\"TargetConnectionErrorCount\"', 'Sum', 60))",
-                                                "label": "${PROP('Dim.LoadBalancer')} ${PROP('Dim.TargetGroup')}",
-                                                "id": "e1",
-                                                "region": "us-east-1"
-                                            }
-                                        ]
-                                    ],
-                                    "view": "timeSeries",
-                                    "stacked": false,
-                                    "region": "us-east-1",
-                                    "title": "TargetConnectionErrorCount",
-                                    "period": 300,
-                                    "stat": "Average"
-                                }
-                            },
-                            {
-                                "type": "text",
-                                "x": 0,
-                                "y": 22,
-                                "width": 24,
-                                "height": 1,
-                                "properties": {
-                                    "markdown": "## Target Group Metrics",
-                                    "background": "transparent"
-                                }
-                            },
-                            {
-                                "type": "metric",
-                                "x": 0,
-                                "y": 51,
-                                "width": 6,
-                                "height": 7,
-                                "properties": {
-                                    "metrics": [
-                                        [
-                                            {
-                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,TargetGroup,LoadBalancer} MetricName=\"TargetResponseTime\"', 'p90', 60))",
-                                                "label": "${LABEL} ${PROP('Dim.TargetGroup')}",
-                                                "id": "e1",
-                                                "region": "us-east-1",
-                                                "period": 60
-                                            }
-                                        ]
-                                    ],
-                                    "view": "timeSeries",
-                                    "stacked": false,
-                                    "region": "us-east-1",
-                                    "title": "Latency added by Target (TargetResponseTime p90)",
-                                    "period": 60,
-                                    "stat": "Average"
-                                }
-                            },
-                            {
-                                "type": "metric",
-                                "x": 0,
-                                "y": 84,
-                                "width": 12,
-                                "height": 7,
-                                "properties": {
-                                    "metrics": [
-                                        [
-                                            {
-                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"ELBAuthSuccess\"', 'Sum', 60))",
-                                                "label": "${PROP('Dim.LoadBalancer')}",
-                                                "id": "e1",
-                                                "region": "us-east-1"
-                                            }
-                                        ]
-                                    ],
-                                    "view": "timeSeries",
-                                    "stacked": false,
-                                    "region": "us-east-1",
-                                    "period": 60,
-                                    "stat": "Sum",
-                                    "title": "Successful Authenticate Actions"
-                                }
-                            },
-                            {
-                                "type": "metric",
-                                "x": 6,
-                                "y": 8,
-                                "width": 6,
-                                "height": 7,
-                                "properties": {
-                                    "metrics": [
-                                        [
-                                            {
-                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"HTTPCode_ELB_3XX_Count\"', 'Sum', 60))",
-                                                "label": "${PROP('Dim.LoadBalancer')}",
-                                                "id": "e1",
-                                                "region": "us-east-1"
-                                            }
-                                        ]
-                                    ],
-                                    "view": "timeSeries",
-                                    "stacked": false,
-                                    "region": "us-east-1",
-                                    "title": "HTTP 3XX emitted by ALB",
-                                    "period": 60,
-                                    "stat": "Sum"
-                                }
-                            },
-                            {
-                                "type": "metric",
-                                "x": 0,
-                                "y": 61,
-                                "width": 12,
-                                "height": 7,
-                                "properties": {
-                                    "metrics": [
-                                        [
-                                            {
-                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"NewConnectionCount\"', 'Sum', 60))",
-                                                "label": "${PROP('Dim.LoadBalancer')}",
-                                                "id": "e1",
-                                                "region": "us-east-1"
-                                            }
-                                        ]
-                                    ],
-                                    "view": "timeSeries",
-                                    "stacked": false,
-                                    "region": "us-east-1",
-                                    "stat": "Sum",
-                                    "period": 60,
-                                    "title": "New Connections"
-                                }
-                            },
-                            {
-                                "type": "metric",
-                                "x": 0,
-                                "y": 44,
-                                "width": 6,
-                                "height": 7,
-                                "properties": {
-                                    "metrics": [
-                                        [
-                                            {
-                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,TargetGroup,LoadBalancer} MetricName=\"HTTPCode_Target_2XX_Count\"', 'Sum', 60))",
-                                                "label": "${PROP('Dim.LoadBalancer')} ${PROP('Dim.TargetGroup')}",
-                                                "id": "e1",
-                                                "region": "us-east-1"
-                                            }
-                                        ]
-                                    ],
-                                    "view": "timeSeries",
-                                    "stacked": false,
-                                    "region": "us-east-1",
-                                    "period": 300,
-                                    "stat": "Average",
-                                    "title": "HTTP 2XX emitted from Targets"
-                                }
-                            },
-                            {
-                                "type": "metric",
-                                "x": 6,
-                                "y": 44,
-                                "width": 6,
-                                "height": 7,
-                                "properties": {
-                                    "metrics": [
-                                        [
-                                            {
-                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,TargetGroup,LoadBalancer} MetricName=\"HTTPCode_Target_3XX_Count\"', 'Sum', 60))",
-                                                "label": "${PROP('Dim.LoadBalancer')} ${PROP('Dim.TargetGroup')}",
-                                                "id": "e1",
-                                                "region": "us-east-1"
-                                            }
-                                        ]
-                                    ],
-                                    "view": "timeSeries",
-                                    "stacked": false,
-                                    "region": "us-east-1",
-                                    "period": 300,
-                                    "stat": "Average",
-                                    "title": "HTTP 3XX emitted from Targets"
-                                }
-                            },
-                            {
-                                "type": "metric",
-                                "x": 12,
-                                "y": 44,
-                                "width": 6,
-                                "height": 7,
-                                "properties": {
-                                    "metrics": [
-                                        [
-                                            {
-                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,TargetGroup,LoadBalancer} MetricName=\"HTTPCode_Target_4XX_Count\"', 'Sum', 60))",
-                                                "label": "${PROP('Dim.LoadBalancer')} ${PROP('Dim.TargetGroup')}",
-                                                "id": "e1",
-                                                "region": "us-east-1"
-                                            }
-                                        ]
-                                    ],
-                                    "view": "timeSeries",
-                                    "stacked": false,
-                                    "region": "us-east-1",
-                                    "period": 300,
-                                    "stat": "Average",
-                                    "title": "HTTP 4XX emitted from Targets"
-                                }
-                            },
-                            {
-                                "type": "metric",
-                                "x": 18,
-                                "y": 44,
-                                "width": 6,
-                                "height": 7,
-                                "properties": {
-                                    "metrics": [
-                                        [
-                                            {
-                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,TargetGroup,LoadBalancer} MetricName=\"HTTPCode_Target_5XX_Count\"', 'Sum', 60))",
-                                                "label": "${PROP('Dim.LoadBalancer')} ${PROP('Dim.TargetGroup')}",
-                                                "id": "e1",
-                                                "region": "us-east-1"
-                                            }
-                                        ]
-                                    ],
-                                    "view": "timeSeries",
-                                    "stacked": false,
-                                    "region": "us-east-1",
-                                    "period": 300,
-                                    "stat": "Average",
-                                    "title": "HTTP 5XX emitted from Targets"
-                                }
-                            },
-                            {
-                                "type": "metric",
-                                "x": 18,
-                                "y": 37,
-                                "width": 6,
-                                "height": 7,
-                                "properties": {
-                                    "metrics": [
-                                        [
-                                            {
-                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,TargetGroup,LoadBalancer} MetricName=\"UnHealthyHostCount\"', 'Maximum', 60))",
-                                                "label": "${PROP('Dim.LoadBalancer')} ${PROP('Dim.TargetGroup')}",
-                                                "id": "e1",
-                                                "region": "us-east-1"
-                                            }
-                                        ]
-                                    ],
-                                    "view": "timeSeries",
-                                    "stacked": false,
-                                    "region": "us-east-1",
-                                    "period": 300,
-                                    "stat": "Average",
-                                    "title": "Unhealthy Targets"
-                                }
-                            },
-                            {
-                                "type": "metric",
-                                "x": 0,
-                                "y": 37,
-                                "width": 6,
-                                "height": 7,
-                                "properties": {
-                                    "metrics": [
-                                        [
-                                            {
-                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,TargetGroup,LoadBalancer} MetricName=\"RequestCount\"', 'Sum', 60))",
-                                                "label": "${PROP('Dim.LoadBalancer')} ${PROP('Dim.TargetGroup')}",
-                                                "id": "e1",
-                                                "region": "us-east-1"
-                                            }
-                                        ]
-                                    ],
-                                    "view": "timeSeries",
-                                    "stacked": false,
-                                    "region": "us-east-1",
-                                    "period": 300,
-                                    "stat": "Average",
-                                    "title": "Request Count Per Target Group"
-                                }
-                            },
-                            {
-                                "type": "metric",
-                                "x": 6,
-                                "y": 15,
-                                "width": 6,
-                                "height": 7,
-                                "properties": {
-                                    "metrics": [
-                                        [
-                                            {
-                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"HTTPCode_ELB_502_Count\"', 'Sum', 60))",
-                                                "label": "${PROP('Dim.LoadBalancer')}",
-                                                "id": "e1",
-                                                "region": "us-east-1"
-                                            }
-                                        ]
-                                    ],
-                                    "view": "timeSeries",
-                                    "stacked": false,
-                                    "region": "us-east-1",
-                                    "title": "HTTP 502 emitted by ALB",
-                                    "period": 60,
-                                    "stat": "Sum"
-                                }
-                            },
-                            {
-                                "type": "metric",
-                                "x": 12,
-                                "y": 15,
-                                "width": 6,
-                                "height": 7,
-                                "properties": {
-                                    "metrics": [
-                                        [
-                                            {
-                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"HTTPCode_ELB_503_Count\"', 'Sum', 60))",
-                                                "label": "${PROP('Dim.LoadBalancer')}",
-                                                "id": "e1",
-                                                "region": "us-east-1"
-                                            }
-                                        ]
-                                    ],
-                                    "view": "timeSeries",
-                                    "stacked": false,
-                                    "region": "us-east-1",
-                                    "title": "HTTP 503 emitted by ALB",
-                                    "period": 60,
-                                    "stat": "Sum"
-                                }
-                            },
-                            {
-                                "type": "metric",
-                                "x": 18,
-                                "y": 15,
-                                "width": 6,
-                                "height": 7,
-                                "properties": {
-                                    "metrics": [
-                                        [
-                                            {
-                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"HTTPCode_ELB_504_Count\"', 'Sum', 60))",
-                                                "label": "${PROP('Dim.LoadBalancer')}",
-                                                "id": "e1",
-                                                "region": "us-east-1"
-                                            }
-                                        ]
-                                    ],
-                                    "view": "timeSeries",
-                                    "stacked": false,
-                                    "region": "us-east-1",
-                                    "title": "HTTP 504 emitted by ALB",
-                                    "period": 60,
-                                    "stat": "Sum"
-                                }
-                            },
-                            {
-                                "type": "text",
-                                "x": 0,
-                                "y": 75,
-                                "width": 24,
-                                "height": 1,
-                                "properties": {
-                                    "markdown": "## TLS Metrics",
-                                    "background": "transparent"
-                                }
-                            },
-                            {
-                                "type": "text",
-                                "x": 0,
-                                "y": 58,
-                                "width": 24,
-                                "height": 3,
-                                "properties": {
-                                    "markdown": "## Connection Metrics\n\n- Here are troubleshooting guides for: \n\n[button:Connection Errors](https://repost.aws/knowledge-center/elb-alb-http-connection-errors) \n[button:Connection Timed Out](https://repost.aws/knowledge-center/elb-troubleshoot-connection-errors) \n",
-                                    "background": "transparent"
-                                }
-                            },
-                            {
-                                "type": "metric",
-                                "x": 12,
-                                "y": 61,
-                                "width": 12,
-                                "height": 7,
-                                "properties": {
-                                    "metrics": [
-                                        [
-                                            {
-                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"ActiveConnectionCount\"', 'Sum', 60))",
-                                                "label": "${PROP('Dim.LoadBalancer')}",
-                                                "id": "e1",
-                                                "region": "us-east-1"
-                                            }
-                                        ]
-                                    ],
-                                    "view": "timeSeries",
-                                    "stacked": false,
-                                    "region": "us-east-1",
-                                    "stat": "Sum",
-                                    "period": 60,
-                                    "title": "Active Connections"
-                                }
-                            },
-                            {
-                                "type": "metric",
-                                "x": 0,
-                                "y": 68,
-                                "width": 12,
-                                "height": 7,
-                                "properties": {
-                                    "metrics": [
-                                        [
-                                            {
-                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"RejectedConnectionCount\"', 'Sum', 60))",
-                                                "label": "${PROP('Dim.LoadBalancer')}",
-                                                "id": "e1",
-                                                "region": "us-east-1"
-                                            }
-                                        ]
-                                    ],
-                                    "view": "timeSeries",
-                                    "stacked": false,
-                                    "region": "us-east-1",
-                                    "stat": "Sum",
-                                    "period": 60,
-                                    "title": "Rejected Connections"
                                 }
                             },
                             {
                                 "type": "metric",
                                 "x": 0,
                                 "y": 1,
-                                "width": 12,
+                                "width": 8,
                                 "height": 7,
                                 "properties": {
                                     "metrics": [
                                         [
                                             {
-                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"RequestCount\"', 'Sum', 60))",
-                                                "label": "${PROP('Dim.LoadBalancer')}",
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/EventBridge/Pipes} MetricName=\"ExecutionThrottled\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('MetricName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "ExecutionThrottled"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 8,
+                                "y": 1,
+                                "width": 8,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/EventBridge/Pipes} MetricName=\"Invocations\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('MetricName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "Invocations"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 16,
+                                "y": 1,
+                                "width": 8,
+                                "height": 7,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/EventBridge/Pipes} MetricName=\"Concurrency\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('MetricName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "Concurrency"
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 8,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "# Execution",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 33,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "# Enrichment",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 9,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/EventBridge/Pipes,PipeName} MetricName=\"ExecutionThrottled\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.PipeName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "ExecutionThrottled",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 6,
+                                "y": 9,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/EventBridge/Pipes,PipeName} MetricName=\"ExecutionFailed\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.PipeName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "ExecutionFailed",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 9,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/EventBridge/Pipes,PipeName} MetricName=\"ExecutionPartiallyFailed\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.PipeName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "ExecutionPartiallyFailed",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 18,
+                                "y": 9,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/EventBridge/Pipes,PipeName} MetricName=\"ExecutionTimeout\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.PipeName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "ExecutionTimeout",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 15,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/EventBridge/Pipes,PipeName} MetricName=\"ExecutionThrottled\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.PipeName')}",
+                                                "id": "e1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "ExecutionThrottled"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 6,
+                                "y": 15,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/EventBridge/Pipes,PipeName} MetricName=\"ExecutionFailed\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.PipeName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "ExecutionFailed"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 15,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/EventBridge/Pipes,PipeName} MetricName=\"ExecutionPartiallyFailed\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.PipeName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "ExecutionPartiallyFailed"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 18,
+                                "y": 15,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/EventBridge/Pipes,PipeName} MetricName=\"ExecutionTimeout\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.PipeName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "ExecutionTimeout"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 6,
+                                "y": 21,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/EventBridge/Pipes,PipeName} MetricName=\"Invocations\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.PipeName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "Invocations"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 18,
+                                "y": 21,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/EventBridge/Pipes,PipeName} MetricName=\"EventCount\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.PipeName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "EventCount"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 27,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/EventBridge/Pipes,PipeName} MetricName=\"Duration\"', 'Average', 60), AVG, DESC))",
+                                                "label": "${PROP('Dim.PipeName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "Duration (Average)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 6,
+                                "y": 27,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/EventBridge/Pipes,PipeName} MetricName=\"EventSize\"', 'Average', 60), AVG, DESC))",
+                                                "label": "${PROP('Dim.PipeName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "EventSize (Average)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 21,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/EventBridge/Pipes,PipeName} MetricName=\"Invocations\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.PipeName')}",
                                                 "id": "e1",
                                                 "region": "us-east-1"
                                             }
@@ -706,84 +544,24 @@
                                     "view": "pie",
                                     "stacked": false,
                                     "region": "us-east-1",
-                                    "period": 60,
-                                    "stat": "Sum",
-                                    "title": "RequestCount by ALB",
-                                    "setPeriodToTimeRange": true,
-                                    "sparkline": false,
-                                    "labels": {
-                                        "visible": true
-                                    },
-                                    "legend": {
-                                        "position": "hidden"
-                                    }
-                                }
-                            },
-                            {
-                                "type": "metric",
-                                "x": 12,
-                                "y": 1,
-                                "width": 12,
-                                "height": 7,
-                                "properties": {
-                                    "metrics": [
-                                        [
-                                            {
-                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"HTTPCode_ELB_5XX_Count\"', 'Sum', 60), SUM, DESC))",
-                                                "label": "${PROP('Dim.LoadBalancer')}",
-                                                "id": "e2"
-                                            }
-                                        ]
-                                    ],
-                                    "view": "singleValue",
-                                    "stacked": false,
-                                    "region": "us-east-1",
-                                    "title": "HTTP 5XX Responses by ALB",
-                                    "period": 60,
-                                    "stat": "Sum",
-                                    "setPeriodToTimeRange": true,
-                                    "sparkline": false
-                                }
-                            },
-                            {
-                                "type": "metric",
-                                "x": 12,
-                                "y": 23,
-                                "width": 12,
-                                "height": 7,
-                                "properties": {
-                                    "metrics": [
-                                        [
-                                            {
-                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/ApplicationELB,TargetGroup,LoadBalancer} MetricName=\"UnHealthyHostCount\"', 'Maximum', 60), MAX, DESC))",
-                                                "label": "${PROP('Dim.LoadBalancer')} ${PROP('Dim.TargetGroup')}",
-                                                "id": "e1",
-                                                "region": "us-east-1"
-                                            }
-                                        ]
-                                    ],
-                                    "view": "singleValue",
-                                    "stacked": false,
-                                    "region": "us-east-1",
-                                    "period": 300,
                                     "stat": "Average",
-                                    "title": "Unhealthy Targets by ALB & Target Group",
-                                    "setPeriodToTimeRange": true,
-                                    "sparkline": false
+                                    "period": 300,
+                                    "title": "Invocations",
+                                    "setPeriodToTimeRange": true
                                 }
                             },
                             {
                                 "type": "metric",
-                                "x": 0,
-                                "y": 23,
-                                "width": 12,
-                                "height": 7,
+                                "x": 12,
+                                "y": 21,
+                                "width": 6,
+                                "height": 6,
                                 "properties": {
                                     "metrics": [
                                         [
                                             {
-                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/ApplicationELB,TargetGroup,LoadBalancer} MetricName=\"RequestCount\"', 'Sum', 60), SUM, DESC))",
-                                                "label": "${PROP('Dim.LoadBalancer')} ${PROP('Dim.TargetGroup')}",
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/EventBridge/Pipes,PipeName} MetricName=\"EventCount\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.PipeName')}",
                                                 "id": "e1",
                                                 "region": "us-east-1"
                                             }
@@ -792,59 +570,85 @@
                                     "view": "pie",
                                     "stacked": false,
                                     "region": "us-east-1",
-                                    "period": 300,
                                     "stat": "Average",
-                                    "title": "Request Count Per Target Group",
-                                    "setPeriodToTimeRange": true,
-                                    "sparkline": false,
-                                    "labels": {
-                                        "visible": true
-                                    },
-                                    "legend": {
-                                        "position": "hidden"
-                                    }
+                                    "period": 300,
+                                    "title": "EventCount",
+                                    "setPeriodToTimeRange": true
                                 }
                             },
                             {
-                                "type": "metric",
-                                "x": 12,
-                                "y": 30,
-                                "width": 12,
-                                "height": 7,
+                                "type": "text",
+                                "x": 0,
+                                "y": 40,
+                                "width": 24,
+                                "height": 1,
                                 "properties": {
-                                    "metrics": [
-                                        [
-                                            {
-                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/ApplicationELB,TargetGroup,LoadBalancer} MetricName=\"TargetResponseTime\"', 'p90', 60), SUM, DESC))",
-                                                "label": "${LABEL} ${PROP('Dim.TargetGroup')}",
-                                                "id": "e1",
-                                                "region": "us-east-1",
-                                                "period": 60
-                                            }
-                                        ]
-                                    ],
-                                    "view": "singleValue",
-                                    "stacked": false,
-                                    "region": "us-east-1",
-                                    "title": "Latency added by Target (TargetResponseTime p90)",
-                                    "period": 60,
-                                    "stat": "Average",
-                                    "setPeriodToTimeRange": true,
-                                    "singleValueFullPrecision": false
+                                    "markdown": "# Targets",
+                                    "background": "transparent"
                                 }
                             },
                             {
                                 "type": "metric",
                                 "x": 0,
-                                "y": 30,
+                                "y": 34,
                                 "width": 12,
-                                "height": 7,
+                                "height": 6,
                                 "properties": {
                                     "metrics": [
                                         [
                                             {
-                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,TargetGroup,LoadBalancer} MetricName=\"HTTPCode_Target_5XX_Count\"', 'Sum', 60))",
-                                                "label": "${PROP('Dim.LoadBalancer')} ${PROP('Dim.TargetGroup')}",
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/EventBridge/Pipes,PipeName} MetricName=\"EnrichmentStageFailed\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.PipeName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "EnrichmentStageFailed"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 34,
+                                "width": 12,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/EventBridge/Pipes,PipeName} MetricName=\"EnrichmentStageDuration\"', 'Average', 60), AVG, DESC))",
+                                                "label": "${PROP('Dim.PipeName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "EnrichmentStageDuration"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 41,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/EventBridge/Pipes,PipeName} MetricName=\"TargetStageFailed\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.PipeName')}",
                                                 "id": "e1",
                                                 "region": "us-east-1"
                                             }
@@ -853,12 +657,88 @@
                                     "view": "singleValue",
                                     "stacked": false,
                                     "region": "us-east-1",
-                                    "period": 300,
                                     "stat": "Average",
-                                    "title": "HTTP 5XX by Target Group",
-                                    "legend": {
-                                        "position": "hidden"
-                                    },
+                                    "period": 300,
+                                    "title": "TargetStageFailed",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 6,
+                                "y": 41,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/EventBridge/Pipes,PipeName} MetricName=\"TargetStagePartiallyFailed\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.PipeName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "TargetStagePartiallyFailed",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 18,
+                                "y": 41,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/EventBridge/Pipes,PipeName} MetricName=\"TargetStageDuration\"', 'Average', 60), AVG, DESC))",
+                                                "label": "${PROP('Dim.PipeName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "TargetStageDuration"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 41,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/EventBridge/Pipes,PipeName} MetricName=\"TargetStageSkipped\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.PipeName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "TargetStageSkipped",
                                     "setPeriodToTimeRange": true,
                                     "sparkline": false
                                 }
@@ -866,15 +746,15 @@
                             {
                                 "type": "metric",
                                 "x": 0,
-                                "y": 15,
+                                "y": 47,
                                 "width": 6,
-                                "height": 7,
+                                "height": 6,
                                 "properties": {
                                     "metrics": [
                                         [
                                             {
-                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"NonStickyRequestCount\"', 'Sum', 60), SUM, DESC))",
-                                                "label": "${PROP('Dim.LoadBalancer')}",
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/EventBridge/Pipes,PipeName} MetricName=\"TargetStageFailed\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.PipeName')}",
                                                 "id": "e1",
                                                 "region": "us-east-1"
                                             }
@@ -883,34 +763,48 @@
                                     "view": "timeSeries",
                                     "stacked": false,
                                     "region": "us-east-1",
-                                    "period": 60,
-                                    "stat": "Sum",
-                                    "title": "NonStickyRequestCount"
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "TargetStageFailed"
                                 }
                             },
                             {
-                                "type": "text",
-                                "x": 0,
-                                "y": 83,
-                                "width": 24,
-                                "height": 1,
+                                "type": "metric",
+                                "x": 6,
+                                "y": 47,
+                                "width": 6,
+                                "height": 6,
                                 "properties": {
-                                    "markdown": "## Authentication Metrics\n",
-                                    "background": "transparent"
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/EventBridge/Pipes,PipeName} MetricName=\"TargetStagePartiallyFailed\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.PipeName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "TargetStagePartiallyFailed"
                                 }
                             },
                             {
                                 "type": "metric",
                                 "x": 12,
-                                "y": 84,
-                                "width": 12,
-                                "height": 7,
+                                "y": 47,
+                                "width": 6,
+                                "height": 6,
                                 "properties": {
                                     "metrics": [
                                         [
                                             {
-                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"ELBAuthFailure\"', 'Sum', 60))",
-                                                "label": "${PROP('Dim.LoadBalancer')}",
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/EventBridge/Pipes,PipeName} MetricName=\"TargetStageSkipped\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.PipeName')}",
                                                 "id": "e1",
                                                 "region": "us-east-1"
                                             }
@@ -919,23 +813,23 @@
                                     "view": "timeSeries",
                                     "stacked": false,
                                     "region": "us-east-1",
-                                    "period": 60,
-                                    "stat": "Sum",
-                                    "title": "Failed Authenticate Actions"
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "TargetStageSkipped"
                                 }
                             },
                             {
                                 "type": "metric",
-                                "x": 0,
-                                "y": 91,
-                                "width": 12,
-                                "height": 7,
+                                "x": 18,
+                                "y": 47,
+                                "width": 6,
+                                "height": 6,
                                 "properties": {
                                     "metrics": [
                                         [
                                             {
-                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"ELBAuthError\"', 'Sum', 60))",
-                                                "label": "${PROP('Dim.LoadBalancer')}",
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/EventBridge/Pipes,PipeName} MetricName=\"TargetStageDuration\"', 'Average', 60), AVG, DESC))",
+                                                "label": "${PROP('Dim.PipeName')}",
                                                 "id": "e1",
                                                 "region": "us-east-1"
                                             }
@@ -944,160 +838,9 @@
                                     "view": "timeSeries",
                                     "stacked": false,
                                     "region": "us-east-1",
-                                    "period": 60,
-                                    "stat": "Sum",
-                                    "title": "Errored Authenticate Actions"
-                                }
-                            },
-                            {
-                                "type": "metric",
-                                "x": 0,
-                                "y": 76,
-                                "width": 12,
-                                "height": 7,
-                                "properties": {
-                                    "metrics": [
-                                        [
-                                            {
-                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"ClientTLSNegotiationErrorCount\"', 'Sum', 60))",
-                                                "label": "${PROP('Dim.LoadBalancer')}",
-                                                "id": "e1",
-                                                "region": "us-east-1"
-                                            }
-                                        ]
-                                    ],
-                                    "view": "timeSeries",
-                                    "stacked": false,
-                                    "region": "us-east-1",
-                                    "period": 60,
-                                    "stat": "Sum",
-                                    "title": "TLS Negotiation Errors emitted by Client"
-                                }
-                            },
-                            {
-                                "type": "metric",
-                                "x": 12,
-                                "y": 76,
-                                "width": 12,
-                                "height": 7,
-                                "properties": {
-                                    "metrics": [
-                                        [
-                                            {
-                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"TargetTLSNegotiationErrorCount\"', 'Sum', 60))",
-                                                "label": "${PROP('Dim.LoadBalancer')}",
-                                                "id": "e1",
-                                                "region": "us-east-1"
-                                            }
-                                        ]
-                                    ],
-                                    "view": "timeSeries",
-                                    "stacked": false,
-                                    "region": "us-east-1",
-                                    "period": 60,
-                                    "stat": "Sum",
-                                    "title": "TLS Negotiation Errors emitted by Target"
-                                }
-                            },
-                            {
-                                "type": "text",
-                                "x": 0,
-                                "y": 98,
-                                "width": 24,
-                                "height": 1,
-                                "properties": {
-                                    "markdown": "## Load Balancer Capacity Units (LCU)",
-                                    "background": "transparent"
-                                }
-                            },
-                            {
-                                "type": "metric",
-                                "x": 0,
-                                "y": 99,
-                                "width": 12,
-                                "height": 7,
-                                "properties": {
-                                    "metrics": [
-                                        [
-                                            {
-                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"ConsumedLCUs\"', 'Sum', 3600))",
-                                                "label": "${PROP('Dim.LoadBalancer')}",
-                                                "id": "e3",
-                                                "region": "us-east-1"
-                                            }
-                                        ]
-                                    ],
-                                    "period": 3600,
-                                    "region": "us-east-1",
-                                    "stat": "Sum",
-                                    "title": "ConsumedLCUs",
-                                    "yAxis": {
-                                        "left": {
-                                            "min": 0
-                                        }
-                                    },
-                                    "view": "timeSeries",
-                                    "stacked": false
-                                }
-                            },
-                            {
-                                "type": "metric",
-                                "x": 0,
-                                "y": 106,
-                                "width": 12,
-                                "height": 7,
-                                "properties": {
-                                    "metrics": [
-                                        [
-                                            {
-                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"ReservedLCUs\"', 'Sum', 3600))",
-                                                "label": "${PROP('Dim.LoadBalancer')}",
-                                                "id": "e3",
-                                                "region": "us-east-1"
-                                            }
-                                        ]
-                                    ],
-                                    "period": 3600,
-                                    "region": "us-east-1",
-                                    "stat": "Sum",
-                                    "title": "ReservedLCUs",
-                                    "yAxis": {
-                                        "left": {
-                                            "min": 0
-                                        }
-                                    },
-                                    "view": "timeSeries",
-                                    "stacked": false
-                                }
-                            },
-                            {
-                                "type": "metric",
-                                "x": 12,
-                                "y": 99,
-                                "width": 12,
-                                "height": 7,
-                                "properties": {
-                                    "metrics": [
-                                        [
-                                            {
-                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"PeakLCUs\"', 'Sum', 3600))",
-                                                "label": "${PROP('Dim.LoadBalancer')}",
-                                                "id": "e3",
-                                                "region": "us-east-1"
-                                            }
-                                        ]
-                                    ],
-                                    "period": 3600,
-                                    "region": "us-east-1",
-                                    "stat": "Sum",
-                                    "title": "PeakLCUs",
-                                    "yAxis": {
-                                        "left": {
-                                            "min": 0
-                                        }
-                                    },
-                                    "view": "timeSeries",
-                                    "stacked": false
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "TargetStageDuration"
                                 }
                             }
                         ]
@@ -1105,20 +848,20 @@
                 }
             }
         },
-        "CWDashboardALBIndividual": {
+        "WDashboardEBPipesIndividual": {
             "Type": "AWS::CloudWatch::Dashboard",
             "Properties": {
-                "DashboardName": "ALB_Individual_Resources",
+                "DashboardName": "EventBridge_Pipes_Individual_Resources",
                 "DashboardBody": {
                     "Fn::ToJsonString": {
                         "variables": [
                             {
-                                "type": "pattern",
-                                "pattern": "us-east-1",
+                                "type": "property",
+                                "property": "region",
                                 "inputType": "select",
                                 "id": "Region",
                                 "label": "Region",
-                                "defaultValue":{
+                                "defaultValue": {
                                     "Ref": "DefaultRegion"
                                 },
                                 "visible": true,
@@ -1195,122 +938,23 @@
                                         "value": "sa-east-1",
                                         "label": "South America"
                                     }
-                                ],
-                                "value": "us-east-1",
-                                "customValues": "us-east-1, N. Virginia\nus-east-2, Ohio\nus-west-1, N.California\nca-central-1, Canada\nus-west-2, Oregon\neu-west-1, Ireland\neu-west-2, London\neu-central-1, Frankfurt"
+                                ]
                             },
                             {
                                 "type": "property",
-                                "property": "LoadBalancer",
+                                "property": "PipeName",
                                 "inputType": "select",
-                                "id": "LoadBalancer",
-                                "label": "LoadBalancer",
+                                "id": "PipeName",
+                                "label": "PipeName",
                                 "defaultValue": {
-                                    "Ref": "DefaultALB"
+                                    "Ref": "DefaultPipe"
                                 },
                                 "visible": true,
-                                "search": "{AWS/ApplicationELB,LoadBalancer} MetricName=RequestCount",
-                                "populateFrom": "LoadBalancer"
-                            },
-                            {
-                                "type": "property",
-                                "property": "WebACL",
-                                "inputType": "select",
-                                "id": "WebACL",
-                                "label": "WebACL",
-                                "defaultValue": {
-                                    "Ref": "DefaultWebACL"
-                                },
-                                "visible": true,
-                                "search": "{AWS/WAFV2,Region,Rule,WebACL} MetricName=AllowedRequests",
-                                "populateFrom": "WebACL"
+                                "search": "{AWS/EventBridge/Pipes,PipeName} MetricName=Invocations",
+                                "populateFrom": "PipeName"
                             }
                         ],
                         "widgets": [
-                            {
-                                "type": "metric",
-                                "x": 0,
-                                "y": 7,
-                                "width": 6,
-                                "height": 7,
-                                "properties": {
-                                    "metrics": [
-                                        [
-                                            {
-                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"RequestCount\" LoadBalancer=\"appname\"', 'Sum', 60))",
-                                                "label": "${PROP('Dim.LoadBalancer')}",
-                                                "id": "e1",
-                                                "region": "us-east-1"
-                                            }
-                                        ]
-                                    ],
-                                    "view": "timeSeries",
-                                    "stacked": false,
-                                    "region": "us-east-1",
-                                    "period": 60,
-                                    "stat": "Sum",
-                                    "title": "RequestCount"
-                                }
-                            },
-                            {
-                                "type": "metric",
-                                "x": 12,
-                                "y": 1,
-                                "width": 12,
-                                "height": 6,
-                                "properties": {
-                                    "metrics": [
-                                        [
-                                            {
-                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"HTTPCode_ELB_5XX_Count\" LoadBalancer=appname', 'Sum', 60))",
-                                                "label": "${PROP('MetricName')}",
-                                                "id": "e1",
-                                                "region": "us-east-1"
-                                            }
-                                        ],
-                                        [
-                                            {
-                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"HTTPCode_ELB_500_Count\" LoadBalancer=appname', 'Sum', 60))",
-                                                "label": "${PROP('MetricName')}",
-                                                "id": "e5",
-                                                "region": "us-east-1"
-                                            }
-                                        ],
-                                        [
-                                            {
-                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"HTTPCode_ELB_502_Count\" LoadBalancer=appname', 'Sum', 60))",
-                                                "label": "${PROP('MetricName')}",
-                                                "id": "e2",
-                                                "region": "us-east-1"
-                                            }
-                                        ],
-                                        [
-                                            {
-                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"HTTPCode_ELB_503_Count\" LoadBalancer=appname', 'Sum', 60))",
-                                                "label": "${PROP('MetricName')}",
-                                                "id": "e3",
-                                                "region": "us-east-1"
-                                            }
-                                        ],
-                                        [
-                                            {
-                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"HTTPCode_ELB_504_Count\" LoadBalancer=appname', 'Sum', 60))",
-                                                "label": "${PROP('MetricName')}",
-                                                "id": "e4",
-                                                "region": "us-east-1"
-                                            }
-                                        ]
-                                    ],
-                                    "view": "singleValue",
-                                    "stacked": false,
-                                    "region": "us-east-1",
-                                    "title": "HTTP 5XX emitted by ALB",
-                                    "period": 60,
-                                    "stat": "Sum",
-                                    "setPeriodToTimeRange": true,
-                                    "sparkline": false
-                                }
-                            },
                             {
                                 "type": "text",
                                 "x": 0,
@@ -1318,1156 +962,593 @@
                                 "width": 24,
                                 "height": 1,
                                 "properties": {
-                                    "markdown": "## ALB Request Metrics",
-                                    "background": "transparent"
-                                }
-                            },
-                            {
-                                "type": "metric",
-                                "x": 12,
-                                "y": 7,
-                                "width": 6,
-                                "height": 7,
-                                "properties": {
-                                    "metrics": [
-                                        [
-                                            {
-                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"HTTPCode_ELB_4XX_Count\" LoadBalancer=appname', 'Sum', 60))",
-                                                "label": "${PROP('Dim.LoadBalancer')}",
-                                                "id": "e1",
-                                                "region": "us-east-1"
-                                            }
-                                        ]
-                                    ],
-                                    "view": "timeSeries",
-                                    "stacked": false,
-                                    "region": "us-east-1",
-                                    "title": "HTTP 4XX emitted by ALB",
-                                    "period": 60,
-                                    "stat": "Sum"
-                                }
-                            },
-                            {
-                                "type": "metric",
-                                "x": 12,
-                                "y": 29,
-                                "width": 6,
-                                "height": 7,
-                                "properties": {
-                                    "metrics": [
-                                        [
-                                            {
-                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,TargetGroup,LoadBalancer} MetricName=\"HealthyHostCount\" LoadBalancer=appname', 'Minimum', 60))",
-                                                "label": "${PROP('Dim.TargetGroup')}",
-                                                "id": "e1",
-                                                "region": "us-east-1"
-                                            }
-                                        ]
-                                    ],
-                                    "view": "timeSeries",
-                                    "stacked": false,
-                                    "region": "us-east-1",
-                                    "title": "Healthy Targets",
-                                    "stat": "Maximum",
-                                    "period": 60
-                                }
-                            },
-                            {
-                                "type": "metric",
-                                "x": 6,
-                                "y": 29,
-                                "width": 6,
-                                "height": 7,
-                                "properties": {
-                                    "metrics": [
-                                        [
-                                            {
-                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/ApplicationELB,TargetGroup,LoadBalancer} MetricName=\"RequestCountPerTarget\" LoadBalancer=appname', 'Sum', 60), SUM, DESC))",
-                                                "label": "${PROP('Dim.TargetGroup')}",
-                                                "id": "e1",
-                                                "region": "us-east-1"
-                                            }
-                                        ]
-                                    ],
-                                    "view": "timeSeries",
-                                    "stacked": false,
-                                    "region": "us-east-1",
-                                    "period": 300,
-                                    "stat": "Average",
-                                    "title": "RequestCount Per Target"
-                                }
-                            },
-                            {
-                                "type": "metric",
-                                "x": 12,
-                                "y": 43,
-                                "width": 6,
-                                "height": 7,
-                                "properties": {
-                                    "metrics": [
-                                        [
-                                            {
-                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/ApplicationELB,TargetGroup,LoadBalancer} MetricName=\"TargetConnectionErrorCount\" LoadBalancer=appname', 'Sum', 60), SUM, DESC))",
-                                                "label": "${PROP('Dim.TargetGroup')}",
-                                                "id": "e1",
-                                                "region": "us-east-1"
-                                            }
-                                        ]
-                                    ],
-                                    "view": "timeSeries",
-                                    "stacked": false,
-                                    "region": "us-east-1",
-                                    "title": "TargetConnectionErrorCount",
-                                    "period": 300,
-                                    "stat": "Average"
-                                }
-                            },
-                            {
-                                "type": "text",
-                                "x": 0,
-                                "y": 21,
-                                "width": 24,
-                                "height": 1,
-                                "properties": {
-                                    "markdown": "## Target Group Metrics",
-                                    "background": "transparent"
-                                }
-                            },
-                            {
-                                "type": "metric",
-                                "x": 6,
-                                "y": 43,
-                                "width": 6,
-                                "height": 7,
-                                "properties": {
-                                    "metrics": [
-                                        [
-                                            {
-                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,TargetGroup,LoadBalancer} MetricName=\"TargetResponseTime\" LoadBalancer=appname', 'p90', 60))",
-                                                "label": "${PROP('Dim.TargetGroup')}",
-                                                "id": "e1",
-                                                "region": "us-east-1",
-                                                "period": 60
-                                            }
-                                        ]
-                                    ],
-                                    "view": "timeSeries",
-                                    "stacked": false,
-                                    "region": "us-east-1",
-                                    "title": "Latency added by Target (TargetResponseTime p90)",
-                                    "period": 60,
-                                    "stat": "Average"
-                                }
-                            },
-                            {
-                                "type": "metric",
-                                "x": 12,
-                                "y": 60,
-                                "width": 6,
-                                "height": 7,
-                                "properties": {
-                                    "metrics": [
-                                        [
-                                            {
-                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"TargetTLSNegotiationErrorCount\" LoadBalancer=\"appname\"', 'Sum', 60))",
-                                                "label": "${PROP('Dim.LoadBalancer')}",
-                                                "id": "e1",
-                                                "region": "us-east-1"
-                                            }
-                                        ]
-                                    ],
-                                    "view": "timeSeries",
-                                    "stacked": false,
-                                    "region": "us-east-1",
-                                    "period": 60,
-                                    "stat": "Sum",
-                                    "title": "TLS Negotiation Errors emitted by Target"
-                                }
-                            },
-                            {
-                                "type": "metric",
-                                "x": 0,
-                                "y": 60,
-                                "width": 6,
-                                "height": 7,
-                                "properties": {
-                                    "metrics": [
-                                        [
-                                            {
-                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"ClientTLSNegotiationErrorCount\" LoadBalancer=\"appname\"', 'Sum', 60))",
-                                                "label": "${PROP('Dim.LoadBalancer')}",
-                                                "id": "e1",
-                                                "region": "us-east-1"
-                                            }
-                                        ]
-                                    ],
-                                    "view": "timeSeries",
-                                    "stacked": false,
-                                    "region": "us-east-1",
-                                    "period": 60,
-                                    "stat": "Sum",
-                                    "title": "TLS Negotiation Errors emitted by Client"
-                                }
-                            },
-                            {
-                                "type": "metric",
-                                "x": 6,
-                                "y": 7,
-                                "width": 6,
-                                "height": 7,
-                                "properties": {
-                                    "metrics": [
-                                        [
-                                            {
-                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"HTTPCode_ELB_3XX_Count\" LoadBalancer=appname', 'Sum', 60))",
-                                                "label": "${PROP('Dim.LoadBalancer')}",
-                                                "id": "e1",
-                                                "region": "us-east-1"
-                                            }
-                                        ]
-                                    ],
-                                    "view": "timeSeries",
-                                    "stacked": false,
-                                    "region": "us-east-1",
-                                    "title": "HTTP 3XX emitted by ALB",
-                                    "period": 60,
-                                    "stat": "Sum"
-                                }
-                            },
-                            {
-                                "type": "metric",
-                                "x": 0,
-                                "y": 36,
-                                "width": 6,
-                                "height": 7,
-                                "properties": {
-                                    "metrics": [
-                                        [
-                                            {
-                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/ApplicationELB,TargetGroup,LoadBalancer} MetricName=\"HTTPCode_Target_2XX_Count\" LoadBalancer=appname', 'Sum', 60), SUM, DESC))",
-                                                "label": "${PROP('Dim.TargetGroup')}",
-                                                "id": "e1",
-                                                "region": "us-east-1"
-                                            }
-                                        ]
-                                    ],
-                                    "view": "timeSeries",
-                                    "stacked": false,
-                                    "region": "us-east-1",
-                                    "title": "HTTP 2XX emitted from Targets",
-                                    "period": 60,
-                                    "stat": "Sum"
-                                }
-                            },
-                            {
-                                "type": "metric",
-                                "x": 6,
-                                "y": 36,
-                                "width": 6,
-                                "height": 7,
-                                "properties": {
-                                    "metrics": [
-                                        [
-                                            {
-                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/ApplicationELB,TargetGroup,LoadBalancer} MetricName=\"HTTPCode_Target_3XX_Count\" LoadBalancer=appname', 'Sum', 60), SUM, DESC))",
-                                                "label": "${PROP('Dim.TargetGroup')}",
-                                                "id": "e1",
-                                                "region": "us-east-1"
-                                            }
-                                        ]
-                                    ],
-                                    "view": "timeSeries",
-                                    "stacked": false,
-                                    "region": "us-east-1",
-                                    "title": "HTTP 3XX emitted from Targets",
-                                    "period": 60,
-                                    "stat": "Sum"
-                                }
-                            },
-                            {
-                                "type": "metric",
-                                "x": 12,
-                                "y": 36,
-                                "width": 6,
-                                "height": 7,
-                                "properties": {
-                                    "metrics": [
-                                        [
-                                            {
-                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/ApplicationELB,TargetGroup,LoadBalancer} MetricName=\"HTTPCode_Target_4XX_Count\" LoadBalancer=appname', 'Sum', 60), SUM, DESC))",
-                                                "label": "${PROP('Dim.TargetGroup')}",
-                                                "id": "e1",
-                                                "region": "us-east-1"
-                                            }
-                                        ]
-                                    ],
-                                    "view": "timeSeries",
-                                    "stacked": false,
-                                    "region": "us-east-1",
-                                    "title": "HTTP 4XX emitted from Targets",
-                                    "period": 60,
-                                    "stat": "Sum"
-                                }
-                            },
-                            {
-                                "type": "metric",
-                                "x": 18,
-                                "y": 36,
-                                "width": 6,
-                                "height": 7,
-                                "properties": {
-                                    "metrics": [
-                                        [
-                                            {
-                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/ApplicationELB,TargetGroup,LoadBalancer} MetricName=\"HTTPCode_Target_5XX_Count\" LoadBalancer=appname', 'Sum', 60), SUM, DESC))",
-                                                "label": "${PROP('Dim.TargetGroup')}",
-                                                "id": "e1",
-                                                "region": "us-east-1"
-                                            }
-                                        ]
-                                    ],
-                                    "view": "timeSeries",
-                                    "stacked": false,
-                                    "region": "us-east-1",
-                                    "title": "HTTP 5XX emitted from Targets",
-                                    "period": 60,
-                                    "stat": "Sum"
-                                }
-                            },
-                            {
-                                "type": "metric",
-                                "x": 18,
-                                "y": 84,
-                                "width": 6,
-                                "height": 7,
-                                "properties": {
-                                    "metrics": [
-                                        [
-                                            {
-                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/WAFV2,WebACL,Region,Rule} WebACL=\"appname\" Region=\"us-east-1\" MetricName=\"AllowedRequests\"', 'Sum', 60),SUM, DESC))",
-                                                "label": "${LABEL} ${PROP('Dim.WebACL')}",
-                                                "id": "e1",
-                                                "region": "us-east-1"
-                                            }
-                                        ]
-                                    ],
-                                    "view": "timeSeries",
-                                    "stacked": false,
-                                    "region": "us-east-1",
-                                    "period": 60,
-                                    "stat": "Sum",
-                                    "title": "AllowedRequests"
-                                }
-                            },
-                            {
-                                "type": "metric",
-                                "x": 12,
-                                "y": 84,
-                                "width": 6,
-                                "height": 7,
-                                "properties": {
-                                    "metrics": [
-                                        [
-                                            {
-                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/WAFV2,WebACL,Region,Rule} WebACL=\"appname\" Region=\"us-east-1\" MetricName=\"BlockedRequests\"', 'Sum', 60), SUM, DESC))",
-                                                "label": "${LABEL} ${PROP('Dim.WebACL')}",
-                                                "id": "e1",
-                                                "region": "us-east-1"
-                                            }
-                                        ]
-                                    ],
-                                    "view": "timeSeries",
-                                    "stacked": false,
-                                    "region": "us-east-1",
-                                    "period": 60,
-                                    "stat": "Sum",
-                                    "title": "BlockedRequests"
-                                }
-                            },
-                            {
-                                "type": "metric",
-                                "x": 18,
-                                "y": 29,
-                                "width": 6,
-                                "height": 7,
-                                "properties": {
-                                    "metrics": [
-                                        [
-                                            {
-                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,TargetGroup,LoadBalancer} MetricName=\"UnHealthyHostCount\" LoadBalancer=appname', 'Maximum', 60))",
-                                                "label": "${PROP('Dim.TargetGroup')}",
-                                                "id": "e2",
-                                                "region": "us-east-1"
-                                            }
-                                        ]
-                                    ],
-                                    "view": "timeSeries",
-                                    "stacked": false,
-                                    "region": "us-east-1",
-                                    "title": "UnHealthy Targets",
-                                    "stat": "Maximum",
-                                    "period": 60
-                                }
-                            },
-                            {
-                                "type": "metric",
-                                "x": 0,
-                                "y": 29,
-                                "width": 6,
-                                "height": 7,
-                                "properties": {
-                                    "metrics": [
-                                        [
-                                            {
-                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/ApplicationELB,TargetGroup,LoadBalancer} MetricName=\"RequestCount\" LoadBalancer=appname', 'Sum', 60), SUM, DESC))",
-                                                "label": "${PROP('Dim.TargetGroup')}",
-                                                "id": "e1",
-                                                "region": "us-east-1"
-                                            }
-                                        ]
-                                    ],
-                                    "view": "timeSeries",
-                                    "stacked": false,
-                                    "region": "us-east-1",
-                                    "period": 300,
-                                    "stat": "Average",
-                                    "title": "Request Count Per Target Group"
-                                }
-                            },
-                            {
-                                "type": "metric",
-                                "x": 18,
-                                "y": 7,
-                                "width": 6,
-                                "height": 7,
-                                "properties": {
-                                    "metrics": [
-                                        [
-                                            {
-                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"HTTPCode_ELB_5XX_Count\" LoadBalancer=appname', 'Sum', 60))",
-                                                "label": "${PROP('MetricName')}",
-                                                "id": "e1",
-                                                "region": "us-east-1"
-                                            }
-                                        ],
-                                        [
-                                            {
-                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"HTTPCode_ELB_500_Count\" LoadBalancer=appname', 'Sum', 60))",
-                                                "label": "${PROP('MetricName')}",
-                                                "id": "e5",
-                                                "region": "us-east-1"
-                                            }
-                                        ],
-                                        [
-                                            {
-                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"HTTPCode_ELB_502_Count\" LoadBalancer=appname', 'Sum', 60))",
-                                                "label": "${PROP('MetricName')}",
-                                                "id": "e2",
-                                                "region": "us-east-1"
-                                            }
-                                        ],
-                                        [
-                                            {
-                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"HTTPCode_ELB_503_Count\" LoadBalancer=appname', 'Sum', 60))",
-                                                "label": "${PROP('MetricName')}",
-                                                "id": "e3",
-                                                "region": "us-east-1"
-                                            }
-                                        ],
-                                        [
-                                            {
-                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"HTTPCode_ELB_504_Count\" LoadBalancer=appname', 'Sum', 60))",
-                                                "label": "${PROP('MetricName')}",
-                                                "id": "e4",
-                                                "region": "us-east-1"
-                                            }
-                                        ]
-                                    ],
-                                    "view": "timeSeries",
-                                    "stacked": false,
-                                    "region": "us-east-1",
-                                    "title": "HTTP 5XX emitted by ALB",
-                                    "period": 60,
-                                    "stat": "Sum"
-                                }
-                            },
-                            {
-                                "type": "metric",
-                                "x": 0,
-                                "y": 14,
-                                "width": 6,
-                                "height": 7,
-                                "properties": {
-                                    "metrics": [
-                                        [
-                                            {
-                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"NonStickyRequestCount\" LoadBalancer=\"appname\"', 'Sum', 60), SUM, DESC))",
-                                                "label": "${PROP('MetricName')}",
-                                                "id": "e1",
-                                                "region": "us-east-1"
-                                            }
-                                        ]
-                                    ],
-                                    "view": "timeSeries",
-                                    "stacked": false,
-                                    "region": "us-east-1",
-                                    "period": 60,
-                                    "stat": "Sum",
-                                    "title": "NonStickyRequestCount"
-                                }
-                            },
-                            {
-                                "type": "text",
-                                "x": 0,
-                                "y": 50,
-                                "width": 24,
-                                "height": 1,
-                                "properties": {
-                                    "markdown": "## Connection Metrics",
+                                    "markdown": "# Execution",
                                     "background": "transparent"
                                 }
                             },
                             {
                                 "type": "text",
                                 "x": 0,
-                                "y": 59,
+                                "y": 19,
                                 "width": 24,
                                 "height": 1,
                                 "properties": {
-                                    "markdown": "## TLS Metrics",
+                                    "markdown": "# Enrichment",
                                     "background": "transparent"
-                                }
-                            },
-                            {
-                                "type": "text",
-                                "x": 0,
-                                "y": 67,
-                                "width": 24,
-                                "height": 1,
-                                "properties": {
-                                    "markdown": "## Authentication Metrics",
-                                    "background": "transparent"
-                                }
-                            },
-                            {
-                                "type": "metric",
-                                "x": 0,
-                                "y": 51,
-                                "width": 12,
-                                "height": 8,
-                                "properties": {
-                                    "metrics": [
-                                        [
-                                            {
-                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"NewConnectionCount\" LoadBalancer=\"appname\"', 'Sum', 60))",
-                                                "label": "${PROP('MetricName')}",
-                                                "id": "e1",
-                                                "region": "us-east-1"
-                                            }
-                                        ],
-                                        [
-                                            {
-                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"ActiveConnectionCount\" LoadBalancer=\"appname\"', 'Sum', 60))",
-                                                "label": "${PROP('MetricName')}",
-                                                "id": "e2",
-                                                "region": "us-east-1"
-                                            }
-                                        ],
-                                        [
-                                            {
-                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"RejectedConnectionCount\" LoadBalancer=\"appname\"', 'Sum', 60))",
-                                                "label": "${PROP('MetricName')}",
-                                                "id": "e3",
-                                                "region": "us-east-1"
-                                            }
-                                        ]
-                                    ],
-                                    "view": "timeSeries",
-                                    "stacked": false,
-                                    "region": "us-east-1",
-                                    "stat": "Sum",
-                                    "period": 60,
-                                    "title": "Connections"
-                                }
-                            },
-                            {
-                                "type": "metric",
-                                "x": 12,
-                                "y": 51,
-                                "width": 12,
-                                "height": 5,
-                                "properties": {
-                                    "metrics": [
-                                        [
-                                            {
-                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"NewConnectionCount\" LoadBalancer=\"appname\"', 'Sum', 60))",
-                                                "label": "${PROP('MetricName')}",
-                                                "id": "e1",
-                                                "region": "us-east-1"
-                                            }
-                                        ],
-                                        [
-                                            {
-                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"ActiveConnectionCount\" LoadBalancer=\"appname\"', 'Sum', 60))",
-                                                "label": "${PROP('MetricName')}",
-                                                "id": "e2",
-                                                "region": "us-east-1"
-                                            }
-                                        ],
-                                        [
-                                            {
-                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"RejectedConnectionCount\" LoadBalancer=\"appname\"', 'Sum', 60))",
-                                                "label": "${PROP('MetricName')}",
-                                                "id": "e3",
-                                                "region": "us-east-1"
-                                            }
-                                        ]
-                                    ],
-                                    "view": "singleValue",
-                                    "stacked": false,
-                                    "region": "us-east-1",
-                                    "stat": "Sum",
-                                    "period": 60,
-                                    "title": "Connections",
-                                    "setPeriodToTimeRange": true,
-                                    "sparkline": false
-                                }
-                            },
-                            {
-                                "type": "metric",
-                                "x": 6,
-                                "y": 60,
-                                "width": 6,
-                                "height": 7,
-                                "properties": {
-                                    "metrics": [
-                                        [
-                                            {
-                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"ClientTLSNegotiationErrorCount\" LoadBalancer=\"appname\"', 'Sum', 60))",
-                                                "label": "${PROP('Dim.LoadBalancer')}",
-                                                "id": "e1",
-                                                "region": "us-east-1"
-                                            }
-                                        ]
-                                    ],
-                                    "view": "singleValue",
-                                    "stacked": false,
-                                    "region": "us-east-1",
-                                    "period": 60,
-                                    "stat": "Sum",
-                                    "title": "TLS Negotiation Errors emitted by Client",
-                                    "setPeriodToTimeRange": true,
-                                    "sparkline": false
-                                }
-                            },
-                            {
-                                "type": "metric",
-                                "x": 18,
-                                "y": 60,
-                                "width": 6,
-                                "height": 7,
-                                "properties": {
-                                    "metrics": [
-                                        [
-                                            {
-                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"TargetTLSNegotiationErrorCount\" LoadBalancer=\"appname\"', 'Sum', 60))",
-                                                "label": "${PROP('Dim.LoadBalancer')}",
-                                                "id": "e1",
-                                                "region": "us-east-1"
-                                            }
-                                        ]
-                                    ],
-                                    "view": "singleValue",
-                                    "stacked": false,
-                                    "region": "us-east-1",
-                                    "period": 60,
-                                    "stat": "Sum",
-                                    "title": "TLS Negotiation Errors emitted by Target",
-                                    "setPeriodToTimeRange": true,
-                                    "sparkline": false
-                                }
-                            },
-                            {
-                                "type": "metric",
-                                "x": 0,
-                                "y": 68,
-                                "width": 6,
-                                "height": 7,
-                                "properties": {
-                                    "metrics": [
-                                        [
-                                            {
-                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"ELBAuthSuccess\" LoadBalancer=\"appname\"', 'Sum', 60))",
-                                                "label": "${PROP('Dim.LoadBalancer')}",
-                                                "id": "e1",
-                                                "region": "us-east-1"
-                                            }
-                                        ]
-                                    ],
-                                    "view": "timeSeries",
-                                    "stacked": false,
-                                    "region": "us-east-1",
-                                    "period": 60,
-                                    "stat": "Sum",
-                                    "title": "Successful Authenticate Actions"
-                                }
-                            },
-                            {
-                                "type": "metric",
-                                "x": 12,
-                                "y": 68,
-                                "width": 6,
-                                "height": 7,
-                                "properties": {
-                                    "metrics": [
-                                        [
-                                            {
-                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"ELBAuthFailure\" LoadBalancer=\"appname\"', 'Sum', 60))",
-                                                "label": "${PROP('Dim.LoadBalancer')}",
-                                                "id": "e1",
-                                                "region": "us-east-1"
-                                            }
-                                        ]
-                                    ],
-                                    "view": "timeSeries",
-                                    "stacked": false,
-                                    "region": "us-east-1",
-                                    "period": 60,
-                                    "stat": "Sum",
-                                    "title": "Failed Authenticate Actions"
-                                }
-                            },
-                            {
-                                "type": "metric",
-                                "x": 6,
-                                "y": 68,
-                                "width": 6,
-                                "height": 7,
-                                "properties": {
-                                    "metrics": [
-                                        [
-                                            {
-                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"ELBAuthError\" LoadBalancer=\"appname\"', 'Sum', 60))",
-                                                "label": "${PROP('Dim.LoadBalancer')}",
-                                                "id": "e1",
-                                                "region": "us-east-1"
-                                            }
-                                        ]
-                                    ],
-                                    "view": "timeSeries",
-                                    "stacked": false,
-                                    "region": "us-east-1",
-                                    "period": 60,
-                                    "stat": "Sum",
-                                    "title": "Errored Authenticate Actions"
-                                }
-                            },
-                            {
-                                "type": "metric",
-                                "x": 18,
-                                "y": 22,
-                                "width": 6,
-                                "height": 7,
-                                "properties": {
-                                    "metrics": [
-                                        [
-                                            {
-                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,TargetGroup,LoadBalancer} MetricName=\"UnHealthyHostCount\" LoadBalancer=appname', 'Maximum', 60))",
-                                                "label": "${PROP('Dim.TargetGroup')}",
-                                                "id": "e2",
-                                                "region": "us-east-1"
-                                            }
-                                        ]
-                                    ],
-                                    "view": "singleValue",
-                                    "stacked": false,
-                                    "region": "us-east-1",
-                                    "title": "Unhealthy Targets by Target Group",
-                                    "stat": "Maximum",
-                                    "period": 60,
-                                    "setPeriodToTimeRange": true,
-                                    "sparkline": false
-                                }
-                            },
-                            {
-                                "type": "metric",
-                                "x": 0,
-                                "y": 43,
-                                "width": 6,
-                                "height": 7,
-                                "properties": {
-                                    "metrics": [
-                                        [
-                                            {
-                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,TargetGroup,LoadBalancer} MetricName=\"TargetResponseTime\" LoadBalancer=appname', 'p90', 60))",
-                                                "label": "${PROP('Dim.TargetGroup')}",
-                                                "id": "e1",
-                                                "region": "us-east-1",
-                                                "period": 60
-                                            }
-                                        ]
-                                    ],
-                                    "view": "singleValue",
-                                    "stacked": false,
-                                    "region": "us-east-1",
-                                    "title": "Latency added by Target (TargetResponseTime p90)",
-                                    "period": 60,
-                                    "stat": "Average",
-                                    "setPeriodToTimeRange": true,
-                                    "sparkline": false
-                                }
-                            },
-                            {
-                                "type": "metric",
-                                "x": 12,
-                                "y": 22,
-                                "width": 6,
-                                "height": 7,
-                                "properties": {
-                                    "metrics": [
-                                        [
-                                            {
-                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,TargetGroup,LoadBalancer} MetricName=\"HTTPCode_Target_5XX_Count\" LoadBalancer=appname', 'Sum', 60))",
-                                                "label": "${PROP('Dim.TargetGroup')}",
-                                                "id": "e1",
-                                                "region": "us-east-1"
-                                            }
-                                        ]
-                                    ],
-                                    "view": "singleValue",
-                                    "stacked": false,
-                                    "region": "us-east-1",
-                                    "title": "HTTP 5XX by Target Group",
-                                    "period": 60,
-                                    "stat": "Sum",
-                                    "setPeriodToTimeRange": true,
-                                    "sparkline": false
-                                }
-                            },
-                            {
-                                "type": "metric",
-                                "x": 6,
-                                "y": 22,
-                                "width": 6,
-                                "height": 7,
-                                "properties": {
-                                    "metrics": [
-                                        [
-                                            {
-                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"HTTPCode_Target_2XX_Count\" LoadBalancer=appname', 'Sum', 60))",
-                                                "label": "${PROP('MetricName')}",
-                                                "id": "e1",
-                                                "region": "us-east-1"
-                                            }
-                                        ],
-                                        [
-                                            {
-                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"HTTPCode_Target_3XX_Count\" LoadBalancer=appname', 'Sum', 60))",
-                                                "label": "${PROP('MetricName')}",
-                                                "id": "e2",
-                                                "region": "us-east-1"
-                                            }
-                                        ],
-                                        [
-                                            {
-                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"HTTPCode_Target_4XX_Count\" LoadBalancer=appname', 'Sum', 60))",
-                                                "label": "${PROP('MetricName')}",
-                                                "id": "e3",
-                                                "region": "us-east-1"
-                                            }
-                                        ],
-                                        [
-                                            {
-                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"HTTPCode_Target_5XX_Count\" LoadBalancer=appname', 'Sum', 60))",
-                                                "label": "${PROP('MetricName')}",
-                                                "id": "e4",
-                                                "region": "us-east-1"
-                                            }
-                                        ]
-                                    ],
-                                    "view": "pie",
-                                    "stacked": false,
-                                    "region": "us-east-1",
-                                    "title": "Request Count by Response Code",
-                                    "period": 60,
-                                    "stat": "Sum",
-                                    "setPeriodToTimeRange": true
-                                }
-                            },
-                            {
-                                "type": "metric",
-                                "x": 6,
-                                "y": 84,
-                                "width": 6,
-                                "height": 7,
-                                "properties": {
-                                    "metrics": [
-                                        [
-                                            {
-                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"HTTPCode_ELB_4XX_Count\" LoadBalancer=appname', 'Sum', 60))",
-                                                "label": "${PROP('Dim.LoadBalancer')} ${PROP('MetricName')}",
-                                                "id": "e2",
-                                                "region": "us-east-1"
-                                            }
-                                        ],
-                                        [
-                                            {
-                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/WAFV2,WebACL,Region,Rule} Rule=\"ALL\" WebACL=\"appname\" Region=\"us-east-1\" MetricName=\"BlockedRequests\"', 'Sum', 60))",
-                                                "label": "${PROP('Dim.WebACL')} ${PROP('Dim.Rule')} ${PROP('MetricName')}",
-                                                "id": "e1",
-                                                "region": "us-east-1"
-                                            }
-                                        ]
-                                    ],
-                                    "view": "timeSeries",
-                                    "stacked": false,
-                                    "region": "us-east-1",
-                                    "period": 60,
-                                    "stat": "Sum",
-                                    "title": "ALB HTTP 4XX vs WAF BlockedRequests"
-                                }
-                            },
-                            {
-                                "type": "metric",
-                                "x": 12,
-                                "y": 76,
-                                "width": 12,
-                                "height": 7,
-                                "properties": {
-                                    "period": 3600,
-                                    "metrics": [
-                                        [
-                                            "AWS/ApplicationELB",
-                                            "PeakLCUs",
-                                            "LoadBalancer",
-                                            "appname",
-                                            {
-                                                "label": "Peak LCU base",
-                                                "id": "peakLCUs",
-                                                "visible": false,
-                                                "stat": "Maximum",
-                                                "region": "us-east-1"
-                                            }
-                                        ],
-                                        [
-                                            "...",
-                                            {
-                                                "label": "Peak LCU sample count",
-                                                "id": "peakLCUsSampleCount",
-                                                "visible": false,
-                                                "stat": "SampleCount",
-                                                "region": "us-east-1"
-                                            }
-                                        ],
-                                        [
-                                            ".",
-                                            "ReservedLCUs",
-                                            ".",
-                                            ".",
-                                            {
-                                                "label": "Reserved LCU",
-                                                "visible": true,
-                                                "region": "us-east-1"
-                                            }
-                                        ],
-                                        [
-                                            {
-                                                "expression": "peakLCUs*FLOOR(peakLCUsSampleCount*60/PERIOD(peakLCUsSampleCount))",
-                                                "label": "Peak LCU usage",
-                                                "region": "us-east-1"
-                                            }
-                                        ]
-                                    ],
-                                    "region": "us-east-1",
-                                    "stat": "Sum",
-                                    "title": "Load Balancer Capacity Units (LCU): Peak vs. Reserved Usage",
-                                    "yAxis": {
-                                        "left": {
-                                            "min": 0
-                                        }
-                                    },
-                                    "view": "timeSeries",
-                                    "stacked": false
-                                }
-                            },
-                            {
-                                "type": "metric",
-                                "x": 0,
-                                "y": 76,
-                                "width": 12,
-                                "height": 7,
-                                "properties": {
-                                    "metrics": [
-                                        [
-                                            {
-                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"ConsumedLCUs\" LoadBalancer=\"appname\"', 'Sum', 3600))",
-                                                "label": "${PROP('MetricName')}",
-                                                "id": "e3",
-                                                "region": "us-east-1"
-                                            }
-                                        ],
-                                        [
-                                            {
-                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"PeakLCUs\" LoadBalancer=\"appname\"', 'Sum', 3600))",
-                                                "label": "${PROP('MetricName')}",
-                                                "id": "e2",
-                                                "region": "us-east-1"
-                                            }
-                                        ],
-                                        [
-                                            {
-                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"ReservedLCUs\" LoadBalancer=\"appname\"', 'Sum', 3600))",
-                                                "label": "${PROP('MetricName')}",
-                                                "id": "e1",
-                                                "region": "us-east-1"
-                                            }
-                                        ]
-                                    ],
-                                    "period": 3600,
-                                    "region": "us-east-1",
-                                    "stat": "Sum",
-                                    "title": "Load Balancer Capacity Units (LCU)",
-                                    "yAxis": {
-                                        "left": {
-                                            "min": 0
-                                        }
-                                    },
-                                    "view": "timeSeries",
-                                    "stacked": false
                                 }
                             },
                             {
                                 "type": "metric",
                                 "x": 0,
                                 "y": 1,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/EventBridge/Pipes,PipeName} PipeName=\"app_pipe\" MetricName=\"ExecutionThrottled\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.PipeName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "ExecutionThrottled",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 6,
+                                "y": 1,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/EventBridge/Pipes,PipeName} PipeName=\"app_pipe\" MetricName=\"ExecutionFailed\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.PipeName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "ExecutionFailed",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 1,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/EventBridge/Pipes,PipeName} PipeName=\"app_pipe\" MetricName=\"ExecutionPartiallyFailed\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.PipeName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "ExecutionPartiallyFailed",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 18,
+                                "y": 1,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/EventBridge/Pipes,PipeName} PipeName=\"app_pipe\" MetricName=\"ExecutionTimeout\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.PipeName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "ExecutionTimeout",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 7,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/EventBridge/Pipes,PipeName} PipeName=\"app_pipe\" MetricName=\"ExecutionThrottled\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.PipeName')}",
+                                                "id": "e1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "ExecutionThrottled"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 6,
+                                "y": 7,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/EventBridge/Pipes,PipeName} PipeName=\"app_pipe\" MetricName=\"ExecutionFailed\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.PipeName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "ExecutionFailed"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 7,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/EventBridge/Pipes,PipeName} PipeName=\"app_pipe\" MetricName=\"ExecutionPartiallyFailed\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.PipeName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "ExecutionPartiallyFailed"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 18,
+                                "y": 7,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/EventBridge/Pipes,PipeName} PipeName=\"app_pipe\" MetricName=\"ExecutionTimeout\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.PipeName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "ExecutionTimeout"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 13,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/EventBridge/Pipes,PipeName} PipeName=\"app_pipe\" MetricName=\"Invocations\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.PipeName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "Invocations"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 6,
+                                "y": 13,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/EventBridge/Pipes,PipeName} PipeName=\"app_pipe\" MetricName=\"EventCount\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.PipeName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "EventCount"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 18,
+                                "y": 13,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/EventBridge/Pipes,PipeName} PipeName=\"app_pipe\" MetricName=\"Duration\"', 'Average', 60), AVG, DESC))",
+                                                "label": "${PROP('Dim.PipeName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "Duration (Average)"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 13,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/EventBridge/Pipes,PipeName} PipeName=\"app_pipe\" MetricName=\"EventSize\"', 'Average', 60), AVG, DESC))",
+                                                "label": "${PROP('Dim.PipeName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "EventSize (Average)"
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "x": 0,
+                                "y": 26,
+                                "width": 24,
+                                "height": 1,
+                                "properties": {
+                                    "markdown": "# Targets",
+                                    "background": "transparent"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 20,
                                 "width": 12,
                                 "height": 6,
                                 "properties": {
                                     "metrics": [
                                         [
                                             {
-                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"RequestCount\" LoadBalancer=\"appname\"', 'Sum', 60))",
-                                                "label": "${PROP('MetricName')}",
-                                                "id": "e1",
-                                                "region": "us-east-1"
-                                            }
-                                        ],
-                                        [
-                                            {
-                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"HTTPCode_ELB_5XX_Count\" LoadBalancer=appname', 'Sum', 60))",
-                                                "label": "${PROP('MetricName')}",
-                                                "id": "e4",
-                                                "region": "us-east-1"
-                                            }
-                                        ],
-                                        [
-                                            {
-                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"HTTPCode_ELB_4XX_Count\" LoadBalancer=appname', 'Sum', 60))",
-                                                "label": "${PROP('MetricName')}",
-                                                "id": "e3",
-                                                "region": "us-east-1"
-                                            }
-                                        ],
-                                        [
-                                            {
-                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"HTTPCode_ELB_3XX_Count\" LoadBalancer=appname', 'Sum', 60))",
-                                                "label": "${PROP('MetricName')}",
-                                                "id": "e2",
-                                                "region": "us-east-1"
-                                            }
-                                        ]
-                                    ],
-                                    "view": "singleValue",
-                                    "stacked": false,
-                                    "region": "us-east-1",
-                                    "period": 60,
-                                    "stat": "Sum",
-                                    "title": "RequestCount",
-                                    "setPeriodToTimeRange": true,
-                                    "sparkline": false
-                                }
-                            },
-                            {
-                                "type": "metric",
-                                "x": 0,
-                                "y": 84,
-                                "width": 6,
-                                "height": 7,
-                                "properties": {
-                                    "metrics": [
-                                        [
-                                            {
-                                                "expression": "REMOVE_EMPTY(SEARCH('{AWS/ApplicationELB,LoadBalancer} MetricName=\"HTTPCode_ELB_4XX_Count\" LoadBalancer=appname', 'Sum', 60))",
-                                                "label": "${PROP('Dim.LoadBalancer')} ${PROP('MetricName')}",
-                                                "id": "e2",
-                                                "region": "us-east-1"
-                                            }
-                                        ],
-                                        [
-                                            {
-                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/WAFV2,WebACL,Region,Rule} WebACL=\"appname\" Region=\"us-east-1\" MetricName=\"BlockedRequests\"', 'Sum', 60), SUM, DESC))",
-                                                "label": "${PROP('Dim.WebACL')} ${PROP('Dim.Rule')} ${PROP('MetricName')}",
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/EventBridge/Pipes,PipeName} PipeName=\"app_pipe\" MetricName=\"EnrichmentStageFailed\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.PipeName')}",
                                                 "id": "e1",
                                                 "region": "us-east-1"
                                             }
                                         ]
                                     ],
-                                    "view": "singleValue",
+                                    "view": "timeSeries",
                                     "stacked": false,
                                     "region": "us-east-1",
-                                    "period": 60,
-                                    "stat": "Sum",
-                                    "title": "ALB HTTP 4XX vs WAF BlockedRequests",
-                                    "setPeriodToTimeRange": true,
-                                    "sparkline": false
-                                }
-                            },
-                            {
-                                "type": "metric",
-                                "x": 0,
-                                "y": 22,
-                                "width": 6,
-                                "height": 7,
-                                "properties": {
-                                    "metrics": [
-                                        [
-                                            {
-                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/ApplicationELB,TargetGroup,LoadBalancer} MetricName=\"RequestCount\" LoadBalancer=appname', 'Sum', 60), SUM, DESC))",
-                                                "label": "${PROP('Dim.TargetGroup')}",
-                                                "id": "e1",
-                                                "region": "us-east-1"
-                                            }
-                                        ]
-                                    ],
-                                    "view": "pie",
-                                    "stacked": false,
-                                    "region": "us-east-1",
-                                    "period": 300,
                                     "stat": "Average",
-                                    "title": "Request Count Per Target Group",
-                                    "setPeriodToTimeRange": true
+                                    "period": 300,
+                                    "title": "EnrichmentStageFailed"
                                 }
                             },
                             {
-                                "type": "text",
-                                "x": 0,
-                                "y": 75,
-                                "width": 24,
-                                "height": 1,
+                                "type": "metric",
+                                "x": 12,
+                                "y": 20,
+                                "width": 12,
+                                "height": 6,
                                 "properties": {
-                                    "markdown": "## Load Balancer Capacity Units (LCU)",
-                                    "background": "transparent"
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/EventBridge/Pipes,PipeName} PipeName=\"app_pipe\" MetricName=\"EnrichmentStageDuration\"', 'Average', 60), AVG, DESC))",
+                                                "label": "${PROP('Dim.PipeName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "EnrichmentStageDuration"
                                 }
                             },
                             {
-                                "type": "text",
+                                "type": "metric",
                                 "x": 0,
-                                "y": 83,
-                                "width": 24,
-                                "height": 1,
+                                "y": 27,
+                                "width": 6,
+                                "height": 6,
                                 "properties": {
-                                    "markdown": "## Web Application Firewall (WAF)",
-                                    "background": "transparent"
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/EventBridge/Pipes,PipeName} PipeName=\"app_pipe\" MetricName=\"TargetStageFailed\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.PipeName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "TargetStageFailed",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 6,
+                                "y": 27,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/EventBridge/Pipes,PipeName} PipeName=\"app_pipe\" MetricName=\"TargetStagePartiallyFailed\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.PipeName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "TargetStagePartiallyFailed",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 18,
+                                "y": 27,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/EventBridge/Pipes,PipeName} PipeName=\"app_pipe\" MetricName=\"TargetStageDuration\"', 'Average', 60), AVG, DESC))",
+                                                "label": "${PROP('Dim.PipeName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "TargetStageDuration"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 27,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/EventBridge/Pipes,PipeName} PipeName=\"app_pipe\" MetricName=\"TargetStageSkipped\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.PipeName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "singleValue",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "TargetStageSkipped",
+                                    "setPeriodToTimeRange": true,
+                                    "sparkline": false
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 0,
+                                "y": 33,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/EventBridge/Pipes,PipeName} PipeName=\"app_pipe\" MetricName=\"TargetStageFailed\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.PipeName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "TargetStageFailed"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 6,
+                                "y": 33,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/EventBridge/Pipes,PipeName} PipeName=\"app_pipe\" MetricName=\"TargetStagePartiallyFailed\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.PipeName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "TargetStagePartiallyFailed"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 12,
+                                "y": 33,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/EventBridge/Pipes,PipeName} PipeName=\"app_pipe\" MetricName=\"TargetStageSkipped\"', 'Sum', 60), SUM, DESC))",
+                                                "label": "${PROP('Dim.PipeName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "TargetStageSkipped"
+                                }
+                            },
+                            {
+                                "type": "metric",
+                                "x": 18,
+                                "y": 33,
+                                "width": 6,
+                                "height": 6,
+                                "properties": {
+                                    "metrics": [
+                                        [
+                                            {
+                                                "expression": "REMOVE_EMPTY(SORT(SEARCH('{AWS/EventBridge/Pipes,PipeName} PipeName=\"app_pipe\" MetricName=\"TargetStageDuration\"', 'Average', 60), AVG, DESC))",
+                                                "label": "${PROP('Dim.PipeName')}",
+                                                "id": "e1",
+                                                "region": "us-east-1"
+                                            }
+                                        ]
+                                    ],
+                                    "view": "timeSeries",
+                                    "stacked": false,
+                                    "region": "us-east-1",
+                                    "stat": "Average",
+                                    "period": 300,
+                                    "title": "TargetStageDuration"
                                 }
                             }
                         ]
