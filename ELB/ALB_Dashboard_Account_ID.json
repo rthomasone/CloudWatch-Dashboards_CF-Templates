@@ -28,7 +28,7 @@
         "CWDashboardALBAll": {
             "Type": "AWS::CloudWatch::Dashboard",
             "Properties": {
-                "DashboardName": "ALB_All_Resources_Account_ID_Test",
+                "DashboardName": "ALB_All_Resources_Account_ID",
                 "DashboardBody": {
                     "Fn::ToJsonString": {
                         "variables": [
@@ -1167,7 +1167,7 @@
         "CWDashboardALBIndividual": {
             "Type": "AWS::CloudWatch::Dashboard",
             "Properties": {
-                "DashboardName": "ALB_Individual_Resources_Account_ID_Test",
+                "DashboardName": "ALB_Individual_Resources_Account_ID",
                 "DashboardBody": {
                     "Fn::ToJsonString": {
                         "variables": [
