@@ -1,0 +1,6 @@
+template-file-path: ELB/ALB_Dashboard.json
+parameters:
+  DefaultRegion: us-east-1
+  DefaultALB: app/CWT-ALB/07a5a68474fdff28
+  DefaultWebACL: CWT
+tags: {}
