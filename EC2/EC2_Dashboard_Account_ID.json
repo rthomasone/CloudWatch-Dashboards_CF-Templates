@@ -23,7 +23,7 @@
         "CWDashboardEC2All": {
             "Type": "AWS::CloudWatch::Dashboard",
             "Properties": {
-                "DashboardName": "EC2_All_Instances_Test",
+                "DashboardName": "EC2_All_Instances_Account_ID",
                 "DashboardBody": {
                     "Fn::ToJsonString": {
                         "variables": [
@@ -1195,7 +1195,7 @@
         "CWDashboardEC2Individual": {
             "Type": "AWS::CloudWatch::Dashboard",
             "Properties": {
-                "DashboardName": "EC2_Individual_Instances_Test",
+                "DashboardName": "EC2_Individual_Instances_Account_ID",
                 "DashboardBody": {
                     "Fn::ToJsonString": {
                         "variables": [
