@@ -18,7 +18,7 @@
         "CWDashboardALBAll": {
             "Type": "AWS::CloudWatch::Dashboard",
             "Properties": {
-                "DashboardName": "NLB_All_Resources",
+                "DashboardName": "NLB_All_Resources_Account_ID",
                 "DashboardBody": {
                     "Fn::ToJsonString": {
                         "variables": [
@@ -775,17 +775,38 @@
         "CWDashboardALBIndividual": {
             "Type": "AWS::CloudWatch::Dashboard",
             "Properties": {
-                "DashboardName": "NLB_Individual_Resources",
+                "DashboardName": "NLB_Individual_Resources_Account_ID",
                 "DashboardBody": {
                     "Fn::ToJsonString": {
                         "variables": [
+                            {
+                                "type": "property",
+                                "property": "accountId",
+                                "inputType": "select",
+                                "id": "accountId",
+                                "label": "Account ID",
+                                "defaultValue": {
+                                    "Ref": "DefaultAccountID"
+                                },
+                                "visible": true,
+                                "inputPopulationType": "custom",
+                                "values": [
+                                    {
+                                        "value": {
+                                            "Ref": "DefaultAccountID"
+                                        }
+                                    }
+                                ]
+                            },
                             {
                                 "type": "pattern",
                                 "pattern": "us-east-1",
                                 "inputType": "select",
                                 "id": "Region",
                                 "label": "Region",
-                                "defaultValue": "us-east-1",
+                                "defaultValue": {
+                                    "Ref": "DefaultRegion"
+                                },
                                 "visible": true,
                                 "values": [
                                     {
