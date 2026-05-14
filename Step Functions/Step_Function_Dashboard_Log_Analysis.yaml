@@ -1,0 +1,138 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "POC CloudWatch Dashboard to monitor incoming log volumes for Step Function execution logs. This dashboard also includes sample Log Insights queries to analyze Step Function execution logs."
+
+Parameters:
+  LogGroupName:
+    Type: String
+    Description: "CloudWatch Log Group containing Step Function execution logs (e.g. /aws/vendedlogs/states/function-name)."
+    Default: "/aws/vendedlogs/states/function-name"
+
+Resources:
+  StepFunctionLogAnalysisDashboard:
+    Type: AWS::CloudWatch::Dashboard
+    Properties:
+      DashboardName: "Step_Function_Log_Analysis"
+      DashboardBody:
+        Fn::Sub: |
+          {
+            "widgets": [
+              {
+                "type": "metric",
+                "x": 0,
+                "y": 0,
+                "width": 12,
+                "height": 6,
+                "properties": {
+                  "metrics": [
+                    [
+                      {
+                        "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/Logs,LogGroupName} LogGroupName=/aws/vendedlogs/states/ MetricName=\"IncomingLogEvents\"', 'Sum', 3600)),SUM,DESC)",
+                        "label": "${!PROP('Dim.LogGroupName')}",
+                        "id": "e1",
+                        "region": "${AWS::Region}"
+                      }
+                    ]
+                  ],
+                  "view": "timeSeries",
+                  "stacked": false,
+                  "region": "${AWS::Region}",
+                  "period": 60,
+                  "stat": "Sum",
+                  "title": "IncomingLogEvents",
+                  "legend": {
+                    "position": "bottom"
+                  }
+                }
+              },
+              {
+                "type": "metric",
+                "x": 12,
+                "y": 0,
+                "width": 12,
+                "height": 6,
+                "properties": {
+                  "metrics": [
+                    [
+                      {
+                        "expression": "SORT(REMOVE_EMPTY(SEARCH('{AWS/Logs,LogGroupName} LogGroupName=/aws/vendedlogs/states/ MetricName=\"IncomingLogEvents\"', 'Sum', 3600)),SUM,DESC)",
+                        "label": "${!PROP('Dim.LogGroupName')}",
+                        "id": "e1",
+                        "region": "${AWS::Region}"
+                      }
+                    ]
+                  ],
+                  "view": "singleValue",
+                  "stacked": false,
+                  "region": "${AWS::Region}",
+                  "period": 60,
+                  "stat": "Sum",
+                  "title": "IncomingLogEvents",
+                  "legend": {
+                    "position": "bottom"
+                  },
+                  "setPeriodToTimeRange": true,
+                  "sparkline": false
+                }
+              },
+              {
+                "type": "log",
+                "x": 0,
+                "y": 6,
+                "width": 12,
+                "height": 6,
+                "properties": {
+                  "query": "SOURCE \"${LogGroupName}\" |\n#Summarize by Event Type & Resource Type\nstats count(*) as NumLogEventbs by type as EventType, details.resourceType as ResourceType",
+                  "queryBy": "logGroupName",
+                  "logGroupPrefixes": {
+                    "accountIds": [],
+                    "logGroupPrefix": [],
+                    "logClass": "STANDARD"
+                  },
+                  "region": "${AWS::Region}",
+                  "stacked": false,
+                  "title": "Summarize by Event",
+                  "view": "table"
+                }
+              },
+              {
+                "type": "log",
+                "x": 12,
+                "y": 6,
+                "width": 12,
+                "height": 6,
+                "properties": {
+                  "query": "SOURCE \"${LogGroupName}\" |\n#Summarize Aborted or Failed Events\nfilter type like \"Aborted\" or type like \"Failed\"\n| stats count(*) as NumLogEventbs by type as EventType, details.resourceType as ResourceType",
+                  "queryBy": "logGroupName",
+                  "logGroupPrefixes": {
+                    "accountIds": [],
+                    "logGroupPrefix": [],
+                    "logClass": "STANDARD"
+                  },
+                  "region": "${AWS::Region}",
+                  "stacked": false,
+                  "title": "Summarize Aborted or Failed Events",
+                  "view": "table"
+                }
+              },
+              {
+                "type": "log",
+                "x": 0,
+                "y": 12,
+                "width": 24,
+                "height": 6,
+                "properties": {
+                  "query": "SOURCE '${LogGroupName}' | fields @timestamp\n| parse details.output '\"AllocatedCapacity\":*,' as AllocatedCapacity\n| parse details.output '\"ExecutionTime\":*,' as ExecutionTime\n| parse details.output '\"GlueVersion\":\"*\"' as GlueVersion\n| parse details.output '\"JobMode\":\"*\"' as JobMode\n| parse details.output '\"JobName\":\"*\"' as JobName\n| parse details.output '\"JobRunState\":\"*\"' as JobRunState\n| parse details.output '\"LogGroupName\":\"*\"' as LogGroupName\n| parse details.output '\"MaxCapacity\":*,' as MaxCapacity\n| parse details.output '\"NumberOfWorkers\":*,' as NumberOfWorkers\n| parse details.output '\"Timeout\":*,' as Timeout\n| parse details.output '\"WorkerType\":\"*\"' as WorkerType\n| display @timestamp, AllocatedCapacity, ExecutionTime, GlueVersion, JobMode, JobName, JobRunState, LogGroupName, MaxCapacity, NumberOfWorkers, Timeout, WorkerType\n| sort @timestamp desc\n| limit 20",
+                  "queryLanguage": "CWLI",
+                  "queryBy": "logGroupName",
+                  "logGroupPrefixes": {
+                    "accountIds": [],
+                    "logGroupPrefix": [],
+                    "logClass": "STANDARD"
+                  },
+                  "region": "${AWS::Region}",
+                  "title": "Step Function: Output",
+                  "view": "table"
+                }
+              }
+            ]
+          }
